@@ -122,6 +122,8 @@
 	};
 	$(function(){
 		var d = $('<div style="position:absolute;top:-1000px;width:100px;height:100px;padding:5px"></div>').appendTo('body');
+		//$._boxModel-true w2c模型outerWidth=width+padding+border
+		//					 -false ie模型outerWidth=with
 		$._boxModel = d.outerWidth()!=100;
 		d.remove();
 		
@@ -166,6 +168,10 @@
 	
 	$.fn._propAttr = $.fn.prop || $.fn.attr;
 	
+	/*
+	options-string(clear,fit,unfit,minWidth,width,maxWidth,minHeight,height,maxHeight)
+	options-obj(minWidth,width,maxWidth,minHeight,height,maxHeight)
+	*/
 	$.fn._size = function(options, parent){
 		if (typeof options == 'string'){
 			if (options == 'clear'){
@@ -182,9 +188,11 @@
 				});
 			} else {
 				if (parent == undefined){
+					//_css(target,property) options-string
 					return _css(this[0], options);
 				} else {
 					return this.each(function(){
+						//_css(target,property,value) options-string parent-string||int
 						_css(this, options, parent);
 					});
 				}
@@ -251,7 +259,7 @@
 				}
 				t._size('min'+p1, '');
 				t._size('max'+p1, '');
-				t._size(p, v);
+				t._size('max'+p1, '');
 			} else {
 				t._size(p, '');
 				t._size('min'+p1, min);
@@ -259,24 +267,37 @@
 			}
 			return fluid || options.fit;
 		}
+		/*
+		property:string(minWidth,width,maxWidth,minHeight,height,maxHeight)
+		value:string||int
+		_css(target,string)
+		_css(target,string,"")
+		_css(target,string,int)
+		*/
 		function _css(target, property, value){
 			var t = $(target);
 			if (value == undefined){
+				//property-string(_css(target,string))
 				value = parseInt(target.style[property]);
 				if (isNaN(value)){return undefined;}
 				if ($._boxModel){
+					//value+padding+border
 					value += getDeltaSize();
 				}
 				return value;
 			} else if (value === ''){
+				//_css(target,string,"")
 				t.css(property, '');
 			} else {
+				//_css(target,string,int)
 				if ($._boxModel){
+					//value+padding+border
 					value -= getDeltaSize();
 					if (value < 0){value = 0;}
 				}
 				t.css(property, value+'px');
 			}
+			//padding+boder
 			function getDeltaSize(){
 				if (property.toLowerCase().indexOf('width') >= 0){
 					return t.outerWidth() - t.width();
