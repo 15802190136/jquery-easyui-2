@@ -259,7 +259,7 @@
 				}
 				t._size('min'+p1, '');
 				t._size('max'+p1, '');
-				t._size('max'+p1, '');
+				t._size(p,v);
 			} else {
 				t._size(p, '');
 				t._size('min'+p1, min);
