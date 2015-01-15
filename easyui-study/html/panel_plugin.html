@@ -1,0 +1,580 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>05-$.fn.tab++</title>
+    <style>
+.window {
+  position: absolute;
+}
+.panel {
+  background-color:#333333;
+  padding:20px;
+}
+.panel-header,.panel-body,.panel-footer{
+  border:3px solid #5FB1A7;
+}
+.panel-header{
+  background-color:#F92672;
+  padding:10px;
+}
+.panel-body{
+  background-color:#C739F4;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-footer{
+  background-color:#235846;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-noscroll {
+  overflow: hidden;
+}
+.panel-fit,
+.panel-fit body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+.panel-loading{
+  color:#fff;
+}
+.panel-header-noborder,.panel-body-noborder,.panel-footer-noborder{
+  border:none;
+}
+    </style>
+    <script src="../bower_components/jquery/jquery.js"></script>
+    <script>
+    $(function(){
+      var d = $('<div style="position:absolute;top:-1000px;width:100px;height:100px;padding:5px"></div>').appendTo('body');
+      $._boxModel = d.outerWidth()!=100;
+      d.remove();
+    });
+    </script>
+  </head>
+  <body>
+    <div class="easyui-panel" style="width:200px;height:200px;padding:20px;"></div>
+    <div style="width:200px;height:1400px;background-color:#363636;margin-top:30px;margin-left:300px;"></div>
+      <script>
+
+(function($) {
+/*    
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var original = state.original;
+    var pheader = panel.children("div.panel-header");
+    var pbody = panel.children("div.panel-body");
+    var pfooter = panel.children("div.panel-footer");
+*/
+})(jQuery);           
+$(function(){
+  main = function(){
+    $(".easyui-panel").panel()
+    setTimeout(function(){
+      //$(".easyui-panel").panel("resize",{width:220,height:400})
+      //$(".easyui-panel").panel("open")
+      $(".easyui-panel").panel("expand")
+      //$(".easyui-panel").panel("move",{left:50,top:200})
+      //$(".easyui-panel").panel("close")
+      //$(".easyui-panel").panel("collapse")
+      $(".easyui-panel").panel("maximize")
+      //$(".easyui-panel").panel("restore")
+      //$(".easyui-panel").panel("minimize")
+    },500);
+
+  }
+  $.fn.panel = function(options, param) {
+    if (typeof options == "string") {
+      return $.fn.panel.methods[options](this, param);
+    }
+    options = options || {};
+    return this.each(function() {
+      var state = $.data(this, "panel");
+      var opts;
+      if (state) {
+        opts = $.extend(state.options, options);
+      }else{
+        opts = $.extend({}, $.fn.panel.defaults, $.fn.panel.parseOptions(this), options);
+        state = $.data(this, "panel", {
+          options: opts,
+          panel: wrapPanel(this)
+        });
+      }
+      doHeader(this)
+      doFooter(this)
+      initStyle(this)
+      setBorder(this)
+      if (opts.doSize == true) {
+        setSize(this)
+      }
+      openPanel(this)
+    })
+  }
+  $.fn.panel.parseOptions = function(target){
+    return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title"]));    
+  }
+  $.fn.panel.defaults = {fit: false,border: true,collapsed:true,cls:"window",loadingMessage: "Loading..."};
+  $.fn.panel.methods = {
+    options: function(jq) {
+      return $.data(jq[0], "panel").options;
+    },
+    panel: function(jq) {
+      return $.data(jq[0], "panel").panel;
+    },
+    header: function(jq) {
+      return $.data(jq[0], "panel").panel.find(">div.panel-header");
+    },
+    footer: function(jq) {
+      return jq.panel("panel").children(".panel-footer");
+    },
+    body: function(jq) {
+      return $.data(jq[0], "panel").panel.find(">div.panel-body");
+    },
+    open: function(jq, param) {
+      return jq.each(function() {
+        openPanel(this, param);
+      });
+    },
+    close: function(jq, param) {
+      return jq.each(function() {
+        closePanel(this, param);
+      });
+    },
+    resize: function(jq, param) {
+      return jq.each(function() {
+        setSize(this, param);
+      });
+    },
+    move: function(jq, param) {
+      return jq.each(function() {
+        movePanel(this, param);
+      });
+    },
+    maximize: function(jq) {
+      return jq.each(function() {
+        maximizePanel(this);
+      });
+    },
+    minimize: function(jq) {
+      return jq.each(function() {
+        minimizePanel(this);
+      });
+    },
+    restore: function(jq) {
+      return jq.each(function() {
+        restorePanel(this);
+      });
+    },
+    collapse: function(jq, param) {
+      return jq.each(function() {
+        collapsePanel(this, param);
+      });
+    },
+    expand: function(jq, param) {
+      return jq.each(function() {
+        console.log("--expand--");
+        expandPanel(this, param);
+      });
+    }
+  }
+  wrapPanel = function(target){
+    $(target).addClass("panel-body")._size("clear");
+    var panel = $("<div class='panel'></div>").insertBefore(target);
+    panel[0].appendChild(target);
+    var pbody = panel.children("div.panel-body");
+    return panel;    
+  }
+  doHeader = function(target){
+    var state = $.data(target, "panel");
+    var panel = state.panel;
+    var pheader = $("<div class='panel-header'></div>").prependTo(panel)
+    panel.children("div.panel-body").removeClass("panel-body-noheader")
+  }
+  doFooter = function(target){
+    var state = $.data(target, "panel");
+    var panel = state.panel;
+    var pfooter = $("<div class='panel-footer'></div>").appendTo(panel) 
+  }
+  setBorder = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var pheader = panel.children("div.panel-header");
+    var pbody = panel.children("div.panel-body");
+    var pfooter = panel.children("div.panel-footer");
+    panel.addClass(opts.cls);
+    if(opts.border){
+      pheader.removeClass("panel-header-noborder");
+      pbody.removeClass("panel-body-noborder");
+      pfooter.removeClass("panel-footer-noborder");
+    }else{
+      pheader.addClass("panel-header-noborder");
+      pbody.addClass("panel-body-noborder");
+      pfooter.addClass("panel-footer-noborder");    
+    }    
+  }
+  initStyle = function(target){
+    console.log("--init--");
+    var state = $.data(target, "panel");
+    var panel = state.panel;
+    var pheader = panel.children("div.panel-header");
+    var pbody = panel.children("div.panel-body");
+    var pfooter = panel.children("div.panel-footer");
+    panel.css({width:200});
+    pheader.css({height:20});
+    pbody.css({height:20});
+    pfooter.css({height:20});    
+  }
+  setSize = function(target,param){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel; 
+    var pheader = panel.children("div.panel-header");
+    var pbody = panel.children("div.panel-body");
+    var pfooter = panel.children("div.panel-footer");   
+    if(param){
+      $.extend(opts,{
+        width: param.width,
+        height: param.height,
+        left: param.left,
+        top: param.top
+      });
+    }
+    panel._size(opts);
+    pheader.add(pbody)._outerWidth(panel.width());
+    console.log(panel.height());
+    pbody._outerHeight(panel.height()-pheader._outerHeight()-pfooter._outerHeight())
+    console.log(pbody.outerHeight());
+    panel.css({
+      height: "",
+      minHeight: "",
+      maxHeight: "",
+      left:opts.left,
+      top:opts.top
+    })
+  }
+  loadData = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var pbody = panel.children("div.panel-body");
+    pbody.html($("<div class='panel-loading'></div>").html(opts.loadingMessage));
+  }
+  openPanel = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var cb = function(){
+      if (opts.collapsed == true) {
+        collapsePanel(target)
+      }
+      if (!opts.collapsed){
+        loadData(target)
+      }
+    }
+    panel.show(400, cb);
+  }
+  movePanel = function(target,param){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    if (param) {
+      if (param.left != null) {
+        opts.left = param.left;
+      }
+      if (param.top != null) {
+        opts.top = param.top;
+      }
+    }
+    panel.css({
+      left:opts.left,
+      top:opts.top
+    })
+  }
+  closePanel = function(target){
+    var state = $.data(target, "panel");
+    var panel = state.panel;
+    var cb = function(){}
+    //panel.slideUp(400, cb);
+    //panel.fadeOut(400, cb);
+    panel.hide(0, cb);
+  }
+  collapsePanel = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var pbody = panel.children("div.panel-body");
+    var cb = function(){
+      opts.collapsed = true;
+    }
+    //pbody.slideUp("normal",cb);
+    pbody.hide(0,cb)
+  }
+  expandPanel = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var pbody = panel.children("div.panel-body");
+    var cb = function(){
+      opts.collapsed = false;
+    }
+    //pbody.slideDown("normal",cb);
+    pbody.show(0,cb)
+    loadData(target);
+  }
+  maximizePanel = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var original = state.original;
+    if(!original){
+      $.data(target, "panel").original = {
+        width: opts.width,
+        height: opts.height,
+        left: opts.left,
+        top: opts.top,
+        fit: opts.fit
+      }      
+    }
+    opts.left = 0;
+    opts.top = 0;
+    opts.fit = true;
+    setSize(target,opts);
+  }
+  restorePanel = function(target){
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var original = state.original;
+    $.extend(opts, original);
+    setSize(target);
+    original = null;   
+  }
+  minimizePanel = function(target){
+    var state = $.data(target, "panel");
+    var panel = state.panel;
+    panel._size("unfit")
+    panel.hide()
+  }
+  main();
+})
+
+      </script>
+  </body>
+<script id="$.parser.js">
+  $.parser = {
+    parseValue: function(property, value, parent, delta){
+      delta = delta || 0;
+      var v = $.trim(String(value||''));
+      var endchar = v.substr(v.length-1, 1);
+      if (endchar == '%'){
+        v = parseInt(v.substr(0, v.length-1));
+        if (property.toLowerCase().indexOf('width') >= 0){
+          v = Math.floor((parent.width()-delta) * v / 100.0);
+        } else {
+          v = Math.floor((parent.height()-delta) * v / 100.0);
+        }
+      } else {
+        v = parseInt(v) || undefined;
+      }
+      return v;
+    },
+    parseOptions: function(target, properties){
+      var t = $(target);
+      var options = {};
+      var s = $.trim(t.attr('data-options'));
+      if (s){
+        if (s.substring(0, 1) != '{'){
+          s = '{' + s + '}';
+        }
+        options = (new Function('return ' + s))();
+      }
+      $.map(['width','height','left','top','minWidth','maxWidth','minHeight','maxHeight'], function(p){
+        var pv = $.trim(target.style[p] || '');
+        if (pv){
+          if (pv.indexOf('%') == -1){
+            pv = parseInt(pv) || undefined;
+          }
+          options[p] = pv;
+        }
+      });
+        
+      if (properties){
+        var opts = {};
+        for(var i=0; i<properties.length; i++){
+          var pp = properties[i];
+          if (typeof pp == 'string'){
+            opts[pp] = t.attr(pp);
+          } else {
+            for(var name in pp){
+              var type = pp[name];
+              if (type == 'boolean'){
+                opts[name] = t.attr(name) ? (t.attr(name) == 'true') : undefined;
+              } else if (type == 'number'){
+                opts[name] = t.attr(name)=='0' ? 0 : parseFloat(t.attr(name)) || undefined;
+              }
+            }
+          }
+        }
+        $.extend(options, opts);
+      }
+      return options;
+    }
+  }
+  $.fn._size = function(options, parent){
+    if (typeof options == 'string'){
+      if (options == 'clear'){
+        return this.each(function(){
+          $(this).css({width:'',minWidth:'',maxWidth:'',height:'',minHeight:'',maxHeight:''});
+        });
+      } else if (options == 'fit'){
+        return this.each(function(){
+          _fit(this, this.tagName=='BODY' ? $('body') : $(this).parent(), true);
+        });
+      } else if (options == 'unfit'){
+        return this.each(function(){
+          _fit(this, $(this).parent(), false);
+        });
+      } else {
+        if (parent == undefined){
+          //_css(target,property) options-string
+          return _css(this[0], options);
+        } else {
+          return this.each(function(){
+            //_css(target,property,value) options-string parent-string||int
+            _css(this, options, parent);
+          });
+        }
+      }
+    } else {
+      return this.each(function(){
+        parent = parent || $(this).parent();
+        $.extend(options, _fit(this, parent, options.fit)||{});
+        var r1 = _setSize(this, 'width', parent, options);
+        var r2 = _setSize(this, 'height', parent, options);
+        if (r1 || r2){
+          $(this).addClass('easyui-fluid');
+        } else {
+          $(this).removeClass('easyui-fluid');
+        }
+      });
+    }
+    function _fit(target, parent, fit){
+      if (!parent.length){return false;}
+      var t = $(target)[0];
+      var p = parent[0];
+      var fcount = p.fcount || 0;
+      if (fit){
+        if (!t.fitted){
+          t.fitted = true;
+          p.fcount = fcount + 1;
+          $(p).addClass('panel-noscroll');
+          if (p.tagName == 'BODY'){
+            $('html').addClass('panel-fit');
+          }
+        }
+        return {
+          width: ($(p).width()||1),
+          height: ($(p).height()||1)
+        };
+      } else {
+        if (t.fitted){
+          t.fitted = false;
+          p.fcount = fcount - 1;
+          if (p.fcount == 0){
+            $(p).removeClass('panel-noscroll');
+            if (p.tagName == 'BODY'){
+              $('html').removeClass('panel-fit');
+            }
+          }
+        }
+        return false;
+      }
+    }
+    function _setSize(target, property, parent, options){
+      var t = $(target);
+      var p = property;
+      var p1 = p.substr(0,1).toUpperCase() + p.substr(1);
+      var min = $.parser.parseValue('min'+p1, options['min'+p1], parent);// || 0;
+      var max = $.parser.parseValue('max'+p1, options['max'+p1], parent);// || 99999;
+      var val = $.parser.parseValue(p, options[p], parent);
+      var fluid = (String(options[p]||'').indexOf('%') >= 0 ? true : false);
+      
+      if (!isNaN(val)){
+        var v = Math.min(Math.max(val, min||0), max||99999);
+        if (!fluid){
+          options[p] = v;
+        }
+        t._size('min'+p1, '');
+        t._size('max'+p1, '');
+        t._size(p, v);
+      } else {
+        t._size(p, '');
+        t._size('min'+p1, min);
+        t._size('max'+p1, max);
+      }
+      return fluid || options.fit;
+    }
+    /*
+    property:string(minWidth,width,maxWidth,minHeight,height,maxHeight)
+    value:string||int
+    _css(target,string)
+    _css(target,string,"")
+    _css(target,string,int)
+    */
+    function _css(target, property, value){
+      var t = $(target);
+      if (value == undefined){
+        //property-string(_css(target,string))
+        value = parseInt(target.style[property]);
+        if (isNaN(value)){return undefined;}
+        if ($._boxModel){
+          //value+padding+border
+          value += getDeltaSize();
+        }
+        return value;
+      } else if (value === ''){
+        //_css(target,string,"")
+        t.css(property, '');
+      } else {
+        //_css(target,string,int)
+        if ($._boxModel){
+          //value+padding+border
+          value -= getDeltaSize();
+          if (value < 0){value = 0;}
+        }
+        t.css(property, value+'px');
+      }
+      //padding+boder
+      function getDeltaSize(){
+        if (property.toLowerCase().indexOf('width') >= 0){
+          return t.outerWidth() - t.width();
+        } else {
+          return t.outerHeight() - t.height();
+        }
+      }
+    }
+  }
+  $.fn._outerHeight = function(height){
+    if (height == undefined){
+      if (this[0] == window){
+        return this.height() || document.body.clientHeight;
+      }
+      return this.outerHeight()||0;
+    }
+    return this._size('height', height);
+  };
+
+  $.fn._outerWidth = function(width){
+    if (width == undefined){
+      if (this[0] == window){
+        return this.width() || document.body.clientWidth;
+      }
+      return this.outerWidth()||0;
+    }
+    return this._size('width', width);
+  };
+</script>
+</html>
