@@ -60,8 +60,8 @@ $(function(){
   main = function(){
     parseOptions()
     wrapPanel()
-    doHeader()
-    doFooter()
+    initPanelHeader()
+    initPanelFooter()
     setBorder()
     initStyle()
     setSize({width:220,height:220})
@@ -83,11 +83,11 @@ $(function(){
     panel[0].appendChild(target);
     pbody = panel.children("div.panel-body");    
   }
-  doHeader = function(){
+  initPanelHeader = function(){
     pheader = $("<div class='panel-header'></div>").prependTo(panel)
     panel.children("div.panel-body").removeClass("panel-body-noheader")
   }
-  doFooter = function(){
+  initPanelFooter = function(){
     pfooter = $("<div class='panel-footer'></div>").appendTo(panel)
     var original;    
   }

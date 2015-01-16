@@ -7,9 +7,6 @@
  * To use it on other terms please contact us at info@jeasyui.com
  *
  */
-/*
-查询不到是数据doHeader,doFooter,_2a,_2f,_2c,cb,_6f,_70,_71,_72,_73,_7e,_7f
-*/
 (function($) {
   $.fn._remove = function() {
     return this.each(function() {
@@ -97,14 +94,14 @@
     return panel;
   };
 
-  function setBorder(target) {
+  function addHeader(target) {
     var state = $.data(target, "panel");
     var options = state.options;
     var panel = state.panel;
     panel.css(options.style);
     panel.addClass(options.cls);
-    doHeader();
-    doFooter();
+    initPanelTool();
+    initPanelFooter();
     var pheader = $(target).panel("header");
     var pbody = $(target).panel("body");
     var pfooter = $(target).siblings("div.panel-footer");
@@ -126,7 +123,7 @@
       $.parser.parse($(target));
     }
 
-    function doHeader() {
+    function initPanelTool() {
       if (options.tools && typeof options.tools == "string") {
         panel.find(">div.panel-header>div.panel-tool .panel-tool-a").appendTo(options.tools);
       }
@@ -194,7 +191,7 @@
       }
     };
 
-    function doFooter() {
+    function initPanelFooter() {
       if (options.footer) {
         $(options.footer).addClass("panel-footer").appendTo(panel);
         $(target).addClass("panel-body-nobottom");
@@ -205,18 +202,18 @@
     };
   };
 
-  function loadData(target, param) {
+  function refresh(target, queryParams) {
     var state = $.data(target, "panel");
     var options = state.options;
-    if (_2a) {
-      options.queryParams = param;
+    if (queryParams) {
+      options.queryParams = queryParams;
     }
     if (!options.href) {
       return;
     }
     if (!state.isLoaded || !options.cache) {
-      var _2a = $.extend({}, options.queryParams);
-      if (options.onBeforeLoad.call(target, _2a) == false) {
+      var queryParams = $.extend({}, options.queryParams);
+      if (options.onBeforeLoad.call(target, queryParams) == false) {
         return;
       }
       state.isLoaded = false;
@@ -224,9 +221,9 @@
       if (options.loadingMessage) {
         $(target).html($("<div class=\"panel-loading\"></div>").html(options.loadingMessage));
       }
-      options.loader.call(target, _2a, function(data) {
-        var _2c = options.extractor.call(target, data);
-        $(target).html(_2c);
+      options.loader.call(target, queryParams, function(data) {
+        var result = options.extractor.call(target, data);
+        $(target).html(result);
         $.parser.parse($(target));
         options.onLoad.apply(target, arguments);
         state.isLoaded = true;
@@ -256,7 +253,7 @@
     t.empty();
   };
 
-  function _2f(target) {
+  function setLayout(target) {
     $(target).panel("doLayout", true);
   };
 
@@ -305,8 +302,8 @@
         collapsePanel(target);
       }
       if (!options.collapsed) {
-        loadData(target);
-        _2f(target);
+        refresh(target);
+        setLayout(target);
       }
     };
   };
@@ -402,15 +399,15 @@
       body.slideDown("normal", function() {
         opts.collapsed = false;
         opts.onExpand.call(target);
-        loadData(target);
-        _2f(target);
+        refresh(target);
+        setLayout(target);
       });
     } else {
       body.show();
       opts.collapsed = false;
       opts.onExpand.call(target);
-      loadData(target);
-      _2f(target);
+      refresh(target);
+      setLayout(target);
     }
   };
 
@@ -507,7 +504,7 @@
           isLoaded: false
         });
       }
-      setBorder(this);
+      addHeader(this);
       if (opts.doSize == true) {
         state.panel.css("display", "block");
         setSize(this);
@@ -571,7 +568,7 @@
             state.options.queryParams = param;
           }
         }
-        loadData(this);
+        refresh(this);
       });
     },
     resize: function(jq, param) {
@@ -581,17 +578,17 @@
     },
     doLayout: function(jq, all) {
       return jq.each(function() {
-        _6f(this, "body");
-        _6f($(this).siblings("div.panel-footer")[0], "footer");
+        doLayout2(this, "body");
+        doLayout2($(this).siblings("div.panel-footer")[0], "footer");
 
-        function _6f(_70, _71) {
-          if (!_70) {
+        function doLayout2(jq2, bodyOrFooter) {
+          if (!jq2) {
             return;
           }
-          var _72 = _70 == $("body")[0];
-          var s = $(_70).find("div.panel:visible,div.accordion:visible,div.tabs-container:visible,div.layout:visible,.easyui-fluid:visible").filter(function(_73, el) {
-            var p = $(el).parents("div.panel-" + _71 + ":first");
-            return _72 ? p.length == 0 : p[0] == _70;
+          var flag = jq2 == $("body")[0];
+          var s = $(jq2).find("div.panel:visible,div.accordion:visible,div.tabs-container:visible,div.layout:visible,.easyui-fluid:visible").filter(function(index, el) {
+            var p = $(el).parents("div.panel-" + bodyOrFooter + ":first");
+            return flag ? p.length == 0 : p[0] == jq2;
           });
           s.trigger("_resize", [all || false]);
         };
@@ -709,10 +706,10 @@
       });
     },
     extractor: function(data) {
-      var _7e = /<body[^>]*>((.|[\n\r])*)<\/body>/im;
-      var _7f = _7e.exec(data);
-      if (_7f) {
-        return _7f[1];
+      var patterns = /<body[^>]*>((.|[\n\r])*)<\/body>/im;
+      var matchers = patterns.exec(data);
+      if (matchers) {
+        return matchers[1];
       } else {
         return data;
       }

@@ -25,8 +25,8 @@ $.fn.panel = function(options, param) {
         panel: wrapPanel(this)
       });
     }
-    doHeader(this)
-    doFooter(this)
+    initPanelHeader(this)
+    initPanelFooter(this)
     setBorder(this)
     if (opts.doSize == true) {
       setSize(this)
@@ -107,13 +107,13 @@ wrapPanel = function(target){
   var pbody = panel.children("div.panel-body");
   return panel;    
 }
-doHeader = function(target){
+initPanelHeader = function(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
   $("<div class='panel-header'></div>").prependTo(panel)
   panel.children("div.panel-body").removeClass("panel-body-noheader")
 }
-doFooter = function(target){
+initPanelFooter = function(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
   $("<div class='panel-footer'></div>").appendTo(panel) 
