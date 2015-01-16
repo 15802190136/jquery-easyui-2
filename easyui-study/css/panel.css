@@ -1,0 +1,41 @@
+.window {
+  position: absolute;
+}
+.panel {
+  background-color:#333333;
+  padding:20px;
+}
+.panel-header,.panel-body,.panel-footer{
+  border:3px solid #5FB1A7;
+}
+.panel-header{
+  background-color:#F92672;
+  padding:10px;
+}
+.panel-body{
+  background-color:#C739F4;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-footer{
+  background-color:#235846;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-noscroll {
+  overflow: hidden;
+}
+.panel-fit,
+.panel-fit body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+.panel-loading{
+  color:#fff;
+}
+.panel-header-noborder,.panel-body-noborder,.panel-footer-noborder{
+  border:none;
+}
