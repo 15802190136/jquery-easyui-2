@@ -129,7 +129,7 @@ $(function(){
       top:opts.top
     })
   }
-  loadData = function(){
+  refresh = function(){
     pbody.html($("<div class='panel-loading'></div>").html(opts.loadingMessage));
   }
   openPanel = function(){
@@ -138,7 +138,7 @@ $(function(){
         collapsePanel()
       }
       if (!opts.collapsed){
-        loadData()
+        refresh()
       }
     }
     panel.show(400, cb);
@@ -174,7 +174,7 @@ $(function(){
       opts.collapsed = false;
     }
     pbody.slideDown("normal",cb);
-    loadData();
+    refresh();
   }
   maximizePanel = function(){
     original = {

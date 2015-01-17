@@ -1,0 +1,344 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>tabs_simple</title>
+    <link ref="stylesheet" type="text/css" href="../css/panel.css">
+    <style>
+
+    </style>
+    <script src="../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+    <div style="width:700px;height:250px" class="easyui-tabs">
+      <div title="tab1" style="padding:10px">
+        <p>tab1Content1</p>
+      </div>
+      <div title="tab2" style="padding:10px">
+        <p>tab1Content2</p>
+      </div>
+      <div title="tab3" style="padding:10px">
+        <p>tab1Content3</p>
+      </div>
+    </div>
+  </body>
+<script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.panel.js"></script>
+<script>     
+/*
+依次需要完成的方法
+  exists
+  getTab
+  getTabIndex
+  selectTab
+  unselectTab
+*/
+$(function(){
+  var target = $(".easyui-tabs")[0]
+  var container = target
+  var cc = $(container)
+  var defaults = {
+    width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
+    selected: 0,showHeader: true,plain: false,fit: false,border: true,
+    tools: [],toolPosition: 'right',tabPosition: 'top',
+    scrollIncrement: 100,scrollDuration: 400
+  }
+  var state_opts,state_tabs = [],state_selectHis=[]
+  var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
+  main = function(){
+    parseOptions()
+    wrapTabs()
+    addTools()
+    setProperties()
+    setSize()
+    bindEvents()
+  }
+  parseOptions = function(){
+    state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
+      'tools','toolPosition','tabPosition',
+      {fit:'boolean',border:'boolean',plain:'boolean',headerWidth:'number',tabWidth:'number',tabHeight:'number',selected:'number',showHeader:'boolean'}
+    ]))
+  }
+  wrapTabs = function(){
+    initTabsHeader()
+    initTabsPanels()
+  }
+  initTabsPanels = function(){
+    $panels = $('<div class="tabs-panels"></div>').insertBefore(container)
+    cc.children('div').each(function(){
+      $panels[0].appendChild(this);
+    });
+    cc[0].appendChild($panels[0]);
+    $panels.children('div').each(function(i){
+      var pp = $(this)
+      state_tabs.push(pp)
+      createTab(pp)
+    });
+  }
+  initTabsHeader = function(){
+    $header = $('<div class="tabs-header">'
+        + '<div class="tabs-scroller-left"></div>'
+        + '<div class="tabs-scroller-right"></div>'
+        + '<div class="tabs-wrap">'
+        +   '<ul class="tabs"></ul>'
+        + '</div>'
+        + '</div>').prependTo(container);
+    $headerWrap = $header.children('div.tabs-wrap')
+    $headerSLeft = $header.children('div.tabs-scroller-left')
+    $headerSRight = $header.children('div.tabs-scroller-right')
+    $headerTool = $header.children('div.tabs-tool')
+    $headerTabs = $header.find('ul.tabs')
+  }
+  createTab = function(pp){
+    //panel
+    pp.panel($.extend({}, $.parser.parseOptions(pp[0]), {
+      selected: ($(this).attr('selected') ? true : undefined),
+      border: false,
+      noheader: true,
+      closed: true,
+      doSize: false
+    }));
+    var opts = pp.panel('options')
+    //header
+    opts.tab = $('<li></li>').appendTo($headerTabs);
+    opts.tab.append(
+        '<a href="javascript:void(0)" class="tabs-inner">' +
+        '<span class="tabs-title"></span>' +
+        '<span class="tabs-icon"></span>' +
+        '</a>'
+    );
+    updateTab({
+      tab: pp,
+      options: opts,
+      type: 'header'
+    });
+  }
+  updateTab = function(param){
+    var pp = param.tab
+    var oldTitle = pp.panel('options').title
+    if (param.type == 'all' || param.type == 'header'){
+      var opts = pp.panel('options');
+      var tab = opts.tab
+      var s_title = tab.find('span.tabs-title');
+      var s_icon = tab.find('span.tabs-icon');
+      s_title.html(opts.title);
+      s_icon.attr('class', 'tabs-icon');
+    }
+    setSize()
+  }
+  setSize = function(param){
+    if (param){
+      $.extend(state_opts, {
+        width: param.width,
+        height: param.height
+      });
+    }
+    cc._size(state_opts)
+    for(var i=0; i<state_tabs.length; i++){
+      var p_opts = state_tabs[i].panel('options');
+      var p_t = p_opts.tab.find('a.tabs-inner');
+      var width = parseInt(p_opts.tabWidth || state_opts.tabWidth) || undefined;
+      if (width){
+        p_t._outerWidth(width);
+      } else {
+        p_t.css('width', '');
+      }
+      p_t._outerHeight(state_opts.tabHeight);
+      p_t.css('lineHeight', p_t.height()+'px');
+    }
+    if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right'){
+      $header._outerWidth(state_opts.showHeader ? state_opts.headerWidth : 0);
+      $panels._outerWidth(cc.width() - $header.outerWidth());
+      $header.add($panels)._outerHeight(state_opts.height);
+      $headerWrap._outerWidth($header.width())
+      $headerTabs._outerWidth($headerWrap.width()).css('height','');
+    }else{
+      $header._outerWidth(state_opts.width).css('height','');
+      if (state_opts.showHeader){
+        $header.css('background-color','');
+        $headerWrap.css('height','');
+      }else{
+        $header.css('background-color','transparent');
+        $header._outerHeight(0);
+        $headerWrap._outerHeight(0);
+      }
+      $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
+      setScrollers()
+      $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
+      $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
+    }
+  }
+  setScrollers = function(){
+    if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right' || !state_opts.showHeader){return}
+    var tHeight = $header.outerHeight();
+    if (state_opts.plain){
+      tHeight -= tHeight - $header.height();
+    }
+    var tabsWidth = 0;
+    $('ul.tabs li', $header).each(function(){
+      tabsWidth += $(this).outerWidth(true);
+    });
+    $headerTool._outerHeight(tHeight);
+    var cWidth = $header.width() - $headerTool._outerWidth();
+       if (tabsWidth > cWidth) {
+      $headerSLeft.add($headerSRight).show()._outerHeight(tHeight);
+      if (state_opts.toolPosition == 'left'){
+        $headerTool.css({
+          left: $headerSLeft.outerWidth(),
+          right: ''
+        });
+        $headerWrap.css({
+          marginLeft: $headerSLeft.outerWidth() + $headerTool._outerWidth(),
+          marginRight: $headerSRight._outerWidth(),
+          width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
+        });
+      } else {
+        $headerTool.css({
+          left: '',
+          right: $headerSRight.outerWidth()
+        });
+        $headerWrap.css({
+          marginLeft: $headerSLeft.outerWidth(),
+          marginRight: $headerSRight.outerWidth() + $headerTool._outerWidth(),
+          width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
+        });
+      }
+    } else {
+      $headerSLeft.add($headerSRight).hide();
+      if (state_opts.toolPosition == 'left'){
+        $headerTool.css({
+          left: 0,
+          right: ''
+        });
+        $headerWrap.css({
+          marginLeft: $headerTool._outerWidth(),
+          marginRight: 0,
+          width: cWidth
+        });
+      } else {
+        $headerTool.css({
+          left: '',
+          right: 0
+        });
+        $headerWrap.css({
+          marginLeft: 0,
+          marginRight: $headerTool._outerWidth(),
+          width: cWidth
+        });
+      }
+    }
+  }
+  addTools = function(){
+    if (state_opts.tools) {
+      $header.children('div.tabs-tool').remove();
+      $headerTool = $('<div class="tabs-tool"><table cellspacing="0" cellpadding="0" style="height:100%"><tr></tr></table></div>').appendTo($header);
+    }
+  }
+  setProperties = function(){    
+    $header.removeClass('tabs-header-top tabs-header-bottom tabs-header-left tabs-header-right');
+    $panels.removeClass('tabs-panels-top tabs-panels-bottom tabs-panels-left tabs-panels-right');
+    if (state_opts.tabPosition == 'top'){
+      $header.insertBefore($panels);
+    } else if (state_opts.tabPosition == 'bottom'){
+      $header.insertAfter($panels);
+      $header.addClass('tabs-header-bottom');
+      $panels.addClass('tabs-panels-top');
+    } else if (state_opts.tabPosition == 'left'){
+      $header.addClass('tabs-header-left');
+      $panels.addClass('tabs-panels-right');
+    } else if (state_opts.tabPosition == 'right'){
+      $header.addClass('tabs-header-right');
+      $panels.addClass('tabs-panels-left');
+    }
+    
+    if (state_opts.plain == true) {
+      $header.addClass('tabs-header-plain');
+    } else {
+      $header.removeClass('tabs-header-plain');
+    }
+    if (state_opts.border == true){
+      $header.removeClass('tabs-header-noborder');
+      $panels.removeClass('tabs-panels-noborder');
+    } else {
+      $header.addClass('tabs-header-noborder');
+      $panels.addClass('tabs-panels-noborder');
+    }
+  }
+  bindEvents = function(){
+    $header.unbind().bind('click', function(e){
+      if ($(e.target).hasClass('tabs-scroller-left')){
+        scrollBy(-state_opts.scrollIncrement);
+      } else if ($(e.target).hasClass('tabs-scroller-right')){
+        scrollBy(state_opts.scrollIncrement);
+      } else {
+        var li = $(e.target).closest('li');
+        if (li.hasClass('tabs-disabled')){return;}
+        var a = $(e.target).closest('a.tabs-close');
+        if (a.length){
+          closeTab(getLiIndex(li));
+        } else if (li.length){
+          var index = getLiIndex(li);
+          var popts = state_tabs[index].panel('options');
+          if (popts.collapsible){
+            popts.closed ? selectTab(index) : unselectTab(index);
+          } else {
+            selectTab(index);
+          }
+        }
+      }
+    })
+  }
+  getLiIndex = function (li){
+    var index = 0;
+    li.parent().children('li').each(function(i){
+      if (li[0] == this){
+        index = i;
+        return false;
+      }
+    });
+    return index;
+  }
+  scrollBy = function(deltaX){
+    var pos = Math.min($headerWrap._scrollLeft() + deltaX, getMaxScrollWidth());
+    $headerWrap.animate({scrollLeft: pos}, state_opts.scrollDuration);
+      
+    function getMaxScrollWidth(){
+      var w = 0;
+      var ul = $headerWrap.children('ul');
+      ul.children('li').each(function(){
+        w += $(this).outerWidth(true);
+      });
+      return w - $headerWrap.width() + (ul.outerWidth() - ul.width());
+    }
+  }
+  closeTab = function(which){
+    if (!exists(which)) return;
+    
+    var tab = getTab(container, which);
+    var title = state_opts.title;
+    var index = getTabIndex(tab);
+        
+    var tab = getTab(container, which, true);
+    tab.panel('options').tab.remove();
+    tab.panel('destroy');
+    
+    setSize();
+    // remove the select history item
+    for(var i=0; i<state_selectHis.length; i++){
+      if (state_selectHis[i] == title){
+        state_selectHis.splice(i, 1);
+        i --;
+      }
+    }
+    // select the nearest tab panel
+    var hisTitle = state_selectHis.pop();
+    if (hisTitle){
+      selectTab(hisTitle);
+    } else if (tabs.length){
+      selectTab(0);
+    }    
+  }
+  main();
+})
+</script>
+</html>

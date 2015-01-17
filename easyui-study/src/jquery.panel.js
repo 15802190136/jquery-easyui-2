@@ -162,7 +162,7 @@ setSize = function(target,param){
     top:opts.top
   })
 }
-loadData = function(target){
+refresh = function(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -178,7 +178,7 @@ openPanel = function(target){
       collapsePanel(target)
     }
     if (!opts.collapsed){
-      loadData(target)
+      refresh(target)
     }
   }
   panel.show(400, cb);
@@ -229,7 +229,7 @@ expandPanel = function(target){
   }
   //pbody.slideDown("normal",cb);
   pbody.show(0,cb)
-  loadData(target);
+  refresh(target);
 }
 maximizePanel = function(target){
   var state = $.data(target, "panel");
