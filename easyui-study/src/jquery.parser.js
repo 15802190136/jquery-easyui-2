@@ -200,7 +200,6 @@ $.fn._outerHeight = function(height){
   }
   return this._size('height', height);
 };
-
 $.fn._outerWidth = function(width){
   if (width == undefined){
     if (this[0] == window){
@@ -210,6 +209,14 @@ $.fn._outerWidth = function(width){
   }
   return this._size('width', width);
 };
+$.fn._scrollLeft = function(left){
+  if (left == undefined){
+    return this.scrollLeft();
+  } else {
+    return this.each(function(){$(this).scrollLeft(left)});
+  }  
+}
+$.fn._propAttr = $.fn.prop || $.fn.attr;
 $(function(){
   var d = $('<div style="position:absolute;top:-1000px;width:100px;height:100px;padding:5px"></div>').appendTo('body');
   $._boxModel = d.outerWidth()!=100;

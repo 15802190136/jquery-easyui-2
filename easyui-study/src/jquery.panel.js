@@ -8,6 +8,15 @@
     var pbody = panel.children("div.panel-body");
     var pfooter = panel.children("div.panel-footer");
 */
+$.fn._remove = function() {
+  return this.each(function() {
+    $(this).remove();
+    try {
+      this.outerHTML = "";
+    } catch (err) {
+    }
+  });
+};
 $.fn.panel = function(options, param) {
   if (typeof options == "string") {
     return $.fn.panel.methods[options](this, param);
@@ -29,76 +38,26 @@ $.fn.panel = function(options, param) {
     initPanelFooter(this)
     setBorder(this)
     if (opts.doSize == true) {
-      setSize(this)
+      state.panel.css("display", "block");
+      resize(this)
     }
-    openPanel(this)
+    if (opts.closed == true || opts.minimized == true) {
+      state.panel.hide();
+    }else{
+      openPanel(this);
+    }
   })
 }
 $.fn.panel.parseOptions = function(target){
   return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title"]));    
 }
-$.fn.panel.defaults = {fit: false,border: true,collapsed:true,cls:"window",loadingMessage: "Loading..."};
-$.fn.panel.methods = {
-  options: function(jq) {
-    return $.data(jq[0], "panel").options;
-  },
-  panel: function(jq) {
-    return $.data(jq[0], "panel").panel;
-  },
-  header: function(jq) {
-    return $.data(jq[0], "panel").panel.find(">div.panel-header");
-  },
-  footer: function(jq) {
-    return jq.panel("panel").children(".panel-footer");
-  },
-  body: function(jq) {
-    return $.data(jq[0], "panel").panel.find(">div.panel-body");
-  },
-  open: function(jq, param) {
-    return jq.each(function() {
-      openPanel(this, param);
-    });
-  },
-  close: function(jq, param) {
-    return jq.each(function() {
-      closePanel(this, param);
-    });
-  },
-  resize: function(jq, param) {
-    return jq.each(function() {
-      setSize(this, param);
-    });
-  },
-  move: function(jq, param) {
-    return jq.each(function() {
-      movePanel(this, param);
-    });
-  },
-  maximize: function(jq) {
-    return jq.each(function() {
-      maximizePanel(this);
-    });
-  },
-  minimize: function(jq) {
-    return jq.each(function() {
-      minimizePanel(this);
-    });
-  },
-  restore: function(jq) {
-    return jq.each(function() {
-      restorePanel(this);
-    });
-  },
-  collapse: function(jq, param) {
-    return jq.each(function() {
-      collapsePanel(this, param);
-    });
-  },
-  expand: function(jq, param) {
-    return jq.each(function() {
-      expandPanel(this, param);
-    });
-  }
+$.fn.panel.defaults = {
+  fit: false,border: true,noheader : false,cls:null,
+  closed : false,doSize : true,collapsed:false,
+  href : null,loadingMessage: "Loading..."
+};
+remove = function(panel) {
+  panel._remove();
 }
 wrapPanel = function(target){
   $(target).addClass("panel-body")._size("clear");
@@ -109,9 +68,17 @@ wrapPanel = function(target){
 }
 initPanelHeader = function(target){
   var state = $.data(target, "panel");
+  var opts = state.options;
   var panel = state.panel;
-  $("<div class='panel-header'></div>").prependTo(panel)
-  panel.children("div.panel-body").removeClass("panel-body-noheader")
+  remove(panel.children("div.panel-header"));
+  if (!opts.noheader) {
+    $("<div class='panel-header'></div>").prependTo(panel)
+    panel.children("div.panel-body").removeClass("panel-body-noheader")
+  }else{
+    panel.children("div.panel-body").addClass("panel-body-noheader");
+  }
+  
+  
 }
 initPanelFooter = function(target){
   var state = $.data(target, "panel");
@@ -136,7 +103,7 @@ setBorder = function(target){
     pfooter.addClass("panel-footer-noborder");    
   }    
 }
-setSize = function(target,param){
+resize = function(target,param){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel; 
@@ -167,6 +134,9 @@ refresh = function(target){
   var opts = state.options;
   var panel = state.panel;
   var pbody = panel.children("div.panel-body");
+  if (!opts.href) {
+    return;
+  }
   pbody.html($("<div class='panel-loading'></div>").html(opts.loadingMessage));
 }
 openPanel = function(target){
@@ -174,6 +144,8 @@ openPanel = function(target){
   var opts = state.options;
   var panel = state.panel;
   var cb = function(){
+    opts.closed = false;
+    opts.minimized = false;
     if (opts.collapsed == true) {
       collapsePanel(target)
     }
@@ -203,7 +175,10 @@ movePanel = function(target,param){
 closePanel = function(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
-  var cb = function(){}
+  var opts = state.options;
+  var cb = function(){
+    opts.closed = true;
+  }
   //panel.slideUp(400, cb);
   //panel.fadeOut(400, cb);
   panel.hide(0, cb);
@@ -247,14 +222,14 @@ maximizePanel = function(target){
   opts.left = 0;
   opts.top = 0;
   opts.fit = true;
-  setSize(target,opts);
+  resize(target,opts);
 }
 restorePanel = function(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var original = state.original;
   $.extend(opts, original);
-  setSize(target);
+  resize(target);
   original = null;   
 }
 minimizePanel = function(target){
@@ -262,6 +237,69 @@ minimizePanel = function(target){
   var panel = state.panel;
   panel._size("unfit")
   panel.hide()
+}
+
+$.fn.panel.methods = {
+  options: function(jq) {
+    return $.data(jq[0], "panel").options;
+  },
+  panel: function(jq) {
+    return $.data(jq[0], "panel").panel;
+  },
+  header: function(jq) {
+    return $.data(jq[0], "panel").panel.find(">div.panel-header");
+  },
+  footer: function(jq) {
+    return jq.panel("panel").children(".panel-footer");
+  },
+  body: function(jq) {
+    return $.data(jq[0], "panel").panel.find(">div.panel-body");
+  },
+  open: function(jq, param) {
+    return jq.each(function() {
+      openPanel(this, param);
+    });
+  },
+  close: function(jq, param) {
+    return jq.each(function() {
+      closePanel(this, param);
+    });
+  },
+  resize: function(jq, param) {
+    return jq.each(function() {
+      resize(this, param);
+    });
+  },
+  move: function(jq, param) {
+    return jq.each(function() {
+      movePanel(this, param);
+    });
+  },
+  maximize: function(jq) {
+    return jq.each(function() {
+      maximizePanel(this);
+    });
+  },
+  minimize: function(jq) {
+    return jq.each(function() {
+      minimizePanel(this);
+    });
+  },
+  restore: function(jq) {
+    return jq.each(function() {
+      restorePanel(this);
+    });
+  },
+  collapse: function(jq, param) {
+    return jq.each(function() {
+      collapsePanel(this, param);
+    });
+  },
+  expand: function(jq, param) {
+    return jq.each(function() {
+      expandPanel(this, param);
+    });
+  }
 }
 
 })(jQuery);

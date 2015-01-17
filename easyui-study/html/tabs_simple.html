@@ -1,11 +1,142 @@
-
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <title>tabs_simple</title>
     <link ref="stylesheet" type="text/css" href="../css/panel.css">
     <style>
-
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.tabs-container {
+  overflow: hidden;
+}
+.tabs-header, .tabs-scroller-left, .tabs-scroller-right, .tabs-tool, .tabs, .tabs-panels, .tabs li a.tabs-inner, .tabs li.tabs-selected a.tabs-inner, .tabs-header-bottom .tabs li.tabs-selected a.tabs-inner, .tabs-header-left .tabs li.tabs-selected a.tabs-inner, .tabs-header-right .tabs li.tabs-selected a.tabs-inner {
+  border-color: #95B8E7;
+}
+.tabs-header, .tabs-tool {
+  background-color: #E0ECFF;
+}
+.tabs-header {
+  border-width: 1px;
+  border-style: solid;
+  border-bottom-width: 0;
+  position: relative;
+  padding: 0;
+  padding-top: 2px;
+  overflow: hidden;
+}
+.tabs-scroller-left, .tabs-scroller-right {
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  width: 18px;
+  font-size: 1px;
+  display: none;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+}
+.tabs-scroller-left {
+  left: 0;
+}
+.tabs-scroller-left {
+  background: #E0ECFF url('../img/tabs_icons.png') no-repeat 1px center;
+}
+.tabs-scroller-right {
+  right: 0;
+}
+.tabs-scroller-right {
+  background: #E0ECFF url('../img/tabs_icons.png') no-repeat -15px center;
+}
+.tabs-tool {
+  position: absolute;
+  bottom: 0;
+  padding: 1px;
+  overflow: hidden;
+  border-width: 1px;
+  border-style: solid;
+}
+.tabs-header-plain .tabs-tool {
+  padding: 0 1px;
+}
+.tabs-wrap {
+  position: relative;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.tabs-header, .tabs-scroller-left, .tabs-scroller-right, .tabs-tool, .tabs, .tabs-panels, .tabs li a.tabs-inner, .tabs li.tabs-selected a.tabs-inner, .tabs-header-bottom .tabs li.tabs-selected a.tabs-inner, .tabs-header-left .tabs li.tabs-selected a.tabs-inner, .tabs-header-right .tabs li.tabs-selected a.tabs-inner {
+border-color: #95B8E7;
+}
+.tabs {
+  list-style-type: none;
+  height: 26px;
+  margin: 0px;
+  padding: 0px;
+  padding-left: 4px;
+  width: 50000px;
+  border-style: solid;
+  border-width: 0 0 1px 0;
+}
+.tabs li {
+  float: left;
+  display: inline-block;
+  margin: 0 4px -1px 0;
+  padding: 0;
+  position: relative;
+  border: 0;
+}
+.tabs li a.tabs-inner {
+  display: inline-block;
+  text-decoration: none;
+  margin: 0;
+  padding: 0 10px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  white-space: nowrap;
+  border-width: 1px;
+  border-style: solid;
+}
+.tabs li a.tabs-inner {
+  color: #0E2D5F;
+  background-color: #E0ECFF;
+}
+.tabs li.tabs-selected a.tabs-inner {
+  font-weight: bold;
+  outline: none;
+}
+.tabs li.tabs-selected a.tabs-inner {
+  background-color: #ffffff;
+  color: #0E2D5F;
+}
+.tabs li.tabs-selected a.tabs-inner {
+  border-bottom: 1px solid #ffffff;
+}
+.tabs-title {
+  font-size: 12px;
+}
+.tabs-icon {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 10px;
+  top: 50%;
+  margin-top: -8px;
+}
+.tabs-panels {
+  margin: 0px;
+  padding: 0px;
+  border-width: 1px;
+  border-style: solid;
+  border-top-width: 0;
+  overflow: hidden;
+}
     </style>
     <script src="../bower_components/jquery/jquery.js"></script>
   </head>
@@ -25,320 +156,417 @@
 <script src="../src/jquery.parser.js"></script>
 <script src="../src/jquery.panel.js"></script>
 <script>     
-/*
-依次需要完成的方法
-  exists
-  getTab
-  getTabIndex
-  selectTab
-  unselectTab
-*/
 $(function(){
-  var target = $(".easyui-tabs")[0]
-  var container = target
-  var cc = $(container)
-  var defaults = {
-    width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
-    selected: 0,showHeader: true,plain: false,fit: false,border: true,
-    tools: [],toolPosition: 'right',tabPosition: 'top',
-    scrollIncrement: 100,scrollDuration: 400
+var target = $(".easyui-tabs")[0]
+var container = target
+var cc = $(container)
+var state_opts,state_tabs = [],state_selectHis=[]
+var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
+var defaults = {
+  width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
+  selected: 0,showHeader: true,plain: false,fit: false,border: true,
+  tools: [],toolPosition: 'right',tabPosition: 'top',
+  scrollIncrement: 100,scrollDuration: 400
+}
+main = function(){
+  parseOptions()
+  wrapTabs()
+  addTools()
+  setProperties()
+  setSize()
+  bindEvents()
+  doFirstSelect()
+}
+parseOptions = function(){
+  state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
+    'tools','toolPosition','tabPosition',
+    {fit:'boolean',border:'boolean',plain:'boolean',headerWidth:'number',tabWidth:'number',tabHeight:'number',selected:'number',showHeader:'boolean'}
+  ]))
+}
+wrapTabs = function(){
+  cc.addClass('tabs-container')
+  $panels = $('<div class="tabs-panels"></div>').insertBefore(container)
+  cc.children('div').each(function(){
+    $panels[0].appendChild(this);
+  });
+  cc[0].appendChild($panels[0]);
+  $header = $('<div class="tabs-header">'
+      + '<div class="tabs-scroller-left"></div>'
+      + '<div class="tabs-scroller-right"></div>'
+      + '<div class="tabs-wrap">'
+      +   '<ul class="tabs"></ul>'
+      + '</div>'
+      + '</div>').prependTo(container);
+  $headerWrap = $header.children('div.tabs-wrap')
+  $headerSLeft = $header.children('div.tabs-scroller-left')
+  $headerSRight = $header.children('div.tabs-scroller-right')
+  $headerTool = $header.children('div.tabs-tool')
+  $headerTabs = $header.find('ul.tabs')
+  $panels.children('div').each(function(i){
+    var pp = $(this)
+    state_tabs.push(pp)
+    createTab(pp)
+  });
+}
+createTab = function(pp){
+  //panel
+  pp.panel($.extend({}, $.parser.parseOptions(pp[0]), {
+    selected: ($(this).attr('selected') ? true : undefined),
+    border: false,
+    noheader: true,
+    closed: true,
+    doSize: false
+  }));
+  var opts = pp.panel('options')
+  //header
+  opts.tab = $('<li></li>').appendTo($headerTabs);
+  opts.tab.append(
+      '<a href="javascript:void(0)" class="tabs-inner">' +
+      '<span class="tabs-title"></span>' +
+      '<span class="tabs-icon"></span>' +
+      '</a>'
+  );
+  updateTab({
+    tab: pp,
+    options: opts,
+    type: 'header'
+  });
+}
+updateTab = function(param){
+  var pp = param.tab
+  var oldTitle = pp.panel('options').title
+  if (param.type == 'all' || param.type == 'header'){
+    var opts = pp.panel('options');
+    var tab = opts.tab
+    var s_title = tab.find('span.tabs-title');
+    var s_icon = tab.find('span.tabs-icon');
+    s_title.html(opts.title);
+    s_icon.attr('class', 'tabs-icon');
   }
-  var state_opts,state_tabs = [],state_selectHis=[]
-  var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
-  main = function(){
-    parseOptions()
-    wrapTabs()
-    addTools()
-    setProperties()
-    setSize()
-    bindEvents()
-  }
-  parseOptions = function(){
-    state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
-      'tools','toolPosition','tabPosition',
-      {fit:'boolean',border:'boolean',plain:'boolean',headerWidth:'number',tabWidth:'number',tabHeight:'number',selected:'number',showHeader:'boolean'}
-    ]))
-  }
-  wrapTabs = function(){
-    initTabsHeader()
-    initTabsPanels()
-  }
-  initTabsPanels = function(){
-    $panels = $('<div class="tabs-panels"></div>').insertBefore(container)
-    cc.children('div').each(function(){
-      $panels[0].appendChild(this);
+  setSize()
+}
+setSize = function(param){
+  if (param){
+    $.extend(state_opts, {
+      width: param.width,
+      height: param.height
     });
-    cc[0].appendChild($panels[0]);
-    $panels.children('div').each(function(i){
-      var pp = $(this)
-      state_tabs.push(pp)
-      createTab(pp)
-    });
   }
-  initTabsHeader = function(){
-    $header = $('<div class="tabs-header">'
-        + '<div class="tabs-scroller-left"></div>'
-        + '<div class="tabs-scroller-right"></div>'
-        + '<div class="tabs-wrap">'
-        +   '<ul class="tabs"></ul>'
-        + '</div>'
-        + '</div>').prependTo(container);
-    $headerWrap = $header.children('div.tabs-wrap')
-    $headerSLeft = $header.children('div.tabs-scroller-left')
-    $headerSRight = $header.children('div.tabs-scroller-right')
-    $headerTool = $header.children('div.tabs-tool')
-    $headerTabs = $header.find('ul.tabs')
-  }
-  createTab = function(pp){
-    //panel
-    pp.panel($.extend({}, $.parser.parseOptions(pp[0]), {
-      selected: ($(this).attr('selected') ? true : undefined),
-      border: false,
-      noheader: true,
-      closed: true,
-      doSize: false
-    }));
-    var opts = pp.panel('options')
-    //header
-    opts.tab = $('<li></li>').appendTo($headerTabs);
-    opts.tab.append(
-        '<a href="javascript:void(0)" class="tabs-inner">' +
-        '<span class="tabs-title"></span>' +
-        '<span class="tabs-icon"></span>' +
-        '</a>'
-    );
-    updateTab({
-      tab: pp,
-      options: opts,
-      type: 'header'
-    });
-  }
-  updateTab = function(param){
-    var pp = param.tab
-    var oldTitle = pp.panel('options').title
-    if (param.type == 'all' || param.type == 'header'){
-      var opts = pp.panel('options');
-      var tab = opts.tab
-      var s_title = tab.find('span.tabs-title');
-      var s_icon = tab.find('span.tabs-icon');
-      s_title.html(opts.title);
-      s_icon.attr('class', 'tabs-icon');
+  cc._size(state_opts)
+  for(var i=0; i<state_tabs.length; i++){
+    var p_opts = state_tabs[i].panel('options');
+    var p_t = p_opts.tab.find('a.tabs-inner');
+    var width = parseInt(p_opts.tabWidth || state_opts.tabWidth) || undefined;
+    if (width){
+      p_t._outerWidth(width);
+    } else {
+      p_t.css('width', '');
     }
-    setSize()
+    p_t._outerHeight(state_opts.tabHeight);
+    p_t.css('lineHeight', p_t.height()+'px');
   }
-  setSize = function(param){
-    if (param){
-      $.extend(state_opts, {
-        width: param.width,
-        height: param.height
+  if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right'){
+    $header._outerWidth(state_opts.showHeader ? state_opts.headerWidth : 0);
+    $panels._outerWidth(cc.width() - $header.outerWidth());
+    $header.add($panels)._outerHeight(state_opts.height);
+    $headerWrap._outerWidth($header.width())
+    $headerTabs._outerWidth($headerWrap.width()).css('height','');
+  }else{
+    $header._outerWidth(state_opts.width).css('height','');
+    if (state_opts.showHeader){
+      $header.css('background-color','');
+      $headerWrap.css('height','');
+    }else{
+      $header.css('background-color','transparent');
+      $header._outerHeight(0);
+      $headerWrap._outerHeight(0);
+    }
+    $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
+    setScrollers()
+    $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
+    $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
+  }
+}
+setScrollers = function(){
+  return
+  if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right' || !state_opts.showHeader){return}
+  var tHeight = $header.outerHeight();
+  if (state_opts.plain){
+    tHeight -= tHeight - $header.height();
+  }
+  var tabsWidth = 0;
+  $('ul.tabs li', $header).each(function(){
+    tabsWidth += $(this).outerWidth(true);
+  });
+  $headerTool._outerHeight(tHeight);
+  var cWidth = $header.width() - $headerTool._outerWidth();
+  if (tabsWidth > cWidth) {
+    $headerSLeft.add($headerSRight).show()._outerHeight(tHeight);
+    if (state_opts.toolPosition == 'left'){
+      $headerTool.css({
+        left: $headerSLeft.outerWidth(),
+        right: ''
+      });
+      $headerWrap.css({
+        marginLeft: $headerSLeft.outerWidth() + $headerTool._outerWidth(),
+        marginRight: $headerSRight._outerWidth(),
+        width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
+      });
+    } else {
+      $headerTool.css({
+        left: '',
+        right: $headerSRight.outerWidth()
+      });
+      $headerWrap.css({
+        marginLeft: $headerSLeft.outerWidth(),
+        marginRight: $headerSRight.outerWidth() + $headerTool._outerWidth(),
+        width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
       });
     }
-    cc._size(state_opts)
-    for(var i=0; i<state_tabs.length; i++){
-      var p_opts = state_tabs[i].panel('options');
-      var p_t = p_opts.tab.find('a.tabs-inner');
-      var width = parseInt(p_opts.tabWidth || state_opts.tabWidth) || undefined;
-      if (width){
-        p_t._outerWidth(width);
-      } else {
-        p_t.css('width', '');
-      }
-      p_t._outerHeight(state_opts.tabHeight);
-      p_t.css('lineHeight', p_t.height()+'px');
-    }
-    if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right'){
-      $header._outerWidth(state_opts.showHeader ? state_opts.headerWidth : 0);
-      $panels._outerWidth(cc.width() - $header.outerWidth());
-      $header.add($panels)._outerHeight(state_opts.height);
-      $headerWrap._outerWidth($header.width())
-      $headerTabs._outerWidth($headerWrap.width()).css('height','');
-    }else{
-      $header._outerWidth(state_opts.width).css('height','');
-      if (state_opts.showHeader){
-        $header.css('background-color','');
-        $headerWrap.css('height','');
-      }else{
-        $header.css('background-color','transparent');
-        $header._outerHeight(0);
-        $headerWrap._outerHeight(0);
-      }
-      $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
-      setScrollers()
-      $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
-      $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
-    }
-  }
-  setScrollers = function(){
-    if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right' || !state_opts.showHeader){return}
-    var tHeight = $header.outerHeight();
-    if (state_opts.plain){
-      tHeight -= tHeight - $header.height();
-    }
-    var tabsWidth = 0;
-    $('ul.tabs li', $header).each(function(){
-      tabsWidth += $(this).outerWidth(true);
-    });
-    $headerTool._outerHeight(tHeight);
-    var cWidth = $header.width() - $headerTool._outerWidth();
-       if (tabsWidth > cWidth) {
-      $headerSLeft.add($headerSRight).show()._outerHeight(tHeight);
-      if (state_opts.toolPosition == 'left'){
-        $headerTool.css({
-          left: $headerSLeft.outerWidth(),
-          right: ''
-        });
-        $headerWrap.css({
-          marginLeft: $headerSLeft.outerWidth() + $headerTool._outerWidth(),
-          marginRight: $headerSRight._outerWidth(),
-          width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
-        });
-      } else {
-        $headerTool.css({
-          left: '',
-          right: $headerSRight.outerWidth()
-        });
-        $headerWrap.css({
-          marginLeft: $headerSLeft.outerWidth(),
-          marginRight: $headerSRight.outerWidth() + $headerTool._outerWidth(),
-          width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
-        });
-      }
+  } else {
+    $headerSLeft.add($headerSRight).hide();
+    if (state_opts.toolPosition == 'left'){
+      $headerTool.css({
+        left: 0,
+        right: ''
+      });
+      $headerWrap.css({
+        marginLeft: $headerTool._outerWidth(),
+        marginRight: 0,
+        width: cWidth
+      });
     } else {
-      $headerSLeft.add($headerSRight).hide();
-      if (state_opts.toolPosition == 'left'){
-        $headerTool.css({
-          left: 0,
-          right: ''
-        });
-        $headerWrap.css({
-          marginLeft: $headerTool._outerWidth(),
-          marginRight: 0,
-          width: cWidth
-        });
-      } else {
-        $headerTool.css({
-          left: '',
-          right: 0
-        });
-        $headerWrap.css({
-          marginLeft: 0,
-          marginRight: $headerTool._outerWidth(),
-          width: cWidth
-        });
-      }
+      $headerTool.css({
+        left: '',
+        right: 0
+      });
+      $headerWrap.css({
+        marginLeft: 0,
+        marginRight: $headerTool._outerWidth(),
+        width: cWidth
+      });
     }
   }
-  addTools = function(){
-    if (state_opts.tools) {
-      $header.children('div.tabs-tool').remove();
-      $headerTool = $('<div class="tabs-tool"><table cellspacing="0" cellpadding="0" style="height:100%"><tr></tr></table></div>').appendTo($header);
-    }
+}
+addTools = function(){
+  if (state_opts.tools) {
+    $header.children('div.tabs-tool').remove();
+    $headerTool = $('<div class="tabs-tool"><table cellspacing="0" cellpadding="0" style="height:100%"><tr></tr></table></div>').appendTo($header);
   }
-  setProperties = function(){    
-    $header.removeClass('tabs-header-top tabs-header-bottom tabs-header-left tabs-header-right');
-    $panels.removeClass('tabs-panels-top tabs-panels-bottom tabs-panels-left tabs-panels-right');
-    if (state_opts.tabPosition == 'top'){
-      $header.insertBefore($panels);
-    } else if (state_opts.tabPosition == 'bottom'){
-      $header.insertAfter($panels);
-      $header.addClass('tabs-header-bottom');
-      $panels.addClass('tabs-panels-top');
-    } else if (state_opts.tabPosition == 'left'){
-      $header.addClass('tabs-header-left');
-      $panels.addClass('tabs-panels-right');
-    } else if (state_opts.tabPosition == 'right'){
-      $header.addClass('tabs-header-right');
-      $panels.addClass('tabs-panels-left');
-    }
-    
-    if (state_opts.plain == true) {
-      $header.addClass('tabs-header-plain');
+}
+setProperties = function(){    
+  $header.removeClass('tabs-header-top tabs-header-bottom tabs-header-left tabs-header-right');
+  $panels.removeClass('tabs-panels-top tabs-panels-bottom tabs-panels-left tabs-panels-right');
+  if (state_opts.tabPosition == 'top'){
+    $header.insertBefore($panels);
+  } else if (state_opts.tabPosition == 'bottom'){
+    $header.insertAfter($panels);
+    $header.addClass('tabs-header-bottom');
+    $panels.addClass('tabs-panels-top');
+  } else if (state_opts.tabPosition == 'left'){
+    $header.addClass('tabs-header-left');
+    $panels.addClass('tabs-panels-right');
+  } else if (state_opts.tabPosition == 'right'){
+    $header.addClass('tabs-header-right');
+    $panels.addClass('tabs-panels-left');
+  }
+  
+  if (state_opts.plain == true) {
+    $header.addClass('tabs-header-plain');
+  } else {
+    $header.removeClass('tabs-header-plain');
+  }
+  if (state_opts.border == true){
+    $header.removeClass('tabs-header-noborder');
+    $panels.removeClass('tabs-panels-noborder');
+  } else {
+    $header.addClass('tabs-header-noborder');
+    $panels.addClass('tabs-panels-noborder');
+  }
+}
+bindEvents = function(){
+  $header.unbind().bind('click', function(e){
+    if ($(e.target).hasClass('tabs-scroller-left')){
+      scrollBy(-state_opts.scrollIncrement);
+    } else if ($(e.target).hasClass('tabs-scroller-right')){
+      scrollBy(state_opts.scrollIncrement);
     } else {
-      $header.removeClass('tabs-header-plain');
-    }
-    if (state_opts.border == true){
-      $header.removeClass('tabs-header-noborder');
-      $panels.removeClass('tabs-panels-noborder');
-    } else {
-      $header.addClass('tabs-header-noborder');
-      $panels.addClass('tabs-panels-noborder');
-    }
-  }
-  bindEvents = function(){
-    $header.unbind().bind('click', function(e){
-      if ($(e.target).hasClass('tabs-scroller-left')){
-        scrollBy(-state_opts.scrollIncrement);
-      } else if ($(e.target).hasClass('tabs-scroller-right')){
-        scrollBy(state_opts.scrollIncrement);
-      } else {
-        var li = $(e.target).closest('li');
-        if (li.hasClass('tabs-disabled')){return;}
-        var a = $(e.target).closest('a.tabs-close');
-        if (a.length){
-          closeTab(getLiIndex(li));
-        } else if (li.length){
-          var index = getLiIndex(li);
-          var popts = state_tabs[index].panel('options');
-          if (popts.collapsible){
-            popts.closed ? selectTab(index) : unselectTab(index);
-          } else {
-            selectTab(index);
-          }
+      var li = $(e.target).closest('li');
+      if (li.hasClass('tabs-disabled')){return;}
+      var a = $(e.target).closest('a.tabs-close');
+      if (a.length){
+        closeTab(getLiIndex(li));
+      } else if (li.length){
+        var index = getLiIndex(li);
+        var popts = state_tabs[index].panel('options');
+        if (popts.collapsible){
+          popts.closed ? selectTab(index) : unselectTab(index);
+        } else {
+          selectTab(index);
         }
       }
-    })
-  }
-  getLiIndex = function (li){
-    var index = 0;
-    li.parent().children('li').each(function(i){
-      if (li[0] == this){
-        index = i;
-        return false;
-      }
+    }
+  })
+}
+getLiIndex = function (li){
+  var index = 0;
+  li.parent().children('li').each(function(i){
+    if (li[0] == this){
+      index = i;
+      return false;
+    }
+  });
+  return index;
+}
+scrollBy = function(deltaX){
+  var pos = Math.min($headerWrap._scrollLeft() + deltaX, getMaxScrollWidth());
+  $headerWrap.animate({scrollLeft: pos}, state_opts.scrollDuration);
+    
+  function getMaxScrollWidth(){
+    var w = 0;
+    var ul = $headerWrap.children('ul');
+    ul.children('li').each(function(){
+      w += $(this).outerWidth(true);
     });
-    return index;
+    return w - $headerWrap.width() + (ul.outerWidth() - ul.width());
   }
-  scrollBy = function(deltaX){
-    var pos = Math.min($headerWrap._scrollLeft() + deltaX, getMaxScrollWidth());
-    $headerWrap.animate({scrollLeft: pos}, state_opts.scrollDuration);
+}
+closeTab = function(which){
+  if (!exists(which)) return;
+  
+  var tab = getTab(container, which);
+  var title = state_opts.title;
+  var index = getTabIndex(tab);
       
-    function getMaxScrollWidth(){
-      var w = 0;
-      var ul = $headerWrap.children('ul');
-      ul.children('li').each(function(){
-        w += $(this).outerWidth(true);
-      });
-      return w - $headerWrap.width() + (ul.outerWidth() - ul.width());
+  var tab = getTab(container, which, true);
+  tab.panel('options').tab.remove();
+  tab.panel('destroy');
+  
+  setSize();
+  // remove the select history item
+  for(var i=0; i<state_selectHis.length; i++){
+    if (state_selectHis[i] == title){
+      state_selectHis.splice(i, 1);
+      i --;
     }
   }
-  closeTab = function(which){
-    if (!exists(which)) return;
-    
-    var tab = getTab(container, which);
-    var title = state_opts.title;
-    var index = getTabIndex(tab);
-        
-    var tab = getTab(container, which, true);
-    tab.panel('options').tab.remove();
-    tab.panel('destroy');
-    
-    setSize();
-    // remove the select history item
-    for(var i=0; i<state_selectHis.length; i++){
-      if (state_selectHis[i] == title){
-        state_selectHis.splice(i, 1);
-        i --;
+  // select the nearest tab panel
+  var hisTitle = state_selectHis.pop();
+  if (hisTitle){
+    selectTab(hisTitle);
+  } else if (tabs.length){
+    selectTab(0);
+  }    
+}
+exist = function(which){
+  return getTab(which) != null
+}
+getTab = function(which, removeit){
+  if (typeof which == 'number') {
+    if (which < 0 || which >= state_tabs.length) {
+      return null;
+    }else{
+      var tab = state_tabs[which];
+      if (removeit) {
+        state_tabs.splice(which, 1);
+      }
+      return tab;
+    }
+  }
+  for (var i = 0; i < state_tabs.length; i++) {
+    var tab = state_tabs[i];
+    if (tab.panel('options').title == which) {
+      if (removeit) {
+        state_tabs.splice(i, 1);
+      }
+      return tab;
+    }
+  }
+}
+getTabIndex = function(tab){
+  for (var i = 0; i < state_tabs.length; i++) {
+    if (state_tabs[i][0] == $(tab)[0]) {
+      return i;
+    }
+  }
+  return -1;
+}
+selectTab = function(which){
+  if (state_tabs.length == 0) {
+    return;
+  }
+  var panel = getTab(which); // get the panel to be activated
+  if (!panel) {
+    return
+  }
+  var selected = getSelectedTab();
+  if (selected) {
+    if (panel[0] == selected[0]) {
+      setSelectedSize();
+      return;
+    }
+    unselectTab(getTabIndex(selected));
+    if (!selected.panel('options').closed) {
+      return
+    }
+  } 
+  panel.panel('open');
+  var title = panel.panel('options').title; // the panel title
+  state_selectHis.push(title); // push select history
+
+  var tab = panel.panel('options').tab; // get the tab object
+  tab.addClass('tabs-selected');
+  var left = tab.position().left;
+  var right = left + tab.outerWidth();
+  if (left < 0 || right > $headerWrap.width()) {
+    var deltaX = left - ($headerWrap.width() - tab.width()) / 2;
+    scrollBy(deltaX)
+  } else {
+    scrollBy(0)
+  }
+  setSelectedSize(container);
+}
+getSelectedTab = function(){
+  for (var i = 0; i < state_tabs.length; i++) {
+    var tab = state_tabs[i];
+    if (tab.panel('options').closed == false) {
+      return tab;
+    }
+  }
+}
+setSelectedSize = function(){
+  var tab = getSelectedTab();
+  if (tab) {
+    var width = state_opts.width == 'auto' ? 'auto' : $panels.width();
+    var height = state_opts.height == 'auto' ? 'auto' : $panels.height();
+    tab.panel('resize', {
+      width : width,
+      height : height
+    });
+  }
+}
+unselectTab = function(which){
+  var p = getTab(which);
+  if (p) {
+    var opts = p.panel('options');
+    if (!opts.closed) {
+      p.panel('close');
+      if (opts.closed) {
+        opts.tab.removeClass('tabs-selected');
       }
     }
-    // select the nearest tab panel
-    var hisTitle = state_selectHis.pop();
-    if (hisTitle){
-      selectTab(hisTitle);
-    } else if (tabs.length){
-      selectTab(0);
-    }    
   }
-  main();
+}
+doFirstSelect = function(){
+  for (var i = 0; i < state_tabs.length; i++) {
+    if (state_tabs[i].panel('options').selected) {
+      selectTab(i);
+      return;
+    }
+  }
+  selectTab(state_opts.selected);
+}
+main();
 })
 </script>
 </html>
