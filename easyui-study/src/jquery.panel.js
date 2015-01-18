@@ -34,9 +34,7 @@ $.fn.panel = function(options, param) {
         panel: wrapPanel(this)
       });
     }
-    initPanelHeader(this)
-    initPanelFooter(this)
-    setBorder(this)
+    addHeader(this)
     if (opts.doSize == true) {
       state.panel.css("display", "block");
       resize(this)
@@ -52,9 +50,13 @@ $.fn.panel.parseOptions = function(target){
   return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title"]));    
 }
 $.fn.panel.defaults = {
-  fit: false,border: true,noheader : false,cls:null,
+  fit: false,border: true,noheader : false,
+  cls:null,iconCls : null,headerCls : null,bodyCls : null,
   closed : false,doSize : true,collapsed:false,
-  href : null,loadingMessage: "Loading..."
+  tools : null,footer : null,
+  href : null,loadingMessage: "Loading...",
+  style : {},
+  onBeforeLoad : function(param) {},onLoad : function() {},onLoadError : function() {},onBeforeOpen : function() {},onOpen : function() {},onBeforeClose : function() {},onClose : function() {},onBeforeDestroy : function() {},onDestroy : function() {},onResize : function(width, height) {},onMove : function(left, top) {},onMaximize : function() {},onRestore : function() {},onMinimize : function() {},onBeforeCollapse : function() {},onBeforeExpand : function() {},onCollapse : function() {},onExpand : function() {}
 };
 remove = function(panel) {
   panel._remove();
@@ -66,33 +68,96 @@ wrapPanel = function(target){
   var pbody = panel.children("div.panel-body");
   return panel;    
 }
-initPanelHeader = function(target){
+initPanelTool = function(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
   remove(panel.children("div.panel-header"));
   if (!opts.noheader) {
-    $("<div class='panel-header'></div>").prependTo(panel)
+    var pheader = $("<div class='panel-header'></div>").prependTo(panel);
+    var ptitle = $("<div class='panel-title'></div>").html(opts.title).appendTo(pheader);
+    if (opts.iconCls) {
+      ptitle.addClass("panel-with-icon");
+        $("<div class='panel-icon'></div>").addClass(opts.iconCls).appendTo(pheader);
+    }
+    var ptool = $("<div class='panel-tool'></div>").appendTo(pheader);
+    ptool.bind("click", function(e) {
+      e.stopPropagation();
+    });
+    if (opts.tools) {
+      if ($.isArray(opts.tools)) {
+        for (var i = 0; i < opts.tools.length; i++) {
+          var t = $("<a href=\"javascript:void(0)\"></a>").addClass(opts.tools[i].iconCls).appendTo(ptool);
+          if (opts.tools[i].handler) {
+            t.bind("click", eval(opts.tools[i].handler));
+          }
+        }
+      }else{
+        $(opts.tools).children().each(function() {
+          $(this).addClass($(this).attr("iconCls")).addClass("panel-tool-a").appendTo(ptool);
+        });        
+      }
+    }
+    if (opts.collapsible) {
+      $("<a class='panel-tool-collapse' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
+        if (opts.collapsed == true) {
+          expand(target, true);
+        } else {
+          collapse(target, true);
+        }
+        return false;
+      });      
+    }
+    if (opts.minimizable) {
+      $("<a class='panel-tool-min' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
+        minimize(target);
+        return false;
+      });      
+    }
+    if (opts.maximizable) {
+      $("<a class='panel-tool-max' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
+        if (opts.maximized == true) {
+          restore(target);
+        } else {
+          maximize(target);
+        }
+        return false;
+      });
+    }
+    if (opts.closable) {
+      $("<a class='panel-tool-close' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
+        close(target);
+        return false;
+      });
+    }    
     panel.children("div.panel-body").removeClass("panel-body-noheader")
   }else{
     panel.children("div.panel-body").addClass("panel-body-noheader");
   }
-  
-  
 }
 initPanelFooter = function(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
-  $("<div class='panel-footer'></div>").appendTo(panel) 
+  var opts = state.options;
+  if (opts.footer) {
+    $(opts.footer).addClass("panel-footer").appendTo(panel);
+    $(target).addClass("panel-body-nobottom");
+  }else{
+    panel.children("div.panel-footer").remove();
+    $(target).removeClass("panel-body-nobottom");
+  }
 }
-setBorder = function(target){
+addHeader = function(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
+  //panel.css(opts.style);
+  panel.addClass(opts.cls);  
+  initPanelTool(target)
+  initPanelFooter(target)
   var pheader = panel.children("div.panel-header");
   var pbody = panel.children("div.panel-body");
   var pfooter = panel.children("div.panel-footer");
-  panel.addClass(opts.cls);
   if(opts.border){
     pheader.removeClass("panel-header-noborder");
     pbody.removeClass("panel-body-noborder");
@@ -101,7 +166,10 @@ setBorder = function(target){
     pheader.addClass("panel-header-noborder");
     pbody.addClass("panel-body-noborder");
     pfooter.addClass("panel-footer-noborder");    
-  }    
+  } 
+  pheader.addClass(opts.headerCls);  
+  pbody.addClass(opts.bodyCls); 
+  $(target).attr("id", opts.id || "");
 }
 resize = function(target,param){
   var state = $.data(target, "panel");
@@ -114,13 +182,26 @@ resize = function(target,param){
     $.extend(opts,{
       width: param.width,
       height: param.height,
+      minWidth : param.minWidth,
+      maxWidth : param.maxWidth,
+      minHeight : param.minHeight,
+      maxHeight : param.maxHeight,
       left: param.left,
       top: param.top
     });
   }
   panel._size(opts);
   pheader.add(pbody)._outerWidth(panel.width());
-  pbody._outerHeight(panel.height()-pheader._outerHeight()-pfooter._outerHeight())
+  if (!isNaN(parseInt(opts.height))) {
+    pbody._outerHeight(panel.height()-pheader._outerHeight()-pfooter._outerHeight())
+  }else{
+    pbody.css("height", "");
+    var minHeight = $.parser.parseValue("minHeight", opts.minHeight, panel.parent());
+    var maxHeight = $.parser.parseValue("maxHeight", opts.maxHeight, panel.parent());
+    var outerHeight = header._outerHeight() + pfooter._outerHeight() + panel._outerHeight() - panel.height();
+    pbody._size("minHeight", minHeight ? (minHeight - outerHeight) : "");
+    pbody._size("maxHeight", maxHeight ? (maxHeight - outerHeight) : "");
+  }
   panel.css({
     height: "",
     minHeight: "",
@@ -128,6 +209,7 @@ resize = function(target,param){
     left:opts.left,
     top:opts.top
   })
+  opts.onResize.apply(target, [ opts.width, opts.height ]);
 }
 refresh = function(target){
   var state = $.data(target, "panel");
@@ -146,14 +228,20 @@ openPanel = function(target){
   var cb = function(){
     opts.closed = false;
     opts.minimized = false;
+    opts.onOpen.call(target);
+    if (opts.maximized == true) {
+      opts.maximized = false;
+      maximize(target);
+    }
     if (opts.collapsed == true) {
+      opts.collapsed = false;
       collapsePanel(target)
     }
     if (!opts.collapsed){
       refresh(target)
     }
   }
-  panel.show(400, cb);
+  panel.show(0, cb);
 }
 movePanel = function(target,param){
   var state = $.data(target, "panel");
@@ -178,6 +266,7 @@ closePanel = function(target){
   var opts = state.options;
   var cb = function(){
     opts.closed = true;
+    opts.onClose.call(target);
   }
   //panel.slideUp(400, cb);
   //panel.fadeOut(400, cb);
@@ -188,8 +277,17 @@ collapsePanel = function(target){
   var opts = state.options;
   var panel = state.panel;
   var pbody = panel.children("div.panel-body");
+  if (opts.collapsed == true) {
+    return;
+  }
+  pbody.stop(true, true);
+  if (opts.onBeforeCollapse.call(target) == false) {
+    return;
+  }
+  header.addClass("panel-tool-expand");
   var cb = function(){
     opts.collapsed = true;
+    opts.onCollapse.call(target);
   }
   //pbody.slideUp("normal",cb);
   pbody.hide(0,cb)
@@ -201,10 +299,11 @@ expandPanel = function(target){
   var pbody = panel.children("div.panel-body");
   var cb = function(){
     opts.collapsed = false;
+    opts.onExpand.call(target);
+    refresh(target);
   }
   //pbody.slideDown("normal",cb);
   pbody.show(0,cb)
-  refresh(target);
 }
 maximizePanel = function(target){
   var state = $.data(target, "panel");
@@ -237,6 +336,9 @@ minimizePanel = function(target){
   var panel = state.panel;
   panel._size("unfit")
   panel.hide()
+  opts.minimized = true;
+  opts.maximized = false;
+  opts.onMinimize.call(target);
 }
 
 $.fn.panel.methods = {

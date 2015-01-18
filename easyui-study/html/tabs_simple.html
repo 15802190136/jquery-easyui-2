@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8">
     <title>tabs_simple</title>
-    <link ref="stylesheet" type="text/css" href="../css/panel.css">
+    <link rel="stylesheet" type="text/css" href="../css/panel.css">
     <style>
 body {
   font-family: verdana,helvetica,arial,sans-serif;
@@ -13,7 +13,12 @@ body {
 .tabs-container {
   overflow: hidden;
 }
-.tabs-header, .tabs-scroller-left, .tabs-scroller-right, .tabs-tool, .tabs, .tabs-panels, .tabs li a.tabs-inner, .tabs li.tabs-selected a.tabs-inner, .tabs-header-bottom .tabs li.tabs-selected a.tabs-inner, .tabs-header-left .tabs li.tabs-selected a.tabs-inner, .tabs-header-right .tabs li.tabs-selected a.tabs-inner {
+.tabs-header, 
+.tabs-scroller-left, .tabs-scroller-right, 
+.tabs-tool, 
+.tabs, 
+.tabs-panels, 
+.tabs li a.tabs-inner{
   border-color: #95B8E7;
 }
 .tabs-header, .tabs-tool {
@@ -33,7 +38,6 @@ body {
   top: auto;
   bottom: 0;
   width: 18px;
-  font-size: 1px;
   display: none;
   cursor: pointer;
   border-width: 1px;
@@ -55,12 +59,8 @@ body {
   position: absolute;
   bottom: 0;
   padding: 1px;
-  overflow: hidden;
   border-width: 1px;
   border-style: solid;
-}
-.tabs-header-plain .tabs-tool {
-  padding: 0 1px;
 }
 .tabs-wrap {
   position: relative;
@@ -69,9 +69,6 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
-}
-.tabs-header, .tabs-scroller-left, .tabs-scroller-right, .tabs-tool, .tabs, .tabs-panels, .tabs li a.tabs-inner, .tabs li.tabs-selected a.tabs-inner, .tabs-header-bottom .tabs li.tabs-selected a.tabs-inner, .tabs-header-left .tabs li.tabs-selected a.tabs-inner, .tabs-header-right .tabs li.tabs-selected a.tabs-inner {
-border-color: #95B8E7;
 }
 .tabs {
   list-style-type: none;
@@ -99,7 +96,6 @@ border-color: #95B8E7;
   height: 25px;
   line-height: 25px;
   text-align: center;
-  white-space: nowrap;
   border-width: 1px;
   border-style: solid;
 }
@@ -120,14 +116,6 @@ border-color: #95B8E7;
 }
 .tabs-title {
   font-size: 12px;
-}
-.tabs-icon {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  left: 10px;
-  top: 50%;
-  margin-top: -8px;
 }
 .tabs-panels {
   margin: 0px;
@@ -164,9 +152,8 @@ var state_opts,state_tabs = [],state_selectHis=[]
 var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
 var defaults = {
   width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
-  selected: 0,showHeader: true,plain: false,fit: false,border: true,
-  tools: [],toolPosition: 'right',tabPosition: 'top',
-  scrollIncrement: 100,scrollDuration: 400
+  selected: 0,fit: false,border: true,
+  tools: [],scrollIncrement: 100,scrollDuration: 400
 }
 main = function(){
   parseOptions()
@@ -179,8 +166,8 @@ main = function(){
 }
 parseOptions = function(){
   state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
-    'tools','toolPosition','tabPosition',
-    {fit:'boolean',border:'boolean',plain:'boolean',headerWidth:'number',tabWidth:'number',tabHeight:'number',selected:'number',showHeader:'boolean'}
+    'tools',
+    {fit:'boolean',border:'boolean',headerWidth:'number',tabWidth:'number',tabHeight:'number',selected:'number'}
   ]))
 }
 wrapTabs = function(){
@@ -265,35 +252,16 @@ setSize = function(param){
     p_t._outerHeight(state_opts.tabHeight);
     p_t.css('lineHeight', p_t.height()+'px');
   }
-  if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right'){
-    $header._outerWidth(state_opts.showHeader ? state_opts.headerWidth : 0);
-    $panels._outerWidth(cc.width() - $header.outerWidth());
-    $header.add($panels)._outerHeight(state_opts.height);
-    $headerWrap._outerWidth($header.width())
-    $headerTabs._outerWidth($headerWrap.width()).css('height','');
-  }else{
-    $header._outerWidth(state_opts.width).css('height','');
-    if (state_opts.showHeader){
-      $header.css('background-color','');
-      $headerWrap.css('height','');
-    }else{
-      $header.css('background-color','transparent');
-      $header._outerHeight(0);
-      $headerWrap._outerHeight(0);
-    }
-    $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
-    setScrollers()
-    $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
-    $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
-  }
+  $header._outerWidth(state_opts.width).css('height','');
+  $header.css('background-color','');
+  $headerWrap.css('height','');
+  $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
+  setScrollers()
+  $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
+  $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
 }
 setScrollers = function(){
-  return
-  if (state_opts.tabPosition == 'left' || state_opts.tabPosition == 'right' || !state_opts.showHeader){return}
   var tHeight = $header.outerHeight();
-  if (state_opts.plain){
-    tHeight -= tHeight - $header.height();
-  }
   var tabsWidth = 0;
   $('ul.tabs li', $header).each(function(){
     tabsWidth += $(this).outerWidth(true);
@@ -302,50 +270,26 @@ setScrollers = function(){
   var cWidth = $header.width() - $headerTool._outerWidth();
   if (tabsWidth > cWidth) {
     $headerSLeft.add($headerSRight).show()._outerHeight(tHeight);
-    if (state_opts.toolPosition == 'left'){
-      $headerTool.css({
-        left: $headerSLeft.outerWidth(),
-        right: ''
-      });
-      $headerWrap.css({
-        marginLeft: $headerSLeft.outerWidth() + $headerTool._outerWidth(),
-        marginRight: $headerSRight._outerWidth(),
-        width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
-      });
-    } else {
-      $headerTool.css({
-        left: '',
-        right: $headerSRight.outerWidth()
-      });
-      $headerWrap.css({
-        marginLeft: $headerSLeft.outerWidth(),
-        marginRight: $headerSRight.outerWidth() + $headerTool._outerWidth(),
-        width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
-      });
-    }
+    $headerTool.css({
+      left: '',
+      right: $headerSRight.outerWidth()
+    });
+    $headerWrap.css({
+      marginLeft: $headerSLeft.outerWidth(),
+      marginRight: $headerSRight.outerWidth() + $headerTool._outerWidth(),
+      width: cWidth - $headerSLeft.outerWidth() - $headerSRight.outerWidth()
+    });    
   } else {
     $headerSLeft.add($headerSRight).hide();
-    if (state_opts.toolPosition == 'left'){
-      $headerTool.css({
-        left: 0,
-        right: ''
-      });
-      $headerWrap.css({
-        marginLeft: $headerTool._outerWidth(),
-        marginRight: 0,
-        width: cWidth
-      });
-    } else {
-      $headerTool.css({
-        left: '',
-        right: 0
-      });
-      $headerWrap.css({
-        marginLeft: 0,
-        marginRight: $headerTool._outerWidth(),
-        width: cWidth
-      });
-    }
+    $headerTool.css({
+      left: '',
+      right: 0
+    });
+    $headerWrap.css({
+      marginLeft: 0,
+      marginRight: $headerTool._outerWidth(),
+      width: cWidth
+    });
   }
 }
 addTools = function(){
@@ -357,25 +301,7 @@ addTools = function(){
 setProperties = function(){    
   $header.removeClass('tabs-header-top tabs-header-bottom tabs-header-left tabs-header-right');
   $panels.removeClass('tabs-panels-top tabs-panels-bottom tabs-panels-left tabs-panels-right');
-  if (state_opts.tabPosition == 'top'){
-    $header.insertBefore($panels);
-  } else if (state_opts.tabPosition == 'bottom'){
-    $header.insertAfter($panels);
-    $header.addClass('tabs-header-bottom');
-    $panels.addClass('tabs-panels-top');
-  } else if (state_opts.tabPosition == 'left'){
-    $header.addClass('tabs-header-left');
-    $panels.addClass('tabs-panels-right');
-  } else if (state_opts.tabPosition == 'right'){
-    $header.addClass('tabs-header-right');
-    $panels.addClass('tabs-panels-left');
-  }
-  
-  if (state_opts.plain == true) {
-    $header.addClass('tabs-header-plain');
-  } else {
-    $header.removeClass('tabs-header-plain');
-  }
+  $header.insertBefore($panels);
   if (state_opts.border == true){
     $header.removeClass('tabs-header-noborder');
     $panels.removeClass('tabs-panels-noborder');
