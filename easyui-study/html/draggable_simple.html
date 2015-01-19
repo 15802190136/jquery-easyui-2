@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>draggable_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+  </style>
+  <script src="../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <div class="easyui-draggable" data-options="handle:'#title'" style="width:200px;height:150px;background:#fafafa;border:1px solid #ccc;margin-top:10px">
+    <div id="title" style="padding:5px;background:#ccc;color:#fff">Title</div>
+  </div>
+</body>
+<script src="../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-draggable")[0]
+var t = $(".easyui-draggable")
+var defaults = {
+  proxy:null, 
+  revert:false,
+  deltaX:null,
+  deltaY:null,
+  handle: null,
+  disabled: false,
+  edge:0,
+  axis:null// v or h
+}
+var state_opts,state_handle,state_proxy
+var isDragging = false
+main = function(){
+  parseOptions()
+  state_handle = state_opts.handle ? (typeof state_opts.handle=='string' ? $(state_opts.handle, target) : state_opts.handle) : t;
+  if (state_opts.disabled) {
+    $(this).css('cursor', '');
+    return;
+  }
+  bindEvents()
+}
+parseOptions = function(){
+  state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['handle','axis',
+    {'revert':'boolean','deltaX':'number','deltaY':'number','edge':'number'}]), {
+      disabled: (t.attr('disabled') ? true : undefined)
+    });
+}
+bindEvents = function(){
+  state_handle.unbind('.draggable').bind('mousemove.draggable',function(e){
+    if (isDragging){return}
+    if (checkArea(e)){
+      $(this).css('cursor', 'move');
+    } else {
+      $(this).css('cursor', '');
+    }
+  }).bind('mouseleave.draggable',function(e){
+    $(this).css('cursor', '');
+  }).bind('mousedown.draggable',function(e){
+    if (checkArea(e) == false) return;
+    $(this).css('cursor', '');
+    var position = t.position();
+    var offset = t.offset();
+    var data = {
+      startPosition: t.css('position'),
+      startLeft: position.left,
+      startTop: position.top,
+      left: position.left,
+      top: position.top,
+      startX: e.pageX,
+      startY: e.pageY,
+      offsetWidth: (e.pageX - offset.left),
+      offsetHeight: (e.pageY - offset.top),
+      parent: t.parent()[0]
+    };
+    $(document).bind('mousedown.draggable', data, doDown);
+    $(document).bind('mousemove.draggable', data, doMove);
+    $(document).bind('mouseup.draggable', data, doUp);
+  });
+}
+checkArea = function(e){
+  var handle = state_handle;
+  var offset = $(handle).offset();
+  var width = $(handle).outerWidth();
+  var height = $(handle).outerHeight();
+  var t = e.pageY - offset.top;
+  var r = offset.left + width - e.pageX;
+  var b = offset.top + height - e.pageY;
+  var l = e.pageX - offset.left;
+  return Math.min(t,r,b,l) > state_opts.edge;
+}
+doDown = function(e){
+  isDragging = true
+  var proxy = state_proxy
+  if (!proxy){
+    if (state_opts.proxy){
+      if (state_opts.proxy == 'clone'){
+        proxy = t.clone().insertAfter(target);
+      } else {
+        proxy = state_opts.proxy.call(target,target);
+      }
+      state_proxy = proxy;
+    } else {
+      proxy = t;
+    }
+  }
+  proxy.css('position', 'absolute');
+  drag(e);
+  applyDrag(e);
+  return false;
+}
+drag = function(e){
+  var pageX = e.pageX,pageY = e.pageY
+  var dragData = e.data;
+  var left = dragData.startLeft + pageX - dragData.startX;
+  var top = dragData.startTop + pageY - dragData.startY;
+  var proxy = state_proxy
+  var deltaX = state_opts.deltaX,deltaY = state_opts.deltaY
+  var offsetWidth = dragData.offsetWidth,offsetHeight = dragData.offsetHeight
+  var parent = dragData.parent
+  if (proxy){
+    if (proxy.parent()[0] == document.body){
+      if (deltaX != null && deltaX != undefined){
+        left = pageX + deltaX;
+      } else {
+        left = pageX - offsetWidth;
+      }
+      if (deltaY != null && deltaY != undefined){
+        top = pageY + deltaY;
+      } else {
+        top = pageY - offsetHeight;
+      }
+    } else {
+      if (deltaX != null && deltaX != undefined){
+        left += offsetWidth + deltaX;
+      }
+      if (deltaY != null && deltaY != undefined){
+        top += offsetHeight + deltaY;
+      }
+    }
+  }
+  if (parent != document.body) {
+    left += $(parent).scrollLeft();
+    top += $(parent).scrollTop();
+  }
+  
+  if (state_opts.axis == 'h') {
+    dragData.left = left;
+  } else if (state_opts.axis == 'v') {
+    dragData.top = top;
+  } else {
+    dragData.left = left;
+    dragData.top = top;
+  }
+}
+applyDrag = function(e){
+  var proxy = state_proxy;
+  if (!proxy){
+    proxy = t;
+  }
+  proxy.css({
+    left:e.data.left,
+    top:e.data.top
+  });
+  $('body').css('cursor', 'move');
+}
+doMove = function(e){
+  drag(e);
+  applyDrag(e);
+  return false;
+}
+doUp = function(e){
+  isDragging = false;
+  doMove(e);
+  if (state_opts.revert){
+    if (state_proxy){
+      var left, top;
+      if (state_proxy.parent()[0] == document.body){
+        left = e.data.startX - e.data.offsetWidth;
+        top = e.data.startY - e.data.offsetHeight;
+      } else {
+        left = e.data.startLeft;
+        top = e.data.startTop;
+      }
+      state_proxy.animate({
+        left: left,
+        top: top
+      }, function(){
+        removeProxy();
+      });
+    } else {
+      t.animate({
+        left:e.data.startLeft,
+        top:e.data.startTop
+      }, function(){
+        t.css('position', e.data.startPosition);
+      });
+    }
+  } else {
+    t.css({
+      position:'absolute',
+      left:e.data.left,
+      top:e.data.top
+    });
+  }
+  $(document).unbind('.draggable');
+  setTimeout(function(){
+    $('body').css('cursor','');
+  },100);
+  return false;
+}
+removeProxy = function(){
+  if (state_proxy){
+    state_proxy.remove();
+  }
+  state_proxy = null;
+}
+main();
+})
+</script>
+</html>
