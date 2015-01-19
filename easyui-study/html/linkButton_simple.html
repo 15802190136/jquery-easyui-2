@@ -1,0 +1,228 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>linkButton_simple</title>
+    <link rel="stylesheet" type="text/css" href="../css/panel.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.l-btn {
+  text-decoration: none;
+  display: inline-block;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+  vertical-align: middle;
+}
+.l-btn {
+  color: #444;
+  background: #fafafa;
+  border: 1px solid #bbb;
+}
+.l-btn:hover {
+  background: #eaf2ff;
+  color: #000000;
+  border: 1px solid #b7d2ff;
+}
+.l-btn-left {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+.l-btn-text {
+  display: inline-block;
+  vertical-align: top;
+  width: auto;
+  line-height: 24px;
+  font-size: 12px;
+  padding: 0;
+  margin: 0 4px;
+}
+.l-btn-icon-left .l-btn-text {
+  margin: 0 4px 0 24px;
+}
+.icon-add {
+  background: url('../img/icons/edit_add.png') no-repeat center center;
+}
+.l-btn-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  position: absolute;
+  top: 50%;
+  margin-top: -8px;
+  font-size: 1px;
+}
+.l-btn-icon-left .l-btn-icon {
+  left: 4px;
+}
+.l-btn-disabled,
+.l-btn-disabled:hover {
+  opacity: 0.5;
+  cursor: default;
+  background: #fafafa;
+  color: #444;
+}
+.l-btn-disabled .l-btn-text,
+.l-btn-disabled .l-btn-icon {
+  filter: alpha(opacity=50);
+}
+.l-btn-selected,
+.l-btn-selected:hover {
+  background: #ddd;
+  filter: none;
+}
+    </style>
+    <script src="../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+    <div style="padding:5px 0;">
+      <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add'">Add</a>
+    </div>
+  </body>
+<script src="../src/jquery.parser.js"></script>
+<script>     
+$(function(){
+var target = $(".easyui-linkbutton")[0]
+var btn = t = $(".easyui-linkbutton")
+var defaults = {
+  id: null,
+  disabled: false,
+  toggle: true,
+  selected: false,
+  text: '',
+  iconCls: null,
+  size: 'small',  // small,large
+  onClick: function(){}
+}
+var state_opts,state_href,state_onclick
+var $inner
+main = function(){
+  parseOptions()
+  t.removeAttr('disabled')
+  createButton()
+  setSize()
+}
+parseOptions = function(){
+  state_opts = $.extend({},defaults,$.parser.parseOptions(target,['id','iconCls','size',{toggle:'boolean',selected:'boolean'}]),
+    { disabled: (t.attr('disabled') ? true : undefined),
+      text: $.trim(t.html()),
+      iconCls: (t.attr('icon') || t.attr('iconCls'))
+    }
+  )
+}
+createButton = function(){
+  t.empty()
+  t.addClass('l-btn').removeClass('l-btn-selected');
+  t.removeClass('l-btn-small l-btn-medium l-btn-large').addClass('l-btn-'+state_opts.size);
+  if (state_opts.selected){
+    t.addClass('l-btn-selected');
+  }
+  t.attr('id', state_opts.id || '');
+
+  $inner = $('<span class="l-btn-left"></span>').appendTo(t);
+  if (state_opts.text){
+    $('<span class="l-btn-text"></span>').html(state_opts.text).appendTo($inner);
+  } else {
+    $('<span class="l-btn-text l-btn-empty">&nbsp;</span>').appendTo($inner);
+  }
+  if (state_opts.iconCls){
+    $('<span class="l-btn-icon">&nbsp;</span>').addClass(state_opts.iconCls).appendTo($inner);
+    $inner.addClass('l-btn-icon-left');
+  }
+  t.unbind('.linkbutton').bind('click.linkbutton',function(){
+    if (!state_opts.disabled){
+      if (state_opts.toggle){
+        if (state_opts.selected){
+          setSelected(false)
+        } else {
+          setSelected(true)
+        }
+      }
+      state_opts.onClick.call(this);
+    }
+  })
+
+  setSelected(state_opts.selected)
+  setDisabled(state_opts.disabled)
+}
+setSelected = function(selected){
+  if (selected){
+    t.addClass('l-btn-selected');
+    state_opts.selected = true;
+  } else {
+    t.removeClass('l-btn-selected');
+    state_opts.selected = false;
+  }
+}
+setDisabled = function(disabled){
+  t.removeClass('l-btn-disabled');
+  if (disabled){
+    state_opts.disabled = true;
+    var href = t.attr('href');
+    if (href){
+      state_href = href;
+      t.attr('href', 'javascript:void(0)');
+    }
+    if (target.onclick){
+      state_onclick = target.onclick;
+      target.onclick = null;
+    }
+    t.addClass('l-btn-disabled');
+  } else {
+    state_opts.disabled = false;
+    if (state_href) {
+      t.attr('href', state_href);
+    }
+    if (state_onclick) {
+      target.onclick = state_onclick;
+    }
+  }
+}
+setSize = function(param){
+  if (param){
+    $.extend(state_opts, param);
+  }
+  if (state_opts.width || state_opts.height || state_opts.fit){
+    var parent = btn.parent();
+    var isVisible = btn.is(':visible');
+    if (!isVisible){
+      var spacer = $('<div style="display:none"></div>').insertBefore(target);
+      var style = {
+        position: btn.css('position'),
+        display: btn.css('display'),
+        left: btn.css('left')
+      };
+      btn.appendTo('body');
+      btn.css({
+        position: 'absolute',
+        display: 'inline-block',
+        left: -20000
+      });
+    }
+    btn._size(state_opts, parent);
+    $inner.css('margin-top', 0);
+    $inner.css('margin-top', parseInt((btn.height()-$inner.height())/2)+'px');
+    if (!isVisible){
+      btn.insertAfter(spacer);
+      btn.css(style);
+      spacer.remove();
+    }
+  }
+}
+main();
+})
+</script>
+</html>
