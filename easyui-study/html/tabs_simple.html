@@ -221,12 +221,12 @@ createTab = function(pp){
 }
 updateTab = function(param){
   var pp = param.tab
+  var opts = param.options
+  var tab = opts.tab
+  var s_title = tab.find('span.tabs-title')
+  var s_icon = tab.find('span.tabs-icon')
   var oldTitle = pp.panel('options').title
-  if (param.type == 'all' || param.type == 'header'){
-    var opts = pp.panel('options');
-    var tab = opts.tab
-    var s_title = tab.find('span.tabs-title');
-    var s_icon = tab.find('span.tabs-icon');
+  if (param.type == 'header'){
     s_title.html(opts.title);
     s_icon.attr('class', 'tabs-icon');
   }
@@ -347,24 +347,23 @@ getLiIndex = function (li){
 scrollBy = function(deltaX){
   var pos = Math.min($headerWrap._scrollLeft() + deltaX, getMaxScrollWidth());
   $headerWrap.animate({scrollLeft: pos}, state_opts.scrollDuration);
-    
-  function getMaxScrollWidth(){
-    var w = 0;
-    var ul = $headerWrap.children('ul');
-    ul.children('li').each(function(){
-      w += $(this).outerWidth(true);
-    });
-    return w - $headerWrap.width() + (ul.outerWidth() - ul.width());
-  }
+}
+getMaxScrollWidth = function(){
+  var w = 0;
+  var ul = $headerWrap.children('ul');
+  ul.children('li').each(function(){
+    w += $(this).outerWidth(true);
+  });
+  return w - $headerWrap.width() + (ul.outerWidth() - ul.width()); 
 }
 closeTab = function(which){
   if (!exists(which)) return;
   
-  var tab = getTab(container, which);
+  var tab = getTab(which);
   var title = state_opts.title;
   var index = getTabIndex(tab);
       
-  var tab = getTab(container, which, true);
+  var tab = getTab(which, true);
   tab.panel('options').tab.remove();
   tab.panel('destroy');
   
@@ -450,7 +449,7 @@ selectTab = function(which){
   } else {
     scrollBy(0)
   }
-  setSelectedSize(container);
+  setSelectedSize();
 }
 getSelectedTab = function(){
   for (var i = 0; i < state_tabs.length; i++) {
