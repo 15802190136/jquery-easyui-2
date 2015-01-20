@@ -129,15 +129,24 @@ body {
     <script src="../bower_components/jquery/jquery.js"></script>
   </head>
   <body>
-    <div style="width:700px;height:250px" class="easyui-tabs">
+    <div style="width:300px;height:250px" class="easyui-tabs">
       <div title="tab1" style="padding:10px">
-        <p>tab1Content1</p>
+        <p>tabContent1</p>
       </div>
       <div title="tab2" style="padding:10px">
-        <p>tab1Content2</p>
+        <p>tabContent2</p>
       </div>
       <div title="tab3" style="padding:10px">
-        <p>tab1Content3</p>
+        <p>tabContent3</p>
+      </div>
+      <div title="tab4" style="padding:10px">
+        <p>tabContent4</p>
+      </div>
+      <div title="tab5" style="padding:10px">
+        <p>tabContent5</p>
+      </div>
+      <div title="tab6" style="padding:10px">
+        <p>tabContent6</p>
       </div>
     </div>
   </body>
@@ -153,7 +162,7 @@ var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTa
 var defaults = {
   width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
   selected: 0,fit: false,border: true,
-  tools: [],scrollIncrement: 100,scrollDuration: 400
+  tools: null,scrollIncrement: 100,scrollDuration: 400
 }
 main = function(){
   parseOptions()
@@ -163,6 +172,9 @@ main = function(){
   setSize()
   bindEvents()
   doFirstSelect()
+  //test
+  //selectTab(1)
+  //setSize({width:500,height:400})
 }
 parseOptions = function(){
   state_opts = $.extend({},defaults,$.parser.parseOptions(target, [

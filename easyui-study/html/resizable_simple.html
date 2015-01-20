@@ -47,11 +47,10 @@ bindEvents = function(){
   t.bind('mousemove.resizable',function(e){
     if (isResizing) return
     var dir = getDirection(e);
-    if (dir == '') {
+    if (dir == '')
       t.css('cursor', '');
-    } else {
+    else
       t.css('cursor', dir + '-resize');
-    }
   }).bind('mouseleave.resizable',function(e){
     t.css('cursor', '');
   }).bind('mousedown.resizable',function(e){
@@ -84,33 +83,29 @@ getDirection = function(e){
   var width = t.outerWidth();
   var height = t.outerHeight();
   var edge = state_opts.edge;
-  if (e.pageY > offset.top && e.pageY < offset.top + edge) {
+  if (e.pageY > offset.top && e.pageY < offset.top + edge)
     dir += 'n';
-  } else if (e.pageY < offset.top + height && e.pageY > offset.top + height - edge) {
+  else if (e.pageY < offset.top + height && e.pageY > offset.top + height - edge)
     dir += 's';
-  }
-  if (e.pageX > offset.left && e.pageX < offset.left + edge) {
+  if (e.pageX > offset.left && e.pageX < offset.left + edge)
     dir += 'w';
-  } else if (e.pageX < offset.left + width && e.pageX > offset.left + width - edge) {
+  else if (e.pageX < offset.left + width && e.pageX > offset.left + width - edge)
     dir += 'e';
-  }
   
   var handles = state_opts.handles.split(',');
   for(var i=0; i<handles.length; i++) {
     var handle = handles[i].replace(/(^\s*)|(\s*$)/g, '');
-    if (handle == 'all' || handle == dir) {
+    if (handle == 'all' || handle == dir)
       return dir;
-    }
   }
   return '';
 }
 getCssValue = function(css){
   var val = parseInt(t.css(css));
-  if (isNaN(val)) {
+  if (isNaN(val))
     return 0;
-  } else {
-    return val;
-  }  
+  else
+    return val; 
 }
 doDown = function(e){
   isResizing = true
@@ -130,6 +125,7 @@ doUp = function(e){
 }
 resize = function(e){
   var resizeData = e.data;
+  //右
   if (resizeData.dir.indexOf('e') != -1) {
     var width = resizeData.startWidth + e.pageX - resizeData.startX;
     width = Math.min(
@@ -138,6 +134,7 @@ resize = function(e){
     );
     resizeData.width = width;
   }
+  //下
   if (resizeData.dir.indexOf('s') != -1) {
     var height = resizeData.startHeight + e.pageY - resizeData.startY;
     height = Math.min(
@@ -146,14 +143,7 @@ resize = function(e){
     );
     resizeData.height = height;
   }
-  if (resizeData.dir.indexOf('s') != -1) {
-    var height = resizeData.startHeight + e.pageY - resizeData.startY;
-    height = Math.min(
-        Math.max(height, state_opts.minHeight),
-        state_opts.maxHeight
-    );
-    resizeData.height = height;    
-  }
+  //左
   if (resizeData.dir.indexOf('w') != -1) {
     var width = resizeData.startWidth - e.pageX + resizeData.startX;
     width = Math.min(
@@ -163,6 +153,7 @@ resize = function(e){
     resizeData.width = width;
     resizeData.left = resizeData.startLeft + resizeData.startWidth - resizeData.width;    
   }
+  //上
   if (resizeData.dir.indexOf('n') != -1) {
     var height = resizeData.startHeight - e.pageY + resizeData.startY;
     height = Math.min(
