@@ -58,17 +58,17 @@ $.fn.panel.defaults = {
   style : {},
   onBeforeLoad : function(param) {},onLoad : function() {},onLoadError : function() {},onBeforeOpen : function() {},onOpen : function() {},onBeforeClose : function() {},onClose : function() {},onBeforeDestroy : function() {},onDestroy : function() {},onResize : function(width, height) {},onMove : function(left, top) {},onMaximize : function() {},onRestore : function() {},onMinimize : function() {},onBeforeCollapse : function() {},onBeforeExpand : function() {},onCollapse : function() {},onExpand : function() {}
 };
-remove = function(panel) {
+function remove(panel) {
   panel._remove();
 }
-wrapPanel = function(target){
+function wrapPanel(target){
   $(target).addClass("panel-body")._size("clear");
   var panel = $("<div class='panel'></div>").insertBefore(target);
   panel[0].appendChild(target);
   var pbody = panel.children("div.panel-body");
   return panel;    
 }
-initPanelTool = function(target){
+function initPanelTool(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -135,7 +135,7 @@ initPanelTool = function(target){
     panel.children("div.panel-body").addClass("panel-body-noheader");
   }
 }
-initPanelFooter = function(target){
+function initPanelFooter(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
   var opts = state.options;
@@ -147,7 +147,7 @@ initPanelFooter = function(target){
     $(target).removeClass("panel-body-nobottom");
   }
 }
-addHeader = function(target){
+function addHeader(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -171,7 +171,7 @@ addHeader = function(target){
   pbody.addClass(opts.bodyCls); 
   $(target).attr("id", opts.id || "");
 }
-resize = function(target,param){
+function resize(target,param){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel; 
@@ -211,7 +211,7 @@ resize = function(target,param){
   })
   opts.onResize.apply(target, [ opts.width, opts.height ]);
 }
-refresh = function(target){
+function refresh(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -221,7 +221,7 @@ refresh = function(target){
   }
   pbody.html($("<div class='panel-loading'></div>").html(opts.loadingMessage));
 }
-openPanel = function(target){
+function openPanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -243,7 +243,7 @@ openPanel = function(target){
   }
   panel.show(0, cb);
 }
-movePanel = function(target,param){
+function movePanel(target,param){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -260,7 +260,7 @@ movePanel = function(target,param){
     top:opts.top
   })
 }
-closePanel = function(target){
+function closePanel(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
   var opts = state.options;
@@ -272,7 +272,7 @@ closePanel = function(target){
   //panel.fadeOut(400, cb);
   panel.hide(0, cb);
 }
-collapsePanel = function(target){
+function collapsePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -292,7 +292,7 @@ collapsePanel = function(target){
   //pbody.slideUp("normal",cb);
   pbody.hide(0,cb)
 }
-expandPanel = function(target){
+function expandPanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
@@ -305,7 +305,7 @@ expandPanel = function(target){
   //pbody.slideDown("normal",cb);
   pbody.show(0,cb)
 }
-maximizePanel = function(target){
+function maximizePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var original = state.original;
@@ -323,7 +323,7 @@ maximizePanel = function(target){
   opts.fit = true;
   resize(target,opts);
 }
-restorePanel = function(target){
+function restorePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var original = state.original;
@@ -331,7 +331,7 @@ restorePanel = function(target){
   resize(target);
   original = null;   
 }
-minimizePanel = function(target){
+function minimizePanel(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
   panel._size("unfit")

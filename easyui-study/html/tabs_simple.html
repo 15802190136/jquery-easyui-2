@@ -139,7 +139,7 @@ body {
       <div title="tab3" style="padding:10px">
         <p>tabContent3</p>
       </div>
-      <div title="tab4" style="padding:10px">
+<!--  <div title="tab4" style="padding:10px">
         <p>tabContent4</p>
       </div>
       <div title="tab5" style="padding:10px">
@@ -147,15 +147,14 @@ body {
       </div>
       <div title="tab6" style="padding:10px">
         <p>tabContent6</p>
-      </div>
+      </div> -->
     </div>
   </body>
 <script src="../src/jquery.parser.js"></script>
 <script src="../src/jquery.panel.js"></script>
 <script>     
 $(function(){
-var target = $(".easyui-tabs")[0]
-var container = target
+var container = target = $(".easyui-tabs")[0]
 var cc = $(container)
 var state_opts,state_tabs = [],state_selectHis=[]
 var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
@@ -174,7 +173,7 @@ main = function(){
   doFirstSelect()
   //test
   //selectTab(1)
-  //setSize({width:500,height:400})
+  resize({width:500,height:400})
 }
 parseOptions = function(){
   state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
@@ -252,6 +251,7 @@ setSize = function(param){
     });
   }
   cc._size(state_opts)
+  //a.tabs-inner
   for(var i=0; i<state_tabs.length; i++){
     var p_opts = state_tabs[i].panel('options');
     var p_t = p_opts.tab.find('a.tabs-inner');
@@ -264,13 +264,21 @@ setSize = function(param){
     p_t._outerHeight(state_opts.tabHeight);
     p_t.css('lineHeight', p_t.height()+'px');
   }
+  //.tabs-header
   $header._outerWidth(state_opts.width).css('height','');
   $header.css('background-color','');
+  //.tabs-wrap
   $headerWrap.css('height','');
+  //.tabs
   $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
   setScrollers()
+  //.tabs-panels
   $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
   $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
+}
+resize = function(param){
+  setSize(param)
+  setSelectedSize()
 }
 setScrollers = function(){
   var tHeight = $header.outerHeight();

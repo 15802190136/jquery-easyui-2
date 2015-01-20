@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>tooltip_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.tooltip {
+  position: absolute;
+  display: none;
+  z-index: 9900000;
+  outline: none;
+  opacity: 1;
+  filter: alpha(opacity=100);
+  padding: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+.tooltip-arrow-outer,
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  line-height: 0;
+  font-size: 0;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+}
+.tooltip-bottom .tooltip-arrow-outer {
+  top: 0;
+  left: 50%;
+  margin: -13px 0 0 -6px;
+}
+.tooltip-bottom .tooltip-arrow {
+  top: 0;
+  left: 50%;
+  margin: -12px 0 0 -6px;
+}
+.tooltip {
+  background-color: #ffffff;
+  border-color: #95B8E7;
+  color: #000000;
+}
+.tooltip-bottom .tooltip-arrow-outer {
+  border-bottom-color: #95B8E7;
+}
+.tooltip-bottom .tooltip-arrow {
+  border-bottom-color: #ffffff;
+}
+  </style>
+  <script src="../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <a href="#" title="This is the tooltip message." class="easyui-tooltip">Hover me</a>
+</body>
+<script src="../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-tooltip")[0]
+var t = $(".easyui-tooltip")
+var defaults = {
+  position : "bottom",
+  content : null,
+  trackMouse : false,
+  deltaX : 0,deltaY : 0,
+  showDelay : 200,hideDelay : 100
+}
+var state_opts,state_tip,state_showTimer,state_hideTimer
+var $tooltipArrowOuter,$tooltipArrow,$arrow
+main = function(){
+  parseOptions()
+  init()
+  bindEvents()
+  update()
+}
+parseOptions = function(){
+  state_opts = $.extend({}, defaults, $.parser.parseOptions(target,["position", "showEvent", "hideEvent", "content",{
+      trackMouse : "boolean",
+      deltaX : "number",deltaY : "number",
+      showDelay : "number",hideDelay : "number"
+    }]), {
+      _title : t.attr("title")
+    });
+  t.attr("title", "");
+  if (!state_opts.content)
+    state_opts.content = state_opts._title;
+}
+init = function(){
+  t.addClass('tooltip-f')
+}
+bindEvents = function(){
+  t.unbind(".tooltip").bind("mouseenter.tooltip", function(e) {
+    show(e)
+  }).bind("mouseleave.tooltip", function(e) {
+    hide(e)
+  }).bind("mousemove.tooltip", function(e) {
+    if (state_opts.trackMouse) {
+      state_opts.trackMouseX = e.pageX;
+      state_opts.trackMouseY = e.pageY;
+      reposition()
+    }
+  })
+}
+update = function(){
+
+}
+show = function(e){
+  if(!state_tip){
+    state_tip = $("<div tabindex='-1' class='tooltip'>" + 
+        "<div class='tooltip-content'></div>" + 
+        "<div class='tooltip-arrow-outer'></div>" + 
+        "<div class='tooltip-arrow'></div>" + 
+      "</div>").appendTo("body");
+    $tooltipArrowOuter = state_tip.children(".tooltip-arrow-outer")
+    $tooltipArrow = state_tip.children(".tooltip-arrow")
+    $arrow = state_tip.children(".tooltip-arrow-outer,.tooltip-arrow")
+    update()
+  }
+  deleteDelay()
+  state_showTimer = setTimeout(function() {
+    reposition()
+    state_tip.show()
+    var bc = "border-" + state_opts.position + "-color";
+    $tooltipArrowOuter.add($tooltipArrow).css({
+      borderTopColor : "",
+      borderBottomColor : "",
+      borderLeftColor : "",
+      borderRightColor : ""
+    });
+    $tooltipArrowOuter.css(bc, state_tip.css(bc));
+    $tooltipArrow.css(bc, state_tip.css("backgroundColor"));
+  }, state_opts.showDelay)
+}
+hide = function(e){
+  if(state_tip){
+    deleteDelay()
+    state_hideTimer = setTimeout(function() {
+      state_tip.hide();
+    }, state_opts.hideDelay);
+  }
+}
+update = function(content){
+  if(content)
+    state_opts.content = content
+  if (!state_tip) {
+    return;
+  }
+  state_tip.children(".tooltip-content").html(state_opts.content);
+}
+reposition = function(){
+  if(!state_tip) return
+  var xy = {
+    left : -100000,
+    top : -100000
+  };
+  if (t.is(":visible")) {
+    xy = setPosition("bottom");
+    if (state_opts.position == "top" && xy.top < 0) {
+      xy = setPosition("bottom");
+    }else{
+      if ((state_opts.position == "bottom") && (xy.top + state_tip._outerHeight() > $(window)._outerHeight() + $(document).scrollTop()))
+          xy = setPosition("top");      
+    }
+    if (xy.left < 0) {
+      if (state_opts.position == "left") {
+        xy = setPosition("right");
+      }else{
+        $arrow.css("left", state_tip._outerWidth() / 2 + xy.left);
+        xy.left = 0;
+      }
+    }else{
+      if (xy.left + state_tip._outerWidth() > $(window)._outerWidth() + $(document)._scrollLeft()) {
+        if (state_opts.position == "right") {
+          xy = setPosition("left");
+        }else{
+          var left = xy.left;
+          xy.left = $(window)._outerWidth() + $(document)._scrollLeft() - state_tip._outerWidth();
+          $arrow.css("left", state_tip._outerWidth() / 2 - (xy.left - left));
+        } 
+      }
+    }
+  }
+  state_tip.css({
+    left : xy.left,
+    top : xy.top,
+    zIndex : state_opts.zIndex
+  });
+}
+setPosition = function(position){
+  state_opts.position = position || "bottom";
+  state_tip.removeClass("tooltip-top tooltip-bottom tooltip-left tooltip-right").addClass("tooltip-" + state_opts.position);
+  var left, top;
+  if (state_opts.trackMouse) {
+    _t = $();
+    left = state_opts.trackMouseX + state_opts.deltaX;
+    top = state_opts.trackMouseY + state_opts.deltaY;
+  }else{
+    var _t = $(target);
+    left = _t.offset().left + state_opts.deltaX;
+    top = _t.offset().top + state_opts.deltaY;
+  }
+  switch(state_opts.position){
+    case "right":
+      left += _t._outerWidth() + 12 + (state_opts.trackMouse ? 12 : 0);
+      top -= (state_tip._outerHeight() - _t._outerHeight()) / 2;
+      break;
+    case "left":
+      left -= state_tip._outerWidth() + 12 + (state_opts.trackMouse ? 12 : 0);
+      top -= (state_tip._outerHeight() - _t._outerHeight()) / 2;
+      break;
+    case "top":
+      left -= (state_tip._outerWidth() - _t._outerWidth()) / 2;
+      top -= state_tip._outerHeight() + 12 + (state_opts.trackMouse ? 12 : 0);
+      break;
+    case "bottom":
+      left -= (state_tip._outerWidth() - _t._outerWidth()) / 2;
+      top += _t._outerHeight() + 12 + (state_opts.trackMouse ? 12 : 0);
+      break;
+  }
+  return {
+    left : left,
+    top : top
+  };
+}
+deleteDelay = function(){
+  if (state_showTimer) {
+    clearTimeout(state_showTimer);
+    state_showTimer = null;
+  }
+  if (state_hideTimer) {
+    clearTimeout(state_hideTimer);
+    state_hideTimer = null;
+  }  
+}
+main();
+})
+</script>
+</html>
