@@ -188,15 +188,6 @@ getPageArea = function(){
     }
   }  
 }
-setSize = function(param){
-  if (param){
-    $.extend(state_opts, {
-      width: param.width,
-      height: param.height
-    });
-  }
-  cc._size(state_opts)
-}
 hcenter = function(tomove){
   var width = state_window._outerWidth();
   if (state_opts.inline){
