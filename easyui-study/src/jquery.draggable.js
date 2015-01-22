@@ -27,11 +27,10 @@ $.fn.draggable = function(options, param){
     function bindEvents(){
       handle.unbind('.draggable').bind('mousemove.draggable',{target:target},function(e){
         if ($.fn.draggable.isDragging) return
-        if (checkArea(e)){
+        if (checkArea(e))
           $(this).css('cursor', 'move');
-        } else {
+        else
           $(this).css('cursor', '');
-        }
       }).bind('mouseleave.draggable',{target:target},function(e){
         $(this).css('cursor', '');
       }).bind('mousedown.draggable',{target:target},function(e){
@@ -42,7 +41,6 @@ $.fn.draggable = function(options, param){
         var offset = t.offset();
         var data = {
           target:e.data.target,
-          startPosition: t.css('position'),
           startLeft: position.left,
           startTop: position.top,
           left: position.left,
@@ -99,18 +97,17 @@ function doDown(e){
 function drag(e){
   var state = $.data(e.data.target,"draggable")
   var opts = state.options
-  var pageX = e.pageX,pageY = e.pageY
   var dragData = e.data;
+  var deltaX = opts.deltaX,deltaY = opts.deltaY
+  var pageX = e.pageX,pageY = e.pageY
   var left = dragData.startLeft + pageX - dragData.startX;
   var top = dragData.startTop + pageY - dragData.startY;
-  var deltaX = opts.deltaX,deltaY = opts.deltaY
   var offsetWidth = dragData.offsetWidth,offsetHeight = dragData.offsetHeight
   var parent = dragData.parent
   if (parent != document.body) {
     left += $(parent).scrollLeft();
     top += $(parent).scrollTop();
   }
-  
   dragData.left = left;
   dragData.top = top;
 }
@@ -142,4 +139,22 @@ function doUp(e){
   },100);
   return false;
 }
-})(jQuery);  
+$.fn.draggable.methods = {
+  options: function(jq){
+    return $.data(jq[0], 'draggable').options;
+  },
+  proxy: function(jq){
+    return $.data(jq[0], 'draggable').proxy;
+  },
+  enable: function(jq){
+    return jq.each(function(){
+      $(this).draggable({disabled:false});
+    });
+  },
+  disable: function(jq){
+    return jq.each(function(){
+      $(this).draggable({disabled:true});
+    });
+  }  
+}
+})(jQuery); 

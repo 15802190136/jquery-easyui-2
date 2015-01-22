@@ -18,9 +18,7 @@ body {
   opacity: 1;
   filter: alpha(opacity=100);
   padding: 5px;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 5px;
+  border:1px solid;
 }
 .tooltip-arrow-outer,
 .tooltip-arrow {
@@ -29,9 +27,7 @@ body {
   height: 0;
   line-height: 0;
   font-size: 0;
-  border-style: solid;
-  border-width: 6px;
-  border-color: transparent;
+  border:6px solid transparent;
 }
 .tooltip-bottom .tooltip-arrow-outer {
   top: 0;
@@ -108,9 +104,6 @@ bindEvents = function(){
     }
   })
 }
-update = function(){
-
-}
 show = function(e){
   if(!state_tip){
     state_tip = $("<div tabindex='-1' class='tooltip'>" + 
@@ -161,13 +154,18 @@ reposition = function(){
     top : -100000
   };
   if (t.is(":visible")) {
-    xy = setPosition("bottom");
+    xy = setPosition();
     if (state_opts.position == "top" && xy.top < 0) {
-      xy = setPosition("bottom");
+      xy = setPosition(state_opts.position);
     }else{
-      if ((state_opts.position == "bottom") && (xy.top + state_tip._outerHeight() > $(window)._outerHeight() + $(document).scrollTop()))
-          xy = setPosition("top");      
+      if ((state_opts.position == "bottom") 
+        && (xy.top + state_tip._outerHeight() > 
+          $(window)._outerHeight() + $(document).scrollTop())){
+        xy = setPosition("top");  
+      }
+              
     }
+    console.log(xy.left)
     if (xy.left < 0) {
       if (state_opts.position == "left") {
         xy = setPosition("right");
@@ -176,7 +174,8 @@ reposition = function(){
         xy.left = 0;
       }
     }else{
-      if (xy.left + state_tip._outerWidth() > $(window)._outerWidth() + $(document)._scrollLeft()) {
+      if (xy.left + state_tip._outerWidth() > 
+        $(window)._outerWidth() + $(document)._scrollLeft()) {
         if (state_opts.position == "right") {
           xy = setPosition("left");
         }else{

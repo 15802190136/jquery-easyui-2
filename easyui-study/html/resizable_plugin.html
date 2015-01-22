@@ -41,9 +41,7 @@ $.fn.resizable = function(options, param){
       });
     }
 
-    if (opts.disabled == true) {
-      return;
-    }
+    if (opts.disabled == true) return;
     bindEvents(this)
   })
 }
@@ -99,9 +97,7 @@ function bindEvents(target){
       startWidth: t.outerWidth(),
       startHeight: t.outerHeight(),
       width: t.outerWidth(),
-      height: t.outerHeight(),
-      deltaWidth: t.outerWidth() - t.width(),
-      deltaHeight: t.outerHeight() - t.height()
+      height: t.outerHeight()
     }
     $(document).bind('mousedown.resizable', data, doDown);
     $(document).bind('mousemove.resizable', data, doMove);
@@ -145,7 +141,7 @@ function doMove(e){
 }
 function doUp(e){
   $.fn.resizable.isResizing = false;
-  resize(e, true);
+  resize(e);
   applySize(e);
   $(document).unbind('.resizable');
   $('body').css('cursor','');
@@ -202,7 +198,22 @@ function applySize(e){
   });
   if (t.outerWidth() != resizeData.width){t._outerWidth(resizeData.width)}
   if (t.outerHeight() != resizeData.height){t._outerHeight(resizeData.height)}  
-}  
+}
+$.fn.resizable.methods = {
+  options: function(jq){
+    return $.data(jq[0], 'resizable').options;
+  },
+  enable: function(jq){
+    return jq.each(function(){
+      $(this).resizable({disabled:false});
+    });
+  },
+  disable: function(jq){
+    return jq.each(function(){
+      $(this).resizable({disabled:true});
+    });
+  }  
+}
 })(jQuery);
 </script>
 </html>
