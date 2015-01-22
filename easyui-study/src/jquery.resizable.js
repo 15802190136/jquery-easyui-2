@@ -25,7 +25,10 @@ $.fn.resizable.defaults = {
   handles:'n, e, s, w, ne, se, sw, nw, all',
   minWidth: 10,minHeight: 10,
   maxWidth: 10000,maxHeight: 10000,
-  edge:5
+  edge:5,
+  onStartResize: function(e){},
+  onResize: function(e){},
+  onStopResize: function(e){}
 }
 $.fn.resizable.isResizing = false;
 $.fn.resizable.parseOptions = function(target){
@@ -107,17 +110,21 @@ function getDirection(e){
 }
 function doDown(e){
   $.fn.resizable.isResizing = true;
+  $.data(e.data.target, 'resizable').options.onStartResize.call(e.data.target, e);
   return false;
 }
 function doMove(e){
   resize(e);
-  applySize(e);
+  if ($.data(e.data.target, 'resizable').options.onResize.call(e.data.target, e) != false){
+    applySize(e);
+  }
   return false;  
 }
 function doUp(e){
   $.fn.resizable.isResizing = false;
   resize(e);
   applySize(e);
+  $.data(e.data.target, 'resizable').options.onStopResize.call(e.data.target, e);
   $(document).unbind('.resizable');
   $('body').css('cursor','');
   return false;

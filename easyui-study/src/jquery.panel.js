@@ -87,7 +87,7 @@ function initPanelTool(target){
     if (opts.tools) {
       if ($.isArray(opts.tools)) {
         for (var i = 0; i < opts.tools.length; i++) {
-          var t = $("<a href=\"javascript:void(0)\"></a>").addClass(opts.tools[i].iconCls).appendTo(ptool);
+          var t = $("<a href='javascript:void(0)'></a>").addClass(opts.tools[i].iconCls).appendTo(ptool);
           if (opts.tools[i].handler) {
             t.bind("click", eval(opts.tools[i].handler));
           }
@@ -101,32 +101,33 @@ function initPanelTool(target){
     if (opts.collapsible) {
       $("<a class='panel-tool-collapse' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
         if (opts.collapsed == true) {
-          expand(target, true);
+          expandPanel(target, true);
         } else {
-          collapse(target, true);
+          collapsePanel(target, true);
         }
         return false;
       });      
     }
     if (opts.minimizable) {
       $("<a class='panel-tool-min' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
-        minimize(target);
+        minimizePanel(target);
         return false;
       });      
     }
     if (opts.maximizable) {
       $("<a class='panel-tool-max' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
+        console.log("maximized="+opts.maximized)
         if (opts.maximized == true) {
-          restore(target);
+          restorePanel(target);
         } else {
-          maximize(target);
+          maximizePanel(target);
         }
         return false;
       });
     }
     if (opts.closable) {
       $("<a class='panel-tool-close' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
-        close(target);
+        closePanel(target);
         return false;
       });
     }    
@@ -276,6 +277,7 @@ function collapsePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var panel = state.panel;
+  var pheader = panel.children("div.panel-header");
   var pbody = panel.children("div.panel-body");
   if (opts.collapsed == true) {
     return;
@@ -284,7 +286,7 @@ function collapsePanel(target){
   if (opts.onBeforeCollapse.call(target) == false) {
     return;
   }
-  header.addClass("panel-tool-expand");
+  pheader.addClass("panel-tool-expand");
   var cb = function(){
     opts.collapsed = true;
     opts.onCollapse.call(target);
@@ -309,6 +311,7 @@ function maximizePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var original = state.original;
+  if(opts.maximized==true) return;
   if(!original){
     $.data(target, "panel").original = {
       width: opts.width,
@@ -322,18 +325,26 @@ function maximizePanel(target){
   opts.top = 0;
   opts.fit = true;
   resize(target,opts);
+  opts.minimized = false;
+  opts.maximized = true;
+  opts.onMaximize.call(target);
 }
 function restorePanel(target){
   var state = $.data(target, "panel");
   var opts = state.options;
   var original = state.original;
+  if(opts.maximized==false) return;
   $.extend(opts, original);
   resize(target);
-  original = null;   
+  opts.minimized = false;
+  opts.maximized = false;
+  state.original = null;
+  opts.onRestore.call(target);
 }
 function minimizePanel(target){
   var state = $.data(target, "panel");
   var panel = state.panel;
+  var opts = state.options;
   panel._size("unfit")
   panel.hide()
   opts.minimized = true;

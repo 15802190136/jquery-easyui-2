@@ -35,6 +35,7 @@ $.fn.draggable = function(options, param){
         $(this).css('cursor', '');
       }).bind('mousedown.draggable',{target:target},function(e){
         var t = $(e.data.target);
+        var opts = $.data(e.data.target, 'draggable').options;
         if (checkArea(e) == false) return;
         $(this).css('cursor', '');
         var position = t.position();
@@ -51,6 +52,7 @@ $.fn.draggable = function(options, param){
           offsetHeight: (e.pageY - offset.top),
           parent: t.parent()[0]
         };
+        if (opts.onBeforeDrag.call(e.data.target, e) == false) return;
         $(document).bind('mousedown.draggable', data, doDown);
         $(document).bind('mousemove.draggable', data, doMove);
         $(document).bind('mouseup.draggable', data, doUp);
@@ -65,7 +67,11 @@ $.fn.draggable.defaults = {
   deltaY:null,
   handle: null,
   disabled: false,
-  edge:0
+  edge:0,
+  onBeforeDrag: function(e){},
+  onStartDrag: function(e){},
+  onDrag: function(e){},
+  onStopDrag: function(e){}
 }
 $.fn.draggable.parseOptions = function(target){
   var t = $(target);
@@ -88,10 +94,13 @@ function checkArea(e){
 }
 function doDown(e){
   var t = $(e.data.target)
+  var state = $.data(e.data.target, 'draggable');
+  var opts = state.options;
   $.fn.draggable.isDragging = true
   t.css('position', 'absolute');
   drag(e);
   applyDrag(e);
+  opts.onStartDrag.call(e.data.target, e);
   return false;
 }
 function drag(e){
@@ -120,12 +129,17 @@ function applyDrag(e){
   $('body').css('cursor', 'move');
 }
 function doMove(e){
+  var state = $.data(e.data.target, 'draggable');
   drag(e);
-  applyDrag(e);
+  if (state.options.onDrag.call(e.data.target, e) != false){
+    applyDrag(e);
+  }
   return false;
 }
 function doUp(e){
-  var t = $(e.data.target)
+  var t = $(e.data.target);
+  var state = $.data(e.data.target, 'draggable');
+  var opts = state.options;
   $.fn.draggable.isDragging = false;
   doMove(e);
   t.css({
@@ -133,6 +147,7 @@ function doUp(e){
     left:e.data.left,
     top:e.data.top
   });
+  opts.onStopDrag.call(e.data.target, e);
   $(document).unbind('.draggable');
   setTimeout(function(){
     $('body').css('cursor','');

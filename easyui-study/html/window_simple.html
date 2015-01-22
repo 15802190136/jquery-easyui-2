@@ -56,17 +56,20 @@ body {
   <body>
     <div id="w" class="easyui-window" title="Basic Window" style="width:500px;height:200px;padding:10px;">
       The window content.
-    </div>    
+    </div>
   </body>
 <script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.draggable.js"></script>
+<script src="../src/jquery.resizable.js"></script>
 <script src="../src/jquery.panel.js"></script>
 <script>     
 $(function(){
 var target = $(".easyui-window")[0]
-var win = $(".easyui-window")
-var state_opts,state_window,state_shadow,state_mask
+var win = t = $(".easyui-window")
+var state_opts,state_window,state_shadow,state_mask,state_proxy,state_pmask
 var defaults = $.extend({}, $.fn.panel.defaults, {
   zIndex: 9000,
+  draggable: true,resizable: true,
   shadow: true,modal: false,closed: false,
   inline: false,
   title: 'New Window',
@@ -221,7 +224,86 @@ moveWindow = function(param){
     });
   }  
 }
-setProperties = function(){}
+setProperties = function(){
+  state_window.draggable({
+    handle: '>div.panel-header>div.panel-title',
+    disabled: state_opts.draggable == false,
+    onStartDrag: function(e){
+      if (state_mask) 
+        state_mask.css('z-index', defaults.zIndex++);
+      if (state_shadow) 
+        state_shadow.css('z-index', defaults.zIndex++);
+      state_window.css('z-index', defaults.zIndex++);
+      if (!state_proxy)
+        state_proxy = $('<div class="window-proxy"></div>').insertAfter(state_window);
+      state_proxy.css({
+        display:'none',
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(state_window._outerWidth());
+      state_proxy._outerHeight(state_window._outerHeight());
+      setTimeout(function(){
+        if (state_proxy) state_proxy.show();
+      }, 500);
+    },
+    onDrag: function(e){
+      state_proxy.css({
+        display:'block',
+        left: e.data.left,
+        top: e.data.top
+      });
+      return false;      
+    },
+    onStopDrag: function(e){
+      state_opts.left = e.data.left;
+      state_opts.top = e.data.top;
+      moveWindow();
+      state_proxy.remove();
+      state_proxy = null;      
+    }
+  })
+
+  state_window.resizable({
+    disabled: state_opts.resizable == false,
+    onStartResize:function(e){
+      if (state_pmask) state_pmask.remove();
+      state_pmask = $('<div class="window-proxy-mask"></div>').insertAfter(state_window);
+      state_pmask.css({
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top,
+        width: state_window._outerWidth(),
+        height: state_window._outerHeight()
+      });
+      if (state_proxy){state_proxy.remove();}
+      state_proxy = $('<div class="window-proxy"></div>').insertAfter(state_window);
+      state_proxy.css({
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(e.data.width)._outerHeight(e.data.height);
+    },
+    onResize: function(e){
+      state_proxy.css({
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(e.data.width);
+      state_proxy._outerHeight(e.data.height);
+      return false;
+    },
+    onStopResize: function(e){
+      t.panel("resize",e.data);
+      state_pmask.remove();
+      state_pmask = null;
+      state_proxy.remove();
+      state_proxy = null;
+    }
+  })
+}
 $(window).resize(function(){
   $('body>div.window-mask').css({
     width: $(window)._outerWidth(),
