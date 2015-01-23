@@ -16,18 +16,14 @@ body {
   border-width: 1px;
   border-style: solid;
 }
-.window, .window .window-body {
-  border-color: #95B8E7;
-}
-.window {
-  background-color: #E0ECFF;
-}
-.window, .window-shadow {
-  position: absolute;
-}
 .window .window-header {
   background: transparent;
   padding: 0px 0px 6px 0px;
+}
+.window .window-body {
+  border-width: 1px;
+  border-style: solid;
+  border-top-width: 0px;
 }
 .window .window-header .panel-with-icon {
   padding-left: 18px;
@@ -42,12 +38,43 @@ body {
 .window .window-header .panel-tool {
   right: 1px;
 }
-.window .window-body {
-  border-width: 1px;
-  border-style: solid;
-  border-top-width: 0px;
+.window-proxy {
+  position: absolute;
+  overflow: hidden;
+}
+.window-proxy-mask {
+  position: absolute;
+  filter: alpha(opacity=5);
+  opacity: 0.05;
+}
+.window-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  filter: alpha(opacity=40);
+  opacity: 0.40;
+  font-size: 1px;
+  overflow: hidden;
+}
+.window {
+  background-color: #E0ECFF;
+}
+.window, .window .window-body {
+  border-color: #95B8E7;
+}
+.window, .window-shadow {
+  position: absolute;
 }
 .window-shadow {
+  background: #ccc;
+}
+.window-proxy {
+  border: 1px dashed #95B8E7;
+}
+.window-proxy-mask,
+.window-mask {
   background: #ccc;
 }
     </style>

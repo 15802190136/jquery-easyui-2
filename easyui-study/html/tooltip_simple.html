@@ -140,11 +140,8 @@ hide = function(e){
   }
 }
 update = function(content){
-  if(content)
-    state_opts.content = content
-  if (!state_tip) {
-    return;
-  }
+  if(content) state_opts.content = content
+  if (!state_tip) return;
   state_tip.children(".tooltip-content").html(state_opts.content);
 }
 reposition = function(){
@@ -154,7 +151,7 @@ reposition = function(){
     top : -100000
   };
   if (t.is(":visible")) {
-    xy = setPosition();
+    xy = setPosition(state_opts.position);
     if (state_opts.position == "top" && xy.top < 0) {
       xy = setPosition(state_opts.position);
     }else{
@@ -165,7 +162,6 @@ reposition = function(){
       }
               
     }
-    console.log(xy.left)
     if (xy.left < 0) {
       if (state_opts.position == "left") {
         xy = setPosition("right");
@@ -195,13 +191,13 @@ reposition = function(){
 setPosition = function(position){
   state_opts.position = position || "bottom";
   state_tip.removeClass("tooltip-top tooltip-bottom tooltip-left tooltip-right").addClass("tooltip-" + state_opts.position);
-  var left, top;
+  var left,top,_t;
   if (state_opts.trackMouse) {
     _t = $();
     left = state_opts.trackMouseX + state_opts.deltaX;
     top = state_opts.trackMouseY + state_opts.deltaY;
   }else{
-    var _t = $(target);
+    _t = $(target);
     left = _t.offset().left + state_opts.deltaX;
     top = _t.offset().top + state_opts.deltaY;
   }
