@@ -63,6 +63,8 @@ $.fn.draggable = function(options, param){
 }
 $.fn.draggable.isDragging = false;
 $.fn.draggable.defaults = {
+  proxy:null,
+  revert:false,
   deltaX:null,
   deltaY:null,
   handle: null,
@@ -76,7 +78,7 @@ $.fn.draggable.defaults = {
 $.fn.draggable.parseOptions = function(target){
   var t = $(target);
   return $.extend({}, 
-    $.parser.parseOptions(target, ['handle',{'deltaX':'number','deltaY':'number','edge':'number'}]), {
+    $.parser.parseOptions(target, ['handle',{'revert':'boolean','deltaX':'number','deltaY':'number','edge':'number'}]), {
     disabled: (t.attr('disabled') ? true : undefined)
   });
 }
@@ -96,8 +98,33 @@ function doDown(e){
   var t = $(e.data.target)
   var state = $.data(e.data.target, 'draggable');
   var opts = state.options;
+  var droppables = $(".droppable").filter(function(){
+    return e.data.target != this;
+  }).filter(function() {
+    var accept = $.data(this,"droppable").options.accept;
+    if(accept){
+      return $(accept).filter(function(index) {
+        return this == e.data.target;
+      }).length>0;
+    }else{
+      return true;
+    }
+  });
   $.fn.draggable.isDragging = true
-  t.css('position', 'absolute');
+  state.droppables = droppables;
+  var proxy = state.proxy;
+  if (!proxy){
+    if (opts.proxy){
+      if (opts.proxy == 'clone')
+        proxy = t.clone().insertAfter(e.data.target);
+      else
+        proxy = opts.proxy.call(e.data.target, e.data.target)
+      state.proxy = proxy;
+    }else{
+      proxy = t;
+    }
+  }
+  proxy.css('position', 'absolute');
   drag(e);
   applyDrag(e);
   opts.onStartDrag.call(e.data.target, e);
@@ -112,7 +139,25 @@ function drag(e){
   var left = dragData.startLeft + pageX - dragData.startX;
   var top = dragData.startTop + pageY - dragData.startY;
   var offsetWidth = dragData.offsetWidth,offsetHeight = dragData.offsetHeight
+  var proxy = state.proxy
   var parent = dragData.parent
+  if(proxy){
+    if (proxy.parent()[0] == document.body){
+      if(opts.deltaX != null && opts.deltaX != undefined)
+        left = e.pageX + opts.deltaX;
+      else
+        left = e.pageX - e.data.offsetWidth;
+      if(opts.deltaY != null && opts.deltaY != undefined)
+        top = e.pageY + opts.deltaY;
+      else
+        top = e.pageY - e.data.offsetHeight;
+    }else{
+      if (opts.deltaX != null && opts.deltaX != undefined)
+        left += e.data.offsetWidth + opts.deltaX;
+      if (opts.deltaY != null && opts.deltaY != undefined)
+        top += e.data.offsetHeight + opts.deltaY;
+    }
+  }
   if (parent != document.body) {
     left += $(parent).scrollLeft();
     top += $(parent).scrollTop();
@@ -121,37 +166,133 @@ function drag(e){
   dragData.top = top;
 }
 function applyDrag(e){
+  var state = $.data(e.data.target, 'draggable');
   var t = $(e.data.target)
-  t.css({
+  var proxy = state.proxy;
+  if (!proxy) proxy = t;
+  proxy.css({
     left:e.data.left,
     top:e.data.top
   });
   $('body').css('cursor', 'move');
 }
 function doMove(e){
+  var source = e.data.target;
   var state = $.data(e.data.target, 'draggable');
   drag(e);
   if (state.options.onDrag.call(e.data.target, e) != false){
     applyDrag(e);
   }
+  state.droppables.each(function(){
+    var dropObj = $(this);
+    if (dropObj.droppable('options').disabled) return;
+    var p2 = dropObj.offset();
+    if (e.pageX > p2.left && 
+      e.pageX < p2.left + dropObj.outerWidth() && 
+      e.pageY > p2.top && 
+      e.pageY < p2.top + dropObj.outerHeight()){
+      if (!this.entered){
+        $(this).trigger('_dragenter', [source]);
+        this.entered = true;
+      }
+      $(this).trigger('_dragover', [source]);
+    }else{
+      if (this.entered){
+        $(this).trigger('_dragleave', [source]);
+        this.entered = false;
+      }
+    }
+  })
   return false;
 }
 function doUp(e){
   var t = $(e.data.target);
   var state = $.data(e.data.target, 'draggable');
   var opts = state.options;
+  var proxy = state.proxy;
   $.fn.draggable.isDragging = false;
   doMove(e);
-  t.css({
-    position:'absolute',
-    left:e.data.left,
-    top:e.data.top
-  });
+  if (opts.revert){
+    if(checkDrop()==true){
+      t.css({
+        position:e.data.startPosition,
+        left:e.data.startLeft,
+        top:e.data.startTop
+      });
+    }else{
+      if(proxy){
+        var left, top;
+        if (proxy.parent()[0] == document.body){
+          left = e.data.startX - e.data.offsetWidth;
+          top = e.data.startY - e.data.offsetHeight;        
+        }else{
+          left = e.data.startLeft;
+          top = e.data.startTop;        
+        }
+        proxy.animate({
+          left:left,
+          top:top
+        }, function(){
+          removeProxy();
+        });
+      }else{
+        t.animate({
+          left:e.data.startLeft,
+          top:e.data.startTop
+        }, function(){
+          t.css('position', e.data.startPosition);
+        });
+      }
+    }
+  }else{
+    t.css({
+      position:'absolute',
+      left:e.data.left,
+      top:e.data.top
+    });
+    checkDrop();
+  }
   opts.onStopDrag.call(e.data.target, e);
   $(document).unbind('.draggable');
   setTimeout(function(){
     $('body').css('cursor','');
   },100);
+
+  function removeProxy(){
+    if (proxy){
+      proxy.remove();
+    }
+    state.proxy = null;
+  }
+  function checkDrop(){
+    var dropped = false;
+    state.droppables.each(function(){
+      var dropObj = $(this);
+      if (dropObj.droppable('options').disabled) return;
+      var p2 = dropObj.offset();
+      if (e.pageX > p2.left && 
+        e.pageX < p2.left + dropObj.outerWidth() && 
+        e.pageY > p2.top && 
+        e.pageY < p2.top + dropObj.outerHeight()){
+        if (opts.revert){
+          t.css({
+            position:e.data.startPosition,
+            left:e.data.startLeft,
+            top:e.data.startTop
+          });
+        }
+        $(this).trigger('_drop', [e.data.target]);
+        removeProxy();
+        dropped = true;
+        this.entered = false;
+        return false;
+      }
+    })
+    if (!dropped && !opts.revert){
+      removeProxy();
+    }
+    return dropped;
+  }
   return false;
 }
 $.fn.draggable.methods = {
