@@ -1,4 +1,36 @@
 $.parser = {
+  onComplete: function(context){},
+  plugins:['draggable','droppable','resizable','panel'],
+  parse: function(context){
+    var aa = [];
+    for(var i=0; i<$.parser.plugins.length; i++){
+      var name = $.parser.plugins[i];
+      var r = $('.easyui-' + name, context);
+      if (r.length){
+        if (r[name]){
+          r[name]();
+        } else {
+          aa.push({name:name,jq:r});
+        }
+      }
+    }
+    if (aa.length && window.easyloader){
+      var names = [];
+      for(var i=0; i<aa.length; i++){
+        names.push(aa[i].name);
+      }
+      easyloader.load(names, function(){
+        for(var i=0; i<aa.length; i++){
+          var name = aa[i].name;
+          var jq = aa[i].jq;
+          jq[name]();
+        }
+        $.parser.onComplete.call($.parser, context);
+      });
+    } else {
+      $.parser.onComplete.call($.parser, context);
+    }    
+  },
   parseValue: function(property, value, parent, delta){
     delta = delta || 0;
     var v = $.trim(String(value||''));
