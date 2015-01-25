@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>tooltip_src</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../css/tooltip.css">
+  <script src="../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <a href="#" title="This is the tooltip message." class="easyui-tooltip">Hover me</a>
+</body>
+<script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.tooltip.js"></script>
+<script>
+$(function(){
+  $(".easyui-tooltip").tooltip({position:"right"})
+})
+</script>
+</html>

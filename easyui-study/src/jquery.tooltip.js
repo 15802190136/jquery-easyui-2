@@ -24,6 +24,8 @@ $.fn.tooltip.defaults = {
   trackMouse : false,
   deltaX : 0,deltaY : 0,
   showDelay : 200,hideDelay : 100,
+  showEvent : "mouseenter",
+  hideEvent : "mouseleave",
   onShow : function(e) {
   },
   onHide : function(e) {
@@ -54,9 +56,9 @@ function init(target){
 }
 function bindEvents(target){
   var opts = $.data(target, "tooltip").options;
-  $(target).unbind(".tooltip").bind("mouseenter.tooltip", function(e) {
+  $(target).unbind(".tooltip").bind(opts.showEvent+".tooltip", function(e) {
     $(target).tooltip("show", e);
-  }).bind("mouseleave.tooltip", function(e) {
+  }).bind(opts.hideEvent+".tooltip", function(e) {
     $(target).tooltip("hide", e);
   }).bind("mousemove.tooltip", function(e) {
     if (opts.trackMouse) {
@@ -130,8 +132,8 @@ function reposition(target){
     if (opts.position == "top" && xy.top < 0) {
       xy = setPosition(opts.position);
     }else{
-      if ((opts.position == "bottom") 
-        && (xy.top + tip._outerHeight() > 
+      if ((opts.position == "bottom") && 
+          (xy.top + tip._outerHeight() > 
           $(window)._outerHeight() + $(document).scrollTop())){
         xy = setPosition("top");  
       }

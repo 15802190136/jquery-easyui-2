@@ -1,77 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>validateBox_simple</title>
-  <style>
-body {
-  font-family: verdana,helvetica,arial,sans-serif;
-  padding: 20px;
-  font-size: 12px;
-  margin: 0;
+;(function($) {
+$.fn.validatebox = function(options, param) {
+  if (typeof options == "string")
+    return $.fn.validatebox.methods[options](this, param);
+  options = options || {};
+  return this.each(function() {
+    var state = $.data(this, "validatebox");
+    if (state) {
+      $.extend(state.options, options);
+    } else {
+      init(this);
+      $.data(this, "validatebox", {
+        options : $.extend({}, $.fn.validatebox.defaults, $.fn.validatebox.parseOptions(this), options)
+      });
+    }
+    setDisabledValidation(this);
+    validate(this);
+  });  
 }
-.validatebox-invalid {
-  border-color: #ffa8a8;
-  background-color: #fff3f3;
-  color: #000;
-}
-  </style>
-  <link rel="stylesheet" type="text/css" href="../css/panel.css">
-  <link rel="stylesheet" type="text/css" href="../css/tooltip.css">
-  <script src="../bower_components/jquery/jquery.js"></script>
-</head>
-<body>
-  <div class="easyui-panel" title="Register" style="width:400px;padding:10px 60px 20px 60px">
-    <table cellpadding="5">
-      <tr>
-        <td>User Name:</td>
-        <td><input class="easyui-validatebox textbox" data-options="required:true,validType:'length[3,10]'"></td>
-      </tr>
-    </table>
-  </div>
-</body>
-<script src="../src/jquery.parser.js"></script>
-<script src="../src/jquery.panel.js"></script>
-<script src="../src/jquery.tooltip.js"></script>
-<script>
-$(function(){
-$.parser.parse();
-var target = $(".easyui-validatebox")[0]
-var box = t = $(".easyui-validatebox")
-var state_opts,state_validating,state_timer,state_validating,state_tip
-main = function(){
-  init()
-  parseOptions()
-  setDisabledValidation();
-  validate();
-}
-init = function(){
-  t.addClass("validatebox-text");
-}
-parseOptions = function(){
-  state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['handle',
+$.fn.validatebox.parseOptions = function(target){
+  var t = $(target);
+  return $.extend({}, $.parser.parseOptions(target, ['handle',
     {minWidth:'number',minHeight:'number',maxWidth:'number',maxHeight:'number',edge:'number'}]), {
       disabled: (t.attr('disabled') ? true : undefined)
     });
 }
-setDisabledValidation= function(flag) {
-  if (flag != undefined)
-    state_opts.novalidate = flag;
-  if (state_opts.novalidate) {
-    t.removeClass("validatebox-invalid");
-    hideTip();
-  }
-  validate();
-  bindEvents();
+function init(target){
+  $(target).addClass("validatebox-text");
 }
-validate = function(){
-  var opts = state_opts;
+function setDisabledValidation(target,flag) {
+  var opts = $.data(target, "validatebox").options;
+  if (flag != undefined)
+    opts.novalidate = flag;
+  if (opts.novalidate) {
+    $(target).removeClass("validatebox-invalid");
+    hideTip(target);
+  }
+  validate(target);
+  bindEvents(target);
+}
+function validate(target){
+  var state = $.data(target, "validatebox");
+  var opts = state.options;
+  var box = $(target);
   opts.onBeforeValidate.call(target);
   var valid = getValid();
   opts.onValidate.call(target, valid);
   return valid;
   function setTipMessage(msg) {
-    state_message = msg;
+    state.message = msg;
   }
   function setValidateMessage(validType, validParams) {
     var value = box.val();
@@ -88,8 +64,8 @@ validate = function(){
           }
         }
         setTipMessage(opts.invalidMessage || message);
-        if (state_validating)
-          showTip();
+        if (state.validating)
+          showTip(target);
         return false;
       }
     }
@@ -97,14 +73,14 @@ validate = function(){
   }
   function getValid() {
     box.removeClass("validatebox-invalid");
-    hideTip();
+    hideTip(target);
     if (opts.novalidate || box.is(":disabled")) return true;
     if (opts.required) {
       if (box.val() == "") {
         box.addClass("validatebox-invalid");
         setTipMessage(opts.missingMessage);
-        if (state_validating)
-          showTip();
+        if (state.validating)
+          showTip(target);
         return false;
       }
     }
@@ -127,71 +103,85 @@ validate = function(){
     return true;
   }      
 }
-hideTip = function(){
-  state_tip = false;
-  t.tooltip("hide");
+function hideTip(target){
+  var state = $.data(target, "validatebox");
+  state.tip = false;
+  $(target).tooltip("hide");
 }
-showTip = function(){
-  var opts = state_opts;
-  t.tooltip($.extend({}, opts.tipOptions, {
-    content : state_message,
+function showTip(target){
+  var state = $.data(target, "validatebox");
+  var opts = state.options;
+  $(target).tooltip($.extend({}, opts.tipOptions, {
+    content : state.message,
     position : opts.tipPosition,
     deltaX : opts.deltaX
   })).tooltip("show");
-  state_tip = true;
+  state.tip = true;
 }
-setTooltip = function(){
-  if (state_tip){
-    t.tooltip("reposition");
+function setTooltip(target){
+  var state = $.data(target, "validatebox");
+  if (state && state.tip){
+    $(target).tooltip("reposition");
   }
 }
-bindEvents = function(){
-  var opts = state_opts;
+function bindEvents(target){
+  var opts = $.data(target, "validatebox").options;
+  var box = $(target);
   box.unbind(".validatebox");
   if (opts.novalidate || box.is(":disabled")) return;
   for ( var eventname in opts.events) {
-    t.bind(eventname + ".validatebox", {
+    $(target).bind(eventname + ".validatebox", {
       target : target
     }, opts.events[eventname]);
   }
 }
-focusEvent = function(e){
+function focusEvent(e){
+  var target = e.data.target;
+  var t = $(target);
+  var state = $.data(target, "validatebox");
+  var opts = state.options;
+  var box = $(target);
   if (t.attr("readonly")) return;
-  state_validating = true;
-  state_value = undefined;
+  state.validating = true;
+  state.value = undefined;
   (function() {
-    if (state_validating) {
-      if (state_value != box.val()) {
-        state_value = box.val();
-        if (state_timer)
-          clearTimeout(state_timer);
-        state_timer = setTimeout(function() {
-          validate()
-        }, state_opts.delay);
+    if (state.validating) {
+      if (state.value != box.val()) {
+        state.value = box.val();
+        if (state.timer)
+          clearTimeout(state.timer);
+        state.timer = setTimeout(function() {
+          $(target).validatebox("validate");
+        }, opts.delay);
       } else {
-        setTooltip();
+        setTooltip(target);
       }
       setTimeout(arguments.callee, 200);
     }
   })();
 }
-blurEvent = function(e){
-  if (state_timer) {
-    clearTimeout(state_timer);
-    state_timer = undefined;
+function blurEvent(e){
+  var target = e.data.target;
+  var state = $.data(target, "validatebox");
+  if (state.timer) {
+    clearTimeout(state.timer);
+    state.timer = undefined;
   }
-  state_validating = false;
-  hideTip();
+  state.validating = false;
+  hideTip(target);
 }
-mouseenterEvent = function(e){
-  if (t.hasClass("validatebox-invalid")) 
-    showTip();
+function mouseenterEvent(e){
+  var target = e.data.target;
+  if ($(target).hasClass("validatebox-invalid")) 
+    showTip(target);
 }
-mouseleaveEvent = function(e){
-  if (!state_validating)
-    hideTip();
+function mouseleaveEvent(e){
+  var target = e.data.target;
+  var state = $.data(target, "validatebox");
+  if (!state.validating)
+    hideTip(target);
 }
-var defaults = {
+$.fn.validatebox.defaults = {
   required : false,
   validType : null,
   validParams : null,
@@ -269,7 +259,32 @@ var defaults = {
   onBeforeValidate : function() {},
   onValidate : function(valid) {}
 }
-main();
-})
-</script>
-</html>
+$.fn.validatebox.methods = {
+  options : function(jq) {
+    return $.data(jq[0], "validatebox").options;
+  },
+  destroy : function(jq) {
+    return jq.each(function() {
+      destroyBox(this);
+    });
+  },
+  validate : function(jq) {
+    return jq.each(function() {
+      validate(this);
+    });
+  },
+  isValid : function(jq) {
+    return validate(jq[0]);
+  },
+  enableValidation : function(jq) {
+    return jq.each(function() {
+      setDisabledValidation(this, false);
+    });
+  },
+  disableValidation : function(jq) {
+    return jq.each(function() {
+      setDisabledValidation(this, true);
+    });
+  }  
+}
+})(jQuery);
