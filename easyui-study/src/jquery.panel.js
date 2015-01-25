@@ -212,7 +212,7 @@ function resize(target,param){
     pbody.css("height", "");
     var minHeight = $.parser.parseValue("minHeight", opts.minHeight, panel.parent());
     var maxHeight = $.parser.parseValue("maxHeight", opts.maxHeight, panel.parent());
-    var outerHeight = header._outerHeight() + pfooter._outerHeight() + panel._outerHeight() - panel.height();
+    var outerHeight = pheader._outerHeight() + pfooter._outerHeight() + panel._outerHeight() - panel.height();
     pbody._size("minHeight", minHeight ? (minHeight - outerHeight) : "");
     pbody._size("maxHeight", maxHeight ? (maxHeight - outerHeight) : "");
   }

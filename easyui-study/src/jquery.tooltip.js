@@ -23,7 +23,7 @@ $.fn.tooltip.defaults = {
   content : null,
   trackMouse : false,
   deltaX : 0,deltaY : 0,
-  showDelay : 200,hideDelay : 100
+  showDelay : 200,hideDelay : 100,
   onShow : function(e) {
   },
   onHide : function(e) {
@@ -208,6 +208,20 @@ function deleteDelay(target){
     clearTimeout(state.hideTimer);
     state.hideTimer = null;
   }  
+}
+function destroy(target){
+  var state = $.data(target, "tooltip");
+  if (state) {
+    deleteDelay(target);
+    var opts = state.options;
+    if (state.tip)
+      state.tip.remove();
+    if (opts._title)
+      $(target).attr("title", opts._title);
+    $.removeData(target, "tooltip");
+    $(target).unbind(".tooltip").removeClass("tooltip-f");
+    opts.onDestroy.call(target);
+  }
 }
 $.fn.tooltip.methods = {
   options : function(jq) {

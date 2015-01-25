@@ -10,7 +10,14 @@ body {
   font-size: 12px;
   margin: 0;
 }
+.validatebox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+  color: #000;
+}
   </style>
+  <link rel="stylesheet" type="text/css" href="../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../css/tooltip.css">
   <script src="../bower_components/jquery/jquery.js"></script>
 </head>
 <body>
@@ -23,12 +30,15 @@ body {
     </table>
   </div>
 </body>
-<script src="../src/easyloader.js"></script>
+<script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.panel.js"></script>
+<script src="../src/jquery.tooltip.js"></script>
 <script>
 $(function(){
+$.parser.parse();
 var target = $(".easyui-validatebox")[0]
 var box = t = $(".easyui-validatebox")
-var state_opts
+var state_opts,state_validating,state_timer,state_validating,state_tip
 main = function(){
   init()
   parseOptions()
@@ -39,7 +49,6 @@ init = function(){
   t.addClass("validatebox-text");
 }
 parseOptions = function(){
-  console.log($.parser.parseOptions)
   state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['handle',
     {minWidth:'number',minHeight:'number',maxWidth:'number',maxHeight:'number',edge:'number'}]), {
       disabled: (t.attr('disabled') ? true : undefined)
@@ -47,8 +56,8 @@ parseOptions = function(){
 }
 setDisabledValidation= function(flag) {
   if (flag != undefined)
-    state.opts.novalidate = flag;
-  if (state.opts.novalidate) {
+    state_opts.novalidate = flag;
+  if (state_opts.novalidate) {
     t.removeClass("validatebox-invalid");
     hideTip();
   }
@@ -62,7 +71,7 @@ validate = function(){
   opts.onValidate.call(target, valid);
   return valid;
   function setTipMessage(msg) {
-    state.message = msg;
+    state_message = msg;
   }
   function setValidateMessage(validType, validParams) {
     var value = box.val();
@@ -123,17 +132,18 @@ hideTip = function(){
   t.tooltip("hide");
 }
 showTip = function(){
-  var opts = state_options;
+  var opts = state_opts;
   t.tooltip($.extend({}, opts.tipOptions, {
     content : state_message,
     position : opts.tipPosition,
     deltaX : opts.deltaX
   })).tooltip("show");
-  state.tip = true;
+  state_tip = true;
 }
 setTooltip = function(){
-  if (state_tip)
+  if (state_tip){
     t.tooltip("reposition");
+  }
 }
 bindEvents = function(){
   var opts = state_opts;
@@ -178,10 +188,9 @@ mouseenterEvent = function(e){
     showTip();
 }
 mouseleaveEvent = function(e){
-  if (!state.validating)
+  if (!state_validating)
     hideTip();
 }
-main();
 var defaults = {
   required : false,
   validType : null,
@@ -260,6 +269,7 @@ var defaults = {
   onBeforeValidate : function() {},
   onValidate : function(valid) {}
 }
+main();
 })
 </script>
 </html>
