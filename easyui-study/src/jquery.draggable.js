@@ -259,9 +259,8 @@ function doUp(e){
   },100);
 
   function removeProxy(){
-    if (proxy){
+    if (proxy)
       proxy.remove();
-    }
     state.proxy = null;
   }
   function checkDrop(){
@@ -271,9 +270,9 @@ function doUp(e){
       if (dropObj.droppable('options').disabled) return;
       var p2 = dropObj.offset();
       if (e.pageX > p2.left && 
-        e.pageX < p2.left + dropObj.outerWidth() && 
-        e.pageY > p2.top && 
-        e.pageY < p2.top + dropObj.outerHeight()){
+          e.pageX < p2.left + dropObj.outerWidth() && 
+          e.pageY > p2.top && 
+          e.pageY < p2.top + dropObj.outerHeight()){
         if (opts.revert){
           t.css({
             position:e.data.startPosition,

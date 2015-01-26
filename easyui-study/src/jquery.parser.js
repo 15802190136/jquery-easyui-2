@@ -120,15 +120,14 @@ $.fn._size = function(options, parent){
       $.extend(options, _fit(this, parent, options.fit)||{});
       var r1 = _setSize(this, 'width', parent, options);
       var r2 = _setSize(this, 'height', parent, options);
-      if (r1 || r2){
+      if (r1 || r2)
         $(this).addClass('easyui-fluid');
-      } else {
+      else
         $(this).removeClass('easyui-fluid');
-      }
     });
   }
   function _fit(target, parent, fit){
-    if (!parent.length){return false;}
+    if (!parent.length) return false;
     var t = $(target)[0];
     var p = parent[0];
     var fcount = p.fcount || 0;
@@ -137,23 +136,21 @@ $.fn._size = function(options, parent){
         t.fitted = true;
         p.fcount = fcount + 1;
         $(p).addClass('panel-noscroll');
-        if (p.tagName == 'BODY'){
+        if (p.tagName == 'BODY')
           $('html').addClass('panel-fit');
-        }
       }
       return {
         width: ($(p).width()||1),
         height: ($(p).height()||1)
-      };
+      }
     } else {
       if (t.fitted){
         t.fitted = false;
         p.fcount = fcount - 1;
         if (p.fcount == 0){
           $(p).removeClass('panel-noscroll');
-          if (p.tagName == 'BODY'){
+          if (p.tagName == 'BODY')
             $('html').removeClass('panel-fit');
-          }
         }
       }
       return false;
@@ -170,9 +167,8 @@ $.fn._size = function(options, parent){
     
     if (!isNaN(val)){
       var v = Math.min(Math.max(val, min||0), max||99999);
-      if (!fluid){
+      if (!fluid)
         options[p] = v;
-      }
       t._size('min'+p1, '');
       t._size('max'+p1, '');
       t._size(p, v);
