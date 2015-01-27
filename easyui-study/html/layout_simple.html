@@ -25,6 +25,25 @@ body {
 .layout-panel-east, .layout-panel-west {
   z-index: 2;
 }
+.layout-panel-north,.layout-panel-south {
+  z-index: 3;
+}
+.layout-expand {
+  position: absolute;
+  padding: 0px;
+  font-size: 1px;
+  cursor: pointer;
+  z-index: 1;
+}
+.layout-expand .panel-header,
+.layout-expand .panel-body {
+  background: transparent;
+  filter: none;
+  overflow: hidden;
+}
+.layout-expand .panel-header {
+  border-bottom-width: 0px;
+}
 .layout-split-proxy-h, .layout-split-proxy-v {
   position: absolute;
   font-size: 1px;
@@ -42,21 +61,17 @@ body {
 .layout-split-proxy-h, .layout-split-proxy-v {
   background-color: #aac5e7;
 }
-.layout-expand {
-  position: absolute;
-  padding: 0px;
-  font-size: 1px;
-  cursor: pointer;
-  z-index: 1;
-}
-.layout-expand {
-  background-color: #E0ECFF;
-}
 .layout-button-left {
   background: url('../img/layout_arrows.png') no-repeat 0 0;
 }
 .layout-button-right {
   background: url('../img/layout_arrows.png') no-repeat 0 -16px;
+}
+.layout-expand {
+  background-color: #E0ECFF;
+}
+.layout-expand-over {
+  background-color: #E0ECFF;
 }
   </style>
   <script src="../bower_components/jquery/jquery.js"></script>
@@ -128,74 +143,6 @@ parsePanelOptions = function(target){
     maxWidth : "number",maxHeight : "number"
   }]));
 }
-resize = function(text){
-  if (text)
-    $.extend(state_opts, {width : text.width,height : text.height});
-  if (target.tagName.toLowerCase() == "body") {
-    state_opts.fit = true;
-    cc._size(state_opts, $("body"))._size("clear");
-  } else {
-    cc._size(state_opts);
-  }
-  cpos = {
-    top : 0,left : 0,
-    width : cc.width(),height : cc.height()
-  };
-  setSouthNorth(isVisible(panels.expandNorth) ? panels.expandNorth : panels.north, "n");
-  setSouthNorth(isVisible(panels.expandSouth) ? panels.expandSouth : panels.south, "s");
-  setEastWest(isVisible(panels.expandEast) ? panels.expandEast : panels.east, "e");
-  setEastWest(isVisible(panels.expandWest) ? panels.expandWest : panels.west, "w");
-  panels.center.panel("resize", cpos); 
-}
-setSouthNorth = function(pp, direct) {
-  if (!pp.length || !isVisible(pp)) return;
-  var panelOpts = pp.panel("options");
-  pp.panel("resize", {
-    width : cc.width(),
-    height : panelOpts.height
-  });
-  var outerHeight = pp.panel("panel").outerHeight();
-  pp.panel("move", {
-    left : 0,
-    top : (direct == "n" ? 0 : cc.height() - outerHeight)
-  });
-  cpos.height -= outerHeight;
-  if (direct == "n") {
-    cpos.top += outerHeight;
-    if (!panelOpts.split && panelOpts.border)
-      cpos.top--;
-  }
-  if (!panelOpts.split && panelOpts.border)
-    cpos.height++;
-}
-setEastWest = function(pp, region){
-  if (!pp.length || !isVisible(pp)) return;
-  var panelOpts = pp.panel("options");
-  pp.panel("resize", {
-    width : panelOpts.width,
-    height : cpos.height
-  });
-  var outerWidth = pp.panel("panel").outerWidth();
-  pp.panel("move", {
-    left : (region == "e" ? cc.width() - outerWidth : 0),
-    top : cpos.top
-  });
-  cpos.width -= outerWidth;
-  if (region == "w") {
-    cpos.left += outerWidth;
-    if (!panelOpts.split && panelOpts.border)
-      cpos.left--;
-  }
-  if (!panelOpts.split && panelOpts.border)
-    cpos.width++;  
-}
-isVisible = function(pp){
-  if (!pp) return false;
-  if (pp.length) 
-    return pp.panel("panel").is(":visible");
-  else
-    return false;
-}
 addPanel = function(options, el){
   options.region = options.region || "center";
   var dir = options.region;
@@ -257,72 +204,15 @@ return function(){
   $(this).panel("options").collapsible ? t.show() : t.hide();  
 }
 }
-addPanel_resizableOpts_onStartResize = function(panel,dir) {
-return function(e){
-  var proxy
-  var pos = {
-    display : "block"
-  }
-  resizing = true;
-  if (dir == "north" || dir == "south")
-    proxy = $(">div.layout-split-proxy-v", target);
-  else
-    proxy = $(">div.layout-split-proxy-h", target);
-  if (dir == "north") {
-    pos.top = parseInt(panel.css("top")) + panel.outerHeight() - proxy.height();
-    pos.left = parseInt(panel.css("left"));
-    pos.width = panel.outerWidth();
-    pos.height = proxy.height();
-  } else {
-    if (dir == "south") {
-      pos.top = parseInt(panel.css("top"));
-      pos.left = parseInt(panel.css("left"));
-      pos.width = panel.outerWidth();
-      pos.height = proxy.height();
-    } else {
-      if (dir == "east") {
-        pos.top = parseInt(panel.css("top")) || 0;
-        pos.left = parseInt(panel.css("left")) || 0;
-        pos.width = proxy.width();
-        pos.height = panel.outerHeight();
-      } else {
-        if (dir == "west") {
-          pos.top = parseInt(panel.css("top")) || 0;
-          pos.left = panel.outerWidth() - proxy.width();
-          pos.width = proxy.width();
-          pos.height = panel.outerHeight();
-        }
-      }
-    }
-  }
-  proxy.css(pos);
-  $("<div class='layout-mask'></div>").css({
-    left : 0,top : 0,
-    width : cc.width(),height : cc.height()
-  }).appendTo(cc);
-}
-}
-addPanel_resizableOpts_onResize = function(dir) {
-return function(e){
-  var proxy
-  if (dir == "north" || dir == "south") {
-    proxy = $(">div.layout-split-proxy-v", target);
-    proxy.css("top", e.pageY - $(target).offset().top - proxy.height() / 2);
-  } else {
-    proxy = $(">div.layout-split-proxy-h", target);
-    proxy.css("left", e.pageX - $(target).offset().left - proxy.width() / 2);
-  }
-  return false;    
-}
-}
-addPanel_resizableOpts_onStopResize = function(pp) {
-return function(e){
-  cc.children("div.layout-split-proxy-v,div.layout-split-proxy-h").hide();
-  pp.panel("resize", e.data);
-  resize();
-  resizing = false;
-  cc.find(">div.layout-mask").remove();  
-}
+setCollapsedPanel = function(){
+  if (panels.east.length && panels.east.panel("options").collapsed)
+    collapsePanel("east", 0);
+  if (panels.west.length && panels.west.panel("options").collapsed)
+    collapsePanel("west", 0);
+  if (panels.north.length && panels.north.panel("options").collapsed)
+    collapsePanel("north", 0);
+  if (panels.south.length && panels.south.panel("options").collapsed)
+    collapsePanel("south", 0);
 }
 collapsePanel = function(region, speed){
   var p = panels[region];
@@ -366,21 +256,17 @@ collapsePanel = function(region, speed){
 createExpandPanel = function(dir){
   var icon;
   var p = $("<div></div>").appendTo(target);
-  if (dir == "east") {
+  if (dir == "east")
     icon = "layout-button-left";
-  } else {
-    if (dir == "west") {
+  else
+    if (dir == "west")
       icon = "layout-button-right";
-    } else {
-      if (dir == "north") {
+    else
+      if (dir == "north")
         icon = "layout-button-down";
-      } else {
-        if (dir == "south") {
+      else
+        if (dir == "south")
           icon = "layout-button-up";
-        }
-      }
-    }
-  }
   p.panel($.extend({}, paneldefaults, {
     cls : "layout-expand layout-expand-" + dir,
     title : "&nbsp;",
@@ -585,15 +471,140 @@ expandResion = function(region){
     }
   }  
 }
-setCollapsedPanel = function(){
-  if (panels.east.length && panels.east.panel("options").collapsed)
-    collapsePanel("east", 0);
-  if (panels.west.length && panels.west.panel("options").collapsed)
-    collapsePanel("west", 0);
-  if (panels.north.length && panels.north.panel("options").collapsed)
-    collapsePanel("north", 0);
-  if (panels.south.length && panels.south.panel("options").collapsed)
-    collapsePanel("south", 0);
+addPanel_resizableOpts_onStartResize = function(panel,dir) {
+return function(e){
+  var proxy
+  var pos = {
+    display : "block"
+  }
+  resizing = true;
+  if (dir == "north" || dir == "south")
+    proxy = $(">div.layout-split-proxy-v", target);
+  else
+    proxy = $(">div.layout-split-proxy-h", target);
+  if (dir == "north") {
+    pos.top = parseInt(panel.css("top")) + panel.outerHeight() - proxy.height();
+    pos.left = parseInt(panel.css("left"));
+    pos.width = panel.outerWidth();
+    pos.height = proxy.height();
+  } else {
+    if (dir == "south") {
+      pos.top = parseInt(panel.css("top"));
+      pos.left = parseInt(panel.css("left"));
+      pos.width = panel.outerWidth();
+      pos.height = proxy.height();
+    } else {
+      if (dir == "east") {
+        pos.top = parseInt(panel.css("top")) || 0;
+        pos.left = parseInt(panel.css("left")) || 0;
+        pos.width = proxy.width();
+        pos.height = panel.outerHeight();
+      } else {
+        if (dir == "west") {
+          pos.top = parseInt(panel.css("top")) || 0;
+          pos.left = panel.outerWidth() - proxy.width();
+          pos.width = proxy.width();
+          pos.height = panel.outerHeight();
+        }
+      }
+    }
+  }
+  proxy.css(pos);
+  $("<div class='layout-mask'></div>").css({
+    left : 0,top : 0,
+    width : cc.width(),height : cc.height()
+  }).appendTo(cc);
+}
+}
+addPanel_resizableOpts_onResize = function(dir) {
+return function(e){
+  var proxy
+  if (dir == "north" || dir == "south") {
+    proxy = $(">div.layout-split-proxy-v", target);
+    proxy.css("top", e.pageY - $(target).offset().top - proxy.height() / 2);
+  } else {
+    proxy = $(">div.layout-split-proxy-h", target);
+    proxy.css("left", e.pageX - $(target).offset().left - proxy.width() / 2);
+  }
+  return false;    
+}
+}
+addPanel_resizableOpts_onStopResize = function(pp) {
+return function(e){
+  cc.children("div.layout-split-proxy-v,div.layout-split-proxy-h").hide();
+  pp.panel("resize", e.data);
+  resize();
+  resizing = false;
+  cc.find(">div.layout-mask").remove();  
+}
+}
+resize = function(text){
+  if (text)
+    $.extend(state_opts, {width : text.width,height : text.height});
+  if (target.tagName.toLowerCase() == "body") {
+    state_opts.fit = true;
+    cc._size(state_opts, $("body"))._size("clear");
+  } else {
+    cc._size(state_opts);
+  }
+  cpos = {
+    top : 0,left : 0,
+    width : cc.width(),height : cc.height()
+  };
+  setSouthNorth(isVisible(panels.expandNorth) ? panels.expandNorth : panels.north, "n");
+  setSouthNorth(isVisible(panels.expandSouth) ? panels.expandSouth : panels.south, "s");
+  setEastWest(isVisible(panels.expandEast) ? panels.expandEast : panels.east, "e");
+  setEastWest(isVisible(panels.expandWest) ? panels.expandWest : panels.west, "w");
+  panels.center.panel("resize", cpos); 
+}
+setSouthNorth = function(pp, direct) {
+  if (!pp.length || !isVisible(pp)) return;
+  var panelOpts = pp.panel("options");
+  pp.panel("resize", {
+    width : cc.width(),
+    height : panelOpts.height
+  });
+  var outerHeight = pp.panel("panel").outerHeight();
+  pp.panel("move", {
+    left : 0,
+    top : (direct == "n" ? 0 : cc.height() - outerHeight)
+  });
+  cpos.height -= outerHeight;
+  if (direct == "n") {
+    cpos.top += outerHeight;
+    if (!panelOpts.split && panelOpts.border)
+      cpos.top--;
+  }
+  if (!panelOpts.split && panelOpts.border)
+    cpos.height++;
+}
+setEastWest = function(pp, region){
+  if (!pp.length || !isVisible(pp)) return;
+  var panelOpts = pp.panel("options");
+  pp.panel("resize", {
+    width : panelOpts.width,
+    height : cpos.height
+  });
+  var outerWidth = pp.panel("panel").outerWidth();
+  pp.panel("move", {
+    left : (region == "e" ? cc.width() - outerWidth : 0),
+    top : cpos.top
+  });
+  cpos.width -= outerWidth;
+  if (region == "w") {
+    cpos.left += outerWidth;
+    if (!panelOpts.split && panelOpts.border)
+      cpos.left--;
+  }
+  if (!panelOpts.split && panelOpts.border)
+    cpos.width++;  
+}
+isVisible = function(pp){
+  if (!pp) return false;
+  if (pp.length) 
+    return pp.panel("panel").is(":visible");
+  else
+    return false;
 }
 main();
 })

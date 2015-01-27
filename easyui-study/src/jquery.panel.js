@@ -80,7 +80,6 @@ function wrapPanel(target){
   $(target).addClass("panel-body")._size("clear");
   var panel = $("<div class='panel'></div>").insertBefore(target);
   panel[0].appendChild(target);
-  var pbody = panel.children("div.panel-body");
   return panel;    
 }
 function initPanelTool(target){
@@ -93,7 +92,7 @@ function initPanelTool(target){
     var ptitle = $("<div class='panel-title'></div>").html(opts.title).appendTo(pheader);
     if (opts.iconCls) {
       ptitle.addClass("panel-with-icon");
-        $("<div class='panel-icon'></div>").addClass(opts.iconCls).appendTo(pheader);
+      $("<div class='panel-icon'></div>").addClass(opts.iconCls).appendTo(pheader);
     }
     var ptool = $("<div class='panel-tool'></div>").appendTo(pheader);
     ptool.bind("click", function(e) {
@@ -103,9 +102,8 @@ function initPanelTool(target){
       if ($.isArray(opts.tools)) {
         for (var i = 0; i < opts.tools.length; i++) {
           var t = $("<a href='javascript:void(0)'></a>").addClass(opts.tools[i].iconCls).appendTo(ptool);
-          if (opts.tools[i].handler) {
+          if (opts.tools[i].handler)
             t.bind("click", eval(opts.tools[i].handler));
-          }
         }
       }else{
         $(opts.tools).children().each(function() {
@@ -115,11 +113,10 @@ function initPanelTool(target){
     }
     if (opts.collapsible) {
       $("<a class='panel-tool-collapse' href='javascript:void(0)'></a>").appendTo(ptool).bind("click", function() {
-        if (opts.collapsed == true) {
+        if (opts.collapsed == true)
           expand(target, true);
-        } else {
+        else
           collapse(target, true);
-        }
         return false;
       });      
     }
