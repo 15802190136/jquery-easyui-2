@@ -86,6 +86,32 @@ body {
   </div>
 </div>
 <!--渲染后-->
+<div class="easyui-layout layout" style="width:700px;height:350px;">
+  <div class="panel layout-panel layout-panel-west">
+    <div class="panel-header">
+      <div class="panel-title">West</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="layout-button-left"></a>
+      </div>
+    </div>
+    <div id="p" data-options="region:'west'" title="West" style="padding: 10px;" class="panel-body layout-body">
+      <p>width: 30%</p>
+    </div>
+  </div>
+  <div class="panel layout-panel layout-panel-center">
+    <div class="panel-header">
+      <div class="panel-title">Center</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+      </div>
+    </div>
+    <div data-options="region:'center'" title="Center" class="panel-body layout-body" id=""></div>
+  </div>
+  <div class="layout-split-proxy-h"></div>
+  <div class="layout-split-proxy-v"></div>
+</div>
+<!--resize后-->
 <div class="easyui-layout layout" style="width: 700px; height: 350px;">
   <div class="panel layout-panel layout-panel-west easyui-fluid" style="width: 210px; left: 0px; top: 0px;">
     <div class="panel-header" style="width: 198px;">
