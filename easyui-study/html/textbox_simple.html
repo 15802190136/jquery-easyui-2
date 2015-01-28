@@ -94,7 +94,7 @@ var defaults = $.extend({}, $.fn.validatebox.defaults, {
 })
 main = function(){
   parseOptions()
-  state_textbox = init()
+  init()
   state_opts.originalValue = state_opts.value;
   initBtns();
   initBindEvents();
@@ -103,7 +103,8 @@ main = function(){
   initValue(state_opts.value);  
 }
 parseOptions = function(){
-  state_opts = $.extend({},defaults, $.fn.validatebox.parseOptions(target),$.parser.parseOptions(target, ["prompt",{multiline : "boolean",editable : "boolean"}]), {
+  state_opts = $.extend({},defaults, $.fn.validatebox.parseOptions(target),
+    $.parser.parseOptions(target, ["prompt",{multiline : "boolean",editable : "boolean"}]), {
       value : (t.val() || undefined),
       type : (t.attr("type") ? t.attr("type") : undefined),
       disabled: (t.attr('disabled') ? true : undefined),
@@ -112,13 +113,15 @@ parseOptions = function(){
 }
 init = function(){
   t.addClass("textbox-f").hide();
-  var textbox = $("<span class='textbox'>" + "<input class='textbox-text' autocomplete='off'>" + "<input type='hidden' class='textbox-value'>" + "</span>").insertAfter(target);
+  state_textbox = $("<span class='textbox'>" + 
+      "<input class='textbox-text' autocomplete='off'>" + 
+      "<input type='hidden' class='textbox-value'>" + 
+    "</span>").insertAfter(target);
   var name = t.attr("name");
   if (name) {
-    textbox.find("input.textbox-value").attr("name", name);
+    state_textbox.find("input.textbox-value").attr("name", name);
     t.removeAttr("name").attr("textboxName", name);
   }
-  return textbox;
 }
 initBtns = function(){
   var tb = state_textbox;

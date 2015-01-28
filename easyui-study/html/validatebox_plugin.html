@@ -119,31 +119,6 @@ function validate(target){
   var valid = getValid();
   opts.onValidate.call(target, valid);
   return valid;
-  function setTipMessage(msg) {
-    state.message = msg;
-  }
-  function setValidateMessage(validType, validParams) {
-    var value = box.val();
-    var result = /([a-zA-Z_]+)(.*)/.exec(validType);
-    var rule = opts.rules[result[1]];
-    if (rule && value) {
-      var param = validParams || opts.validParams || eval(result[2]);
-      if (!rule["validator"].call(target, value, param)) {
-        box.addClass("validatebox-invalid");
-        var message = rule["message"];
-        if (param) {
-          for (var i = 0; i < param.length; i++) {
-            message = message.replace(new RegExp("\\{" + i + "\\}", "g"), param[i]);
-          }
-        }
-        setTipMessage(opts.invalidMessage || message);
-        if (state.validating)
-          showTip(target);
-        return false;
-      }
-    }
-    return true;
-  }
   function getValid() {
     box.removeClass("validatebox-invalid");
     hideTip(target);
@@ -159,9 +134,8 @@ function validate(target){
     }
     if (opts.validType) {
       if ($.isArray(opts.validType)) {
-        for (var i = 0; i < opts.validType.length; i++) {
+        for (var i = 0; i < opts.validType.length; i++)
           if (!setValidateMessage(opts.validType[i])) return false;
-        }
       } else {
         if (typeof opts.validType == "string") {
           if (!setValidateMessage(opts.validType)) return false;
@@ -174,7 +148,30 @@ function validate(target){
       }
     }
     return true;
-  }      
+  }
+  function setValidateMessage(validType, validParams) {
+    var value = box.val();
+    var result = /([a-zA-Z_]+)(.*)/.exec(validType);
+    var rule = opts.rules[result[1]];
+    if (rule && value) {
+      var param = validParams || opts.validParams || eval(result[2]);
+      if (!rule["validator"].call(target, value, param)) {
+        box.addClass("validatebox-invalid");
+        var message = rule["message"];
+        if (param)
+          for (var i = 0; i < param.length; i++)
+            message = message.replace(new RegExp("\\{" + i + "\\}", "g"), param[i]);
+        setTipMessage(opts.invalidMessage || message);
+        if (state.validating)
+          showTip(target);
+        return false;
+      }
+    }
+    return true;
+  }
+  function setTipMessage(msg) {
+    state.message = msg;
+  }
 }
 function hideTip(target){
   var state = $.data(target, "validatebox");
@@ -193,9 +190,8 @@ function showTip(target){
 }
 function setTooltip(target){
   var state = $.data(target, "validatebox");
-  if (state && state.tip){
+  if (state && state.tip)
     $(target).tooltip("reposition");
-  }
 }
 function bindEvents(target){
   var opts = $.data(target, "validatebox").options;
@@ -252,16 +248,14 @@ function mouseleaveEvent(e){
   var target = e.data.target;
   var state = $.data(target, "validatebox");
   if (!state.validating)
-    hideTip(target);
+    hideTip(target)
 }
 $.fn.validatebox.defaults = {
   required : false,
-  validType : null,
-  validParams : null,
+  validType : null,validParams : null,
   delay : 200,
   missingMessage : "This field is required.",
   invalidMessage : null,
-  tipPosition : "right",
   deltaX : 0,
   novalidate : false,
   events : {
@@ -273,6 +267,7 @@ $.fn.validatebox.defaults = {
       $(e.data.target).trigger("focus");
     }
   },
+  tipPosition : "right",
   tipOptions : {
     showEvent : "none",
     hideEvent : "none",
