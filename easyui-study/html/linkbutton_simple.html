@@ -116,28 +116,24 @@ main = function(){
   setSize()
 }
 parseOptions = function(){
-  state_opts = $.extend({},defaults,$.parser.parseOptions(target,['id','iconCls','size',{toggle:'boolean',selected:'boolean'}]),
-    { disabled: (t.attr('disabled') ? true : undefined),
+  state_opts = $.extend({},defaults,$.parser.parseOptions(target,['id','iconCls','size',{toggle:'boolean',selected:'boolean'}]),{ 
+      disabled: (t.attr('disabled') ? true : undefined),
       text: $.trim(t.html()),
       iconCls: (t.attr('icon') || t.attr('iconCls'))
-    }
-  )
+    })
 }
 createButton = function(){
-  t.empty()
-  t.addClass('l-btn').removeClass('l-btn-selected');
+  t.empty().addClass('l-btn').removeClass('l-btn-selected');
   t.removeClass('l-btn-small l-btn-medium l-btn-large').addClass('l-btn-'+state_opts.size);
-  if (state_opts.selected){
+  if (state_opts.selected)
     t.addClass('l-btn-selected');
-  }
   t.attr('id', state_opts.id || '');
 
   $inner = $('<span class="l-btn-left"></span>').appendTo(t);
-  if (state_opts.text){
+  if (state_opts.text)
     $('<span class="l-btn-text"></span>').html(state_opts.text).appendTo($inner);
-  } else {
+  else
     $('<span class="l-btn-text l-btn-empty">&nbsp;</span>').appendTo($inner);
-  }
   if (state_opts.iconCls){
     $('<span class="l-btn-icon">&nbsp;</span>').addClass(state_opts.iconCls).appendTo($inner);
     $inner.addClass('l-btn-icon-left');
@@ -145,11 +141,10 @@ createButton = function(){
   t.unbind('.linkbutton').bind('click.linkbutton',function(){
     if (!state_opts.disabled){
       if (state_opts.toggle){
-        if (state_opts.selected){
+        if (state_opts.selected)
           setSelected(false)
-        } else {
+        else
           setSelected(true)
-        }
       }
       state_opts.onClick.call(this);
     }
@@ -183,18 +178,15 @@ setDisabled = function(disabled){
     t.addClass('l-btn-disabled');
   } else {
     state_opts.disabled = false;
-    if (state_href) {
+    if (state_href)
       t.attr('href', state_href);
-    }
-    if (state_onclick) {
+    if (state_onclick)
       target.onclick = state_onclick;
-    }
   }
 }
 setSize = function(param){
-  if (param){
+  if (param)
     $.extend(state_opts, param);
-  }
   if (state_opts.width || state_opts.height || state_opts.fit){
     var parent = btn.parent();
     var isVisible = btn.is(':visible');
@@ -204,13 +196,13 @@ setSize = function(param){
         position: btn.css('position'),
         display: btn.css('display'),
         left: btn.css('left')
-      };
+      }
       btn.appendTo('body');
       btn.css({
         position: 'absolute',
         display: 'inline-block',
         left: -20000
-      });
+      })
     }
     btn._size(state_opts, parent);
     $inner.css('margin-top', 0);
