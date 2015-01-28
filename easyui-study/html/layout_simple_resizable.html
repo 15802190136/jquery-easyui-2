@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>layout_resizable</title>
+  <title>layout_simple_resizable</title>
   <link rel="stylesheet" type="text/css" href="../css/panel.css">
   <style>
 body {
@@ -22,12 +22,8 @@ body {
   position: absolute;
   overflow: hidden;
 }
-.layout-panel-east, .layout-panel-west {
-  z-index: 2;
-}
-.layout-panel-north,.layout-panel-south {
-  z-index: 3;
-}
+.layout-panel-east, .layout-panel-west {z-index: 2;}
+.layout-panel-north,.layout-panel-south {z-index: 3;}
 .layout-expand {
   position: absolute;
   padding: 0px;
@@ -44,24 +40,40 @@ body {
 .layout-expand .panel-header {
   border-bottom-width: 0px;
 }
-.layout-button-left {
-  background: url('../img/layout_arrows.png') no-repeat 0 0;
+.layout-button-left {background: url('../img/layout_arrows.png') no-repeat 0 0;}
+.layout-button-right {background: url('../img/layout_arrows.png') no-repeat 0 -16px;}
+.layout-expand {background-color: #E0ECFF;}
+.layout-expand-over {background-color: #E0ECFF;}
+
+.layout-split-proxy-h{
+  position: absolute;
+  font-size: 1px;
+  display: none;
+  z-index: 5;
 }
-.layout-button-right {
-  background: url('../img/layout_arrows.png') no-repeat 0 -16px;
+.layout-split-proxy-h {
+  width: 5px;
+  cursor: e-resize;
 }
-.layout-expand {
-  background-color: #E0ECFF;
+.layout-split-proxy-h {
+  background-color: #aac5e7;
 }
-.layout-expand-over {
-  background-color: #E0ECFF;
+.layout-split-west {
+  border-right: 5px solid #E6EEF8;
+}
+.layout-mask {
+  position: absolute;
+  background: #fafafa;
+  filter: alpha(opacity=10);
+  opacity: 0.10;
+  z-index: 4;
 }
   </style>
   <script src="../bower_components/jquery/jquery.js"></script>
 </head>
 <body>
   <div class="easyui-layout" style="width:700px;height:350px;">
-    <div id="p" data-options="region:'west'" title="West" style="width:30%;padding:10px">
+    <div id="p" data-options="region:'west',split:true" title="West" style="width:30%;padding:10px">
       <p>width: 30%</p>
     </div>
     <div data-options="region:'center'" title="Center">
@@ -69,9 +81,11 @@ body {
   </div>
 </body>
 <script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.resizable.js"></script>
 <script src="../src/jquery.panel.js"></script>
 <script>
 $(function(){
+var resizing = false;  
 var target = $(".easyui-layout")[0]
 var cc = $(".easyui-layout")
 var defaults = {fit:false}
@@ -101,6 +115,7 @@ parseOptions = function(){
 init = function(){
   cc.addClass("layout");
   setRegion(cc);
+  cc.append("<div class='layout-split-proxy-h'></div>");
 }
 setRegion = function(cc){
   cc.children("div").each(function() {
@@ -149,6 +164,58 @@ addPanel = function(options, el){
   }}, options);
   pp.panel(opts);
   panels[dir] = pp;
+
+  if(pp.panel("options").split){
+    var panel = pp.panel("panel");
+    var handles = "";
+    panel.addClass("layout-split-" + dir);
+    if (dir == "north") handles = "s";
+    if (dir == "south") handles = "n";
+    if (dir == "east") handles = "w";
+    if (dir == "west") handles = "e";
+    panel.resizable($.extend({}, {
+      handles : handles,
+      onStartResize : function(e) {
+        resizing = true;
+        var proxy;
+        var top = 0, left = 0, width = 0, height = 0;
+        var pos = {display : "block"};
+        if (dir == "north" || dir == "south") {}
+        else
+          proxy = $(">div.layout-split-proxy-h", target);
+        if (dir == "north"){}
+        if (dir == "south"){}
+        if (dir == "east"){}
+        if (dir == "west"){
+          pos.top = parseInt(panel.css("top")) || 0;
+          pos.left = panel.outerWidth() - proxy.width();
+          pos.width = proxy.width();
+          pos.height = panel.outerHeight();      
+        }
+        proxy.css(pos);
+        $("<div class='layout-mask'></div>").css({
+          left : 0,top : 0,
+          width : cc.width(),height : cc.height()
+        }).appendTo(cc);
+      },
+      onResize : function(e) {
+        var proxy;
+        if (dir == "north" || dir == "south") {} 
+        else {
+          proxy = $(">div.layout-split-proxy-h", target);
+          proxy.css("left", e.pageX - $(target).offset().left - proxy.width() / 2);
+        }
+        return false;
+      },
+      onStopResize : function(e) {
+        cc.children("div.layout-split-proxy-h").hide();
+        pp.panel("resize", e.data);
+        resize(target);
+        resizing = false;
+        cc.find(">div.layout-mask").remove();
+      }
+    }, options));
+  }
 }
 setCollapsedPanel = function(){
   if (panels.east.length && panels.east.panel("options").collapsed)
@@ -176,6 +243,7 @@ collapsePanel = function(region, speed){
         $(this).unbind(".layout").bind("mouseleave.layout", {
           region : region
         }, function(e) {
+          if (resizing == true) return;
           collapsePanel(e.data.region);
         });
       });
@@ -230,7 +298,7 @@ createPanel = function(region){
   if (region == "west") {
     outerWidth = p.panel("panel")._outerWidth();
     ww = centerPanelOpts.width + outerWidth - collapsedSize;
-    if (!panelOpts.border)
+    if (panelOpts.split || !panelOpts.border)
       ww++;
     return {
       resizeC : {
@@ -301,6 +369,7 @@ resize = function(){
   setSouthNorth(isVisible(panels.expandSouth) ? panels.expandSouth : panels.south, "s");
   setEastWest(isVisible(panels.expandEast) ? panels.expandEast : panels.east, "e");
   setEastWest(isVisible(panels.expandWest) ? panels.expandWest : panels.west, "w");
+  console.log(cpos);
   panels.center.panel("resize", cpos); 
 }
 setSouthNorth = function(pp, direct) {}
@@ -312,6 +381,10 @@ setEastWest = function(pp, region){
     height : cpos.height
   });
   var outerWidth = pp.panel("panel").outerWidth();
+  console.log("region="+region)
+  console.log("cc.width="+cc.width())
+  console.log("outerWidth="+outerWidth);
+  console.log("_outerWidth="+pp.panel("panel")._outerWidth());
   pp.panel("move", {
     left : (region == "e" ? cc.width() - outerWidth : 0),
     top : cpos.top
@@ -319,10 +392,12 @@ setEastWest = function(pp, region){
   cpos.width -= outerWidth;
   if (region == "w") {
     cpos.left += outerWidth;
-    if (panelOpts.border)
+    console.log("panelOpts.split="+panelOpts.split);
+    console.log("panelOpts.border="+panelOpts.border);
+    if (!panelOpts.split && panelOpts.border)
       cpos.left--;
   }
-  if (panelOpts.border)
+  if (!panelOpts.split && panelOpts.border)
     cpos.width++;  
 }
 isVisible = function(pp){
