@@ -28,39 +28,34 @@ function loadSingle(name, callback){
   var module = modules[name];
   var jsStatus = 'loading';
   var cssStatus = (easyloader.css && module['css']) ? 'loading' : 'loaded';
-  
+  var url;
   if (easyloader.css && module['css']){
-    if (/^http/i.test(module['css'])){
-      var url = module['css'];
-    } else {
-      var url = easyloader.base + 'css/'+ module['css'];
-    }
+    if (/^http/i.test(module['css']))
+      url = module['css'];
+    else
+      url = easyloader.base + 'css/'+ module['css'];
     loadCss(url, function(){
       cssStatus = 'loaded';
-      if (jsStatus == 'loaded' && cssStatus == 'loaded'){
+      if (jsStatus == 'loaded' && cssStatus == 'loaded')
         finish();
-      }
     });
   }
   
-  if (/^http/i.test(module['js'])){
-    var url = module['js'];
-  } else {
-    var url = easyloader.base + 'src/' + module['js'];
-  }
+  if (/^http/i.test(module['js']))
+    url = module['js'];
+  else
+    url = easyloader.base + 'src/' + module['js'];
   loadJs(url, function(){
     jsStatus = 'loaded';
-    if (jsStatus == 'loaded' && cssStatus == 'loaded'){
+    if (jsStatus == 'loaded' && cssStatus == 'loaded')
       finish();
-    }
   });
   
   function finish(){
     queues[name] = 'loaded';
     easyloader.onProgress(name);
-    if (callback){
+    if (callback)
       callback();
-    }
   }
 }
 function loadModule(name, callback){
@@ -86,13 +81,6 @@ function loadModule(name, callback){
     mm.push(name);
   }
   
-  function finish(){
-    if (callback){
-      callback();
-    }
-    easyloader.onLoad(name);
-  }
-  
   function loadMm(){
     if (mm.length){
       var m = mm[0];  // the first module
@@ -115,6 +103,11 @@ function loadModule(name, callback){
       finish();
     }
   }
+  function finish(){
+    if (callback) 
+      callback();
+    easyloader.onLoad(name);
+  }
 }
 function loadCss(url, callback){
   var link = document.createElement('link');
@@ -123,9 +116,8 @@ function loadCss(url, callback){
   link.media = 'screen';
   link.href = url;
   document.getElementsByTagName('head')[0].appendChild(link);
-  if (callback){
+  if (callback)
     callback.call(link);
-  }
 }
 function loadJs(url, callback){
   var done = false;
@@ -137,9 +129,8 @@ function loadJs(url, callback){
     if (!done && (!script.readyState || script.readyState == 'loaded' || script.readyState == 'complete')){
       done = true;
       script.onload = script.onreadystatechange = null;
-      if (callback){
+      if (callback)
         callback.call(script);
-      }
     }
   }
   document.getElementsByTagName("head")[0].appendChild(script);

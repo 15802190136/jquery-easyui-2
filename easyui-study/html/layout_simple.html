@@ -72,7 +72,6 @@ body {
 <script src="../src/jquery.panel.js"></script>
 <script>
 $(function(){
-var resizing = false;
 var target = $(".easyui-layout")[0]
 var cc = $(".easyui-layout")
 var defaults = {fit:false}
@@ -162,6 +161,7 @@ setCollapsedPanel = function(){
     collapsePanel("south", 0);
 }
 collapsePanel = function(region, speed){
+  if (speed == undefined) speed = "normal";
   var p = panels[region];
   var panelOpts = p.panel("options");
   var pp = "expand" + region.substring(0, 1).toUpperCase() + region.substring(1);
@@ -176,7 +176,6 @@ collapsePanel = function(region, speed){
         $(this).unbind(".layout").bind("mouseleave.layout", {
           region : region
         }, function(e) {
-          if (resizing == true) return;
           collapsePanel(e.data.region);
         });
       });
@@ -273,11 +272,12 @@ expandPanel = function(region){
 expandResion = function(region){
   var p = panels[region];
   var centerPanelOpts = panels.center.panel("options");
+  var outerWidth = p.panel("panel")._outerWidth();
   if (region == "east" && panels.expandEast) {}
   if (region == "west" && panels.expandWest) {
     return {
       collapse : {
-        left : -p.panel("panel")._outerWidth(),
+        left : -outerWidth,
         top : centerPanelOpts.top,
         height : centerPanelOpts.height
       },
