@@ -189,12 +189,12 @@ wrapTabs = function(){
   });
   cc[0].appendChild($panels[0]);
   $header = $('<div class="tabs-header">'
-      + '<div class="tabs-scroller-left"></div>'
-      + '<div class="tabs-scroller-right"></div>'
-      + '<div class="tabs-wrap">'
-      +   '<ul class="tabs"></ul>'
-      + '</div>'
-      + '</div>').prependTo(container);
+    + '<div class="tabs-scroller-left"></div>'
+    + '<div class="tabs-scroller-right"></div>'
+    + '<div class="tabs-wrap">'
+    +   '<ul class="tabs"></ul>'
+    + '</div>'
+    + '</div>').prependTo(container);
   $headerWrap = $header.children('div.tabs-wrap')
   $headerSLeft = $header.children('div.tabs-scroller-left')
   $headerSRight = $header.children('div.tabs-scroller-right')
@@ -207,7 +207,6 @@ wrapTabs = function(){
   });
 }
 createTab = function(pp){
-  //panel
   pp.panel($.extend({}, $.parser.parseOptions(pp[0]), {
     selected: ($(this).attr('selected') ? true : undefined),
     border: false,
@@ -216,14 +215,12 @@ createTab = function(pp){
     doSize: false
   }));
   var opts = pp.panel('options')
-  //header
   opts.tab = $('<li></li>').appendTo($headerTabs);
   opts.tab.append(
-      '<a href="javascript:void(0)" class="tabs-inner">' +
-      '<span class="tabs-title"></span>' +
-      '<span class="tabs-icon"></span>' +
-      '</a>'
-  );
+    '<a href="javascript:void(0)" class="tabs-inner">' +
+    '<span class="tabs-title"></span>' +
+    '<span class="tabs-icon"></span>' +
+    '</a>');
   updateTab({
     tab: pp,
     options: opts,
@@ -251,28 +248,22 @@ setSize = function(param){
     });
   }
   cc._size(state_opts)
-  //a.tabs-inner
   for(var i=0; i<state_tabs.length; i++){
     var p_opts = state_tabs[i].panel('options');
     var p_t = p_opts.tab.find('a.tabs-inner');
     var width = parseInt(p_opts.tabWidth || state_opts.tabWidth) || undefined;
-    if (width){
+    if (width)
       p_t._outerWidth(width);
-    } else {
+    else
       p_t.css('width', '');
-    }
     p_t._outerHeight(state_opts.tabHeight);
     p_t.css('lineHeight', p_t.height()+'px');
   }
-  //.tabs-header
   $header._outerWidth(state_opts.width).css('height','');
   $header.css('background-color','');
-  //.tabs-wrap
   $headerWrap.css('height','');
-  //.tabs
   $headerTabs._outerHeight(state_opts.tabHeight).css('width','');
   setScrollers()
-  //.tabs-panels
   $panels._size('height', isNaN(state_opts.height) ? '' : (state_opts.height-$header.outerHeight()));
   $panels._size('width', isNaN(state_opts.width) ? '' : state_opts.width);
 }
@@ -338,18 +329,17 @@ bindEvents = function(){
       scrollBy(state_opts.scrollIncrement);
     } else {
       var li = $(e.target).closest('li');
-      if (li.hasClass('tabs-disabled')){return;}
+      if (li.hasClass('tabs-disabled')) return;
       var a = $(e.target).closest('a.tabs-close');
       if (a.length){
         closeTab(getLiIndex(li));
       } else if (li.length){
         var index = getLiIndex(li);
         var popts = state_tabs[index].panel('options');
-        if (popts.collapsible){
+        if (popts.collapsible)
           popts.closed ? selectTab(index) : unselectTab(index);
-        } else {
+        else
           selectTab(index);
-        }
       }
     }
   })
@@ -388,20 +378,17 @@ closeTab = function(which){
   tab.panel('destroy');
   
   setSize();
-  // remove the select history item
   for(var i=0; i<state_selectHis.length; i++){
     if (state_selectHis[i] == title){
       state_selectHis.splice(i, 1);
       i --;
     }
   }
-  // select the nearest tab panel
   var hisTitle = state_selectHis.pop();
-  if (hisTitle){
+  if (hisTitle)
     selectTab(hisTitle);
-  } else if (tabs.length){
-    selectTab(0);
-  }    
+  else if (tabs.length)
+    selectTab(0);  
 }
 exist = function(which){
   return getTab(which) != null
@@ -412,38 +399,31 @@ getTab = function(which, removeit){
       return null;
     }else{
       var tab = state_tabs[which];
-      if (removeit) {
+      if (removeit)
         state_tabs.splice(which, 1);
-      }
       return tab;
     }
   }
   for (var i = 0; i < state_tabs.length; i++) {
     var tab = state_tabs[i];
     if (tab.panel('options').title == which) {
-      if (removeit) {
+      if (removeit)
         state_tabs.splice(i, 1);
-      }
       return tab;
     }
   }
 }
 getTabIndex = function(tab){
   for (var i = 0; i < state_tabs.length; i++) {
-    if (state_tabs[i][0] == $(tab)[0]) {
+    if (state_tabs[i][0] == $(tab)[0])
       return i;
-    }
   }
   return -1;
 }
 selectTab = function(which){
-  if (state_tabs.length == 0) {
-    return;
-  }
-  var panel = getTab(which); // get the panel to be activated
-  if (!panel) {
-    return
-  }
+  if (state_tabs.length == 0) return;
+  var panel = getTab(which);
+  if (!panel) return;
   var selected = getSelectedTab();
   if (selected) {
     if (panel[0] == selected[0]) {
@@ -451,15 +431,13 @@ selectTab = function(which){
       return;
     }
     unselectTab(getTabIndex(selected));
-    if (!selected.panel('options').closed) {
-      return
-    }
+    if (!selected.panel('options').closed) return
   } 
   panel.panel('open');
-  var title = panel.panel('options').title; // the panel title
-  state_selectHis.push(title); // push select history
+  var title = panel.panel('options').title;
+  state_selectHis.push(title);
 
-  var tab = panel.panel('options').tab; // get the tab object
+  var tab = panel.panel('options').tab;
   tab.addClass('tabs-selected');
   var left = tab.position().left;
   var right = left + tab.outerWidth();
@@ -474,9 +452,8 @@ selectTab = function(which){
 getSelectedTab = function(){
   for (var i = 0; i < state_tabs.length; i++) {
     var tab = state_tabs[i];
-    if (tab.panel('options').closed == false) {
+    if (tab.panel('options').closed == false)
       return tab;
-    }
   }
 }
 setSelectedSize = function(){
@@ -496,9 +473,8 @@ unselectTab = function(which){
     var opts = p.panel('options');
     if (!opts.closed) {
       p.panel('close');
-      if (opts.closed) {
+      if (opts.closed)
         opts.tab.removeClass('tabs-selected');
-      }
     }
   }
 }
