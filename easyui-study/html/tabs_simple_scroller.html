@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>tabs_simple</title>
+    <title>tabs_simple_scroller</title>
     <link rel="stylesheet" type="text/css" href="../css/panel.css">
     <style>
 body {
@@ -129,39 +129,51 @@ body {
     <script src="../bower_components/jquery/jquery.js"></script>
   </head>
   <body>
-    <div style="width:300px;height:250px" class="easyui-tabs">
-      <div title="tab1" style="padding:10px">
-        <p>tabContent1</p>
-      </div>
-      <div title="tab2" style="padding:10px">
-        <p>tabContent2</p>
-      </div>
-      <div title="tab3" style="padding:10px">
-        <p>tabContent3</p>
-      </div>
-<!--  <div title="tab4" style="padding:10px">
-        <p>tabContent4</p>
-      </div>
-      <div title="tab5" style="padding:10px">
-        <p>tabContent5</p>
-      </div>
-      <div title="tab6" style="padding:10px">
-        <p>tabContent6</p>
-      </div> -->
+    <div class="tabsWraper" style="width:100%;height:400px">
+      <div  class="easyui-tabs">
+        <div title="tab1" style="padding:10px">
+          <p>tabContent1</p>
+        </div>
+        <div title="tab2" style="padding:10px">
+          <p>tabContent2</p>
+        </div>
+        <div title="tab3" style="padding:10px">
+          <p>tabContent3</p>
+        </div>
+        <div title="tab4" style="padding:10px">
+          <p>tabContent4</p>
+        </div>
+        <div title="tab5" style="padding:10px">
+          <p>tabContent5</p>
+        </div>
+        <div title="tab6" style="padding:10px">
+          <p>tabContent6</p>
+        </div> 
+      </div>      
     </div>
   </body>
 <script src="../src/jquery.parser.js"></script>
 <script src="../src/jquery.panel.js"></script>
+<script> 
+var ptemp = null;
+$(window).unbind(".tabs").bind("resize.tabs", function() {
+  if (ptemp)
+    clearTimeout(ptemp);
+  ptemp = setTimeout(function() {
+    $("body").find("div.tabs-container.easyui-fluid:visible").trigger("_resize");
+    ptemp = null;
+  }, 100);
+})
+</script>
 <script>     
 $(function(){
-
 var container = target = $(".easyui-tabs")[0]
 var cc = $(container)
 var state_opts,state_tabs = [],state_selectHis=[]
 var $panels,$header,$headerTool,$headerSLeft,$headerSRight,$headerWrap,$headerTabs
 var defaults = {
   width: 'auto',height: 'auto',headerWidth: 150,tabWidth: 'auto',tabHeight: 27,
-  selected: 0,fit: false,border: true,
+  selected: 0,fit: true,border: true,
   tools: null,scrollIncrement: 100,scrollDuration: 400
 }
 main = function(){
@@ -174,7 +186,7 @@ main = function(){
   doFirstSelect()
   //test
   //selectTab(1)
-  resize({width:500,height:400})
+  //resize({width:500,height:400})
 }
 parseOptions = function(){
   state_opts = $.extend({},defaults,$.parser.parseOptions(target, [
@@ -189,13 +201,13 @@ wrapTabs = function(){
     $panels[0].appendChild(this);
   });
   cc[0].appendChild($panels[0]);
-  $header = $('<div class="tabs-header">'+
-      '<div class="tabs-scroller-left"></div>'+
-      '<div class="tabs-scroller-right"></div>'+
-      '<div class="tabs-wrap">'+
-        '<ul class="tabs"></ul>'+
-      '</div>'+
-    '</div>').prependTo(container);
+  $header = $('<div class="tabs-header">'
+    + '<div class="tabs-scroller-left"></div>'
+    + '<div class="tabs-scroller-right"></div>'
+    + '<div class="tabs-wrap">'
+    +   '<ul class="tabs"></ul>'
+    + '</div>'
+    + '</div>').prependTo(container);
   $headerWrap = $header.children('div.tabs-wrap')
   $headerSLeft = $header.children('div.tabs-scroller-left')
   $headerSRight = $header.children('div.tabs-scroller-right')
@@ -206,6 +218,13 @@ wrapTabs = function(){
     state_tabs.push(pp)
     createTab(pp)
   });
+  cc.bind('_resize', function(e, force) {
+    if ($(this).hasClass('easyui-fluid') || force) {
+      setSize(container);
+      setSelectedSize(container);
+    }
+    return false;
+  });  
 }
 createTab = function(pp){
   pp.panel($.extend({}, $.parser.parseOptions(pp[0]), {
@@ -219,8 +238,8 @@ createTab = function(pp){
   opts.tab = $('<li></li>').appendTo($headerTabs);
   opts.tab.append(
     '<a href="javascript:void(0)" class="tabs-inner">' +
-      '<span class="tabs-title"></span>' +
-      '<span class="tabs-icon"></span>' +
+    '<span class="tabs-title"></span>' +
+    '<span class="tabs-icon"></span>' +
     '</a>');
   updateTab({
     tab: pp,
