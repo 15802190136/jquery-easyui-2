@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>combo_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.combo {
+  display: inline-block;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.combo .combo-text {
+  font-size: 12px;
+  border: 0px;
+  margin: 0;
+  padding: 0px 2px;
+  vertical-align: baseline;
+}
+.combo-arrow {
+  width: 18px;
+  height: 20px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+  cursor: pointer;
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+}
+.combo-arrow-hover {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
+}
+.combo-panel {overflow: auto;}
+.combo-arrow {
+  background: url('../img/combo_arrow.png') no-repeat center center;
+}
+.combo-panel {background-color: #ffffff;}
+.combo {
+  border-color: #95B8E7;
+  background-color: #fff;
+}
+.combo-arrow {background-color: #E0ECFF;}
+.combo-arrow-hover {background-color: #eaf2ff;}
+.combo-arrow:hover {background-color: #eaf2ff;}
+.combo .textbox-icon-disabled:hover {
+  cursor: default;
+}
+.textbox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../css/tooltip.css">
+  <link rel="stylesheet" type="text/css" href="../css/validatebox.css">
+  <link rel="stylesheet" type="text/css" href="../css/textbox.css">
+  <script src="../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <select id="cc" style="width:150px"></select>
+  <div id="sp">
+    <div style="color:#99BBE8;background:#fafafa;padding:5px;">Select a language</div>
+    <div style="padding:10px">
+      <input type="radio" name="lang" value="01"><span>Java</span><br/>
+      <input type="radio" name="lang" value="02"><span>C#</span><br/>
+      <input type="radio" name="lang" value="03"><span>Ruby</span><br/>
+      <input type="radio" name="lang" value="04"><span>Basic</span><br/>
+      <input type="radio" name="lang" value="05"><span>Fortran</span>
+    </div>
+  </div>
+</body>
+<script src="../src/jquery.parser.js"></script>
+<script src="../src/jquery.panel.js"></script>
+<script src="../src/jquery.tooltip.js"></script>
+<script src="../src/jquery.validatebox.js"></script>
+<script src="../src/jquery.textbox.js"></script>
+<script>
+$(function(){
+$.parser.parse();
+var target = $(".easyui-textbox")[0]
+var t = $(".easyui-textbox")
+var combo,state_opts,state_panel,state_combo,state_previousText = "",state_timer
+var defaults = $.extend({}, $.fn.textbox.defaults, {
+  inputEvents : {
+    click : close,
+    keydown : keydown,
+    paste : keydown,
+    drop : keydown
+  },
+  panelWidth : null,
+  panelHeight : 200,
+  panelMinWidth : null,
+  panelMaxWidth : null,
+  panelMinHeight : null,
+  panelMaxHeight : null,
+  panelAlign : "left",
+  multiple : false,
+  selectOnNavigation : true,
+  separator : ",",
+  hasDownArrow : true,
+  delay : 200,
+  keyHandler : {
+    up : function(e) {},
+    down : function(e) {},
+    left : function(e) {},
+    right : function(e) {},
+    enter : function(e) {},
+    query : function(q, e) {}
+  },
+  onShowPanel : function() {},
+  onHidePanel : function() {},
+  onChange : function(newValue, oldValue) {}  
+})
+main = function(){
+  parseOptions() 
+  state_opts.originalValue = state_opts.value;
+  resize();
+  initValue();
+}
+parseOptions = function(){
+  state_opts = $.extend({},defaults, $.fn.textbox.parseOptions(),
+    $.parser.parseOptions(target, ["separator", "panelAlign",{
+        panelWidth : "number",
+        hasDownArrow : "boolean",
+        delay : "number",
+        selectOnNavigation : "boolean"
+      }, {
+        panelMinWidth : "number",
+        panelMaxWidth : "number",
+        panelMinHeight : "number",
+        panelMaxHeight : "number"
+      }]), {
+      panelHeight : (t.attr("panelHeight") == "auto" ? "auto" : parseInt(t.attr("panelHeight")) || undefined),
+      multiple : (t.attr("multiple") ? true : undefined)
+    });
+}
+main();
+})
+</script>
+</html>

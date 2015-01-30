@@ -8,22 +8,6 @@
     var pbody = panel.children("div.panel-body");
     var pfooter = panel.children("div.panel-footer");
 */
-$.fn.panel.defaults = {
-  fit: false,border: true,noheader : false,
-  cls:null,iconCls : null,headerCls : null,bodyCls : null,
-  collapsible : false,minimizable : false,maximizable : false,closable : false,
-  doSize : true,collapsed:false,minimized : false,maximized : false,closed : false,
-  tools : null,footer : null,
-  href : null,loadingMessage: "Loading...",
-  openAnimation : false,openDuration : 400,closeAnimation : false,closeDuration : 400,
-  style : {},
-  onBeforeLoad : function(param) {},onLoad : function() {},onLoadError : function() {},
-  onBeforeOpen : function() {},onOpen : function() {},
-  onBeforeClose : function() {},onClose : function() {},
-  onBeforeDestroy : function() {},onDestroy : function() {},
-  onResize : function(width, height) {},onMove : function(left, top) {},onMaximize : function() {},onRestore : function() {},onMinimize : function() {},
-  onBeforeCollapse : function() {},onBeforeExpand : function() {},onCollapse : function() {},onExpand : function() {}
-};
 $.fn._remove = function() {
   return this.each(function() {
     $(this).remove();
@@ -62,6 +46,22 @@ $.fn.panel = function(options, param) {
     }
   })
 }
+$.fn.panel.defaults = {
+  fit: false,border: true,noheader : false,
+  cls:null,iconCls : null,headerCls : null,bodyCls : null,
+  collapsible : false,minimizable : false,maximizable : false,closable : false,
+  doSize : true,collapsed:false,minimized : false,maximized : false,closed : false,
+  tools : null,footer : null,
+  href : null,loadingMessage: "Loading...",
+  openAnimation : false,openDuration : 400,closeAnimation : false,closeDuration : 400,
+  style : {},
+  onBeforeLoad : function(param) {},onLoad : function() {},onLoadError : function() {},
+  onBeforeOpen : function() {},onOpen : function() {},
+  onBeforeClose : function() {},onClose : function() {},
+  onBeforeDestroy : function() {},onDestroy : function() {},
+  onResize : function(width, height) {},onMove : function(left, top) {},onMaximize : function() {},onRestore : function() {},onMinimize : function() {},
+  onBeforeCollapse : function() {},onBeforeExpand : function() {},onCollapse : function() {},onExpand : function() {}
+};
 $.fn.panel.parseOptions = function(target){
   return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title",
     "iconCls", "cls", "headerCls", "bodyCls",
