@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>accordion_simple</title>
+    <title>accordion_simple_setSize</title>
     <link rel="stylesheet" type="text/css" href="../css/panel.css">
     <style>
 body {
@@ -51,20 +51,20 @@ body {
     <script src="../bower_components/jquery/jquery.js"></script>
   </head>
   <body>
-  <div class="easyui-accordion" data-options="multiple:true" style="width:500px;height1:300px;">
+  <div class="easyui-accordion" data-options="" style="width:500px;height:300px;">
     <div title="Language" style="overflow:auto;padding:10px;">
       <p>A programming language is a formal language designed to communicate instructions to a machine,A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine,  </p>
     </div>
     <div title="Java" style="padding:10px;">
       <p>Java (Indonesian: Jawa) is an island of Indonesia. With a population of 135 million (excluding the 3.6 </p>
     </div>
-    <div title="C#" style="padding:10px;">
+    <div title="C#" style="padding:10px;" data-options="collapsible:false,collapsed:false">
       <p>C# is a multi-paradigm programming language encompassing strong typing, imperative, declarative, </p>
     </div>
     <div title="Ruby" style="padding:10px;">
       <p>A dynamic, reflective, general-purpose object-oriented programming language.</p>
     </div>
-    <div title="Fortran" style="padding:10px;">
+    <div title="Fortran" style="padding:10px;" selected>
       <p>Fortran (previously FORTRAN) is a general-purpose, imperative programming language that is especially </p>
     </div>
   </div>
@@ -89,7 +89,7 @@ var defaults = {
   onBeforeRemove : function(title, index) {},
   onRemove : function(title, index) {}
 }
-main = function(){
+function main(){
   parseOptions()
   init()
   setProperties()
@@ -204,18 +204,27 @@ setSize = function(param) {
       height : param.height
     });
   }
+  console.count("调用setSize次数");
+  console.info("调用者",setSize.caller.toString().split("\n")[0])
+  console.group("_size()");
+  console.log("前的state_opts",$.extend({},state_opts))
   cc._size(opts);
+  console.log("后的state_opts",$.extend({},state_opts))
+  console.groupEnd();  
   if (headers.length)
     headerHeight = $(headers[0]).css('height', '')._outerHeight();
+  console.log("headerHeight",headerHeight)
   if (!isNaN(parseInt(opts.height)))
     bodyHeight = cc.height() - headerHeight * headers.length;
-
-  _resize(true, bodyHeight - _resize(false) + 1, headerHeight);
+  console.log("bodyHeight",bodyHeight);
+  _resize(true, bodyHeight - _resize(false,NaN,headerHeight) + 1, headerHeight);
 }
 _resize = function(collapsible, height, headerHeight){
   var panels = state_panels;
   var totalHeight = 0;
   var p,h,pheight;
+  console.count("调用_resize次数");
+  console.log("arguments",arguments);
   for (var i = 0; i < panels.length; i++) {
     p = panels[i];
     h = p.panel('header')._outerHeight(headerHeight);
@@ -226,8 +235,10 @@ _resize = function(collapsible, height, headerHeight){
         height : (collapsible ? pheight : undefined)
       });
       totalHeight += p.panel('panel').outerHeight() - headerHeight * h.length;
+      console.log("headerHeight",headerHeight,"pheight",pheight,"h.length",h.length,"totalHeight",totalHeight);
     }
   }
+  console.info("return totalHeight",totalHeight)
   return totalHeight;  
 }
 doFirstSelect = function(){
