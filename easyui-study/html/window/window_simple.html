@@ -1,0 +1,354 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>window_simple</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.window,
+.window-shadow {
+  position: absolute;
+}
+.window {
+  overflow: hidden;
+  padding: 5px;
+  border-width: 1px;
+  border-style: solid;
+}
+.window .window-header {
+  background: transparent;
+  padding: 0px 0px 6px 0px;
+}
+.window .window-body {
+  border-width: 1px;
+  border-style: solid;
+  border-top-width: 0px;
+}
+.window .window-header .panel-with-icon {
+  padding-left: 18px;
+}
+.window .window-header .panel-icon, .window .window-header .panel-tool {
+  top: 50%;
+  margin-top: -11px;
+}
+.window .window-header .panel-icon {
+  left: 1px;
+}
+.window .window-header .panel-tool {
+  right: 1px;
+}
+.window-proxy {
+  position: absolute;
+  overflow: hidden;
+}
+.window-proxy-mask {
+  position: absolute;
+  filter: alpha(opacity=5);
+  opacity: 0.05;
+}
+.window-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  filter: alpha(opacity=40);
+  opacity: 0.40;
+  font-size: 1px;
+  overflow: hidden;
+}
+.window {
+  background-color: #E0ECFF;
+}
+.window, .window .window-body {
+  border-color: #95B8E7;
+}
+.window, .window-shadow {
+  position: absolute;
+}
+.window-shadow {
+  background: #ccc;
+}
+.window-proxy {
+  border: 1px dashed #95B8E7;
+}
+.window-proxy-mask,
+.window-mask {
+  background: #ccc;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+    <div id="w" class="easyui-window" title="Basic Window" style="width:500px;height:200px;padding:10px;">
+      The window content.
+    </div>
+  </body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.draggable.js"></script>
+<script src="../../src/jquery.resizable.js"></script>
+<script src="../../src/jquery.panel.js"></script>
+<script>     
+$(function(){
+var target = $(".easyui-window")[0]
+var win = t = $(".easyui-window")
+var state_opts,state_window,state_shadow,state_mask,state_proxy,state_pmask
+var defaults = $.extend({}, $.fn.panel.defaults, {
+  zIndex: 9000,
+  draggable: true,resizable: true,
+  shadow: true,modal: false,closed: false,
+  inline: false,
+  title: 'New Window',
+  draggable: true,resizable: true,collapsible: true,minimizable: true,maximizable: true,closable: true
+});
+main = function(){
+  parseOptions()
+  if(!state_opts.inline){
+    document.body.appendChild(target);
+  }
+  create()
+  setProperties()
+}
+parseOptions = function(){
+  state_opts = $.extend({},defaults,$.fn.panel.parseOptions(target),$.parser.parseOptions(target, [
+    {draggable:'boolean',resizable:'boolean',shadow:'boolean',modal:'boolean',inline:'boolean'}
+  ]))
+}
+create = function(){
+  win.panel($.extend({}, state_opts, {
+    border: false,
+    doSize: true,
+    closed: true,
+    cls: 'window',
+    headerCls: 'window-header',
+    bodyCls: 'window-body ' + (state_opts.noheader ? 'window-body-noheader' : ''),
+    onClose: function(){
+      if (state_shadow){state_shadow.hide();}
+      if (state_mask){state_mask.hide();}
+    },
+    onOpen: function(){
+      if (state_mask){
+        state_mask.css({
+          display:'block',
+          zIndex: defaults.zIndex++
+        });
+      }
+      if (state_shadow){
+        state_shadow.css({
+          display:'block',
+          zIndex: defaults.zIndex++,
+          left: state_opts.left,
+          top: state_opts.top,
+          width: state_window._outerWidth(),
+          height: state_window._outerHeight()
+        });
+      }
+      state_window.css('z-index', defaults.zIndex++);;
+    },
+    onResize: function(width, height){
+      var popts = $(this).panel('options');
+      $.extend(state_opts, {
+        width: popts.width,
+        height: popts.height,
+        left: popts.left,
+        top: popts.top
+      });
+      if (state_shadow){
+        state_shadow.css({
+          left: state_opts.left,
+          top: state_opts.top,
+          width: state_window._outerWidth(),
+          height: state_window._outerHeight()
+        });
+      }
+    },
+    onMinimize: function(){
+      if (state_shadow){state_shadow.hide();}
+      if (state_mask){state_mask.hide();}
+    },
+    onBeforeCollapse: function(){
+      if (state_shadow){state_shadow.hide();}
+    },
+    onExpand: function(){
+      if (state_shadow){state_shadow.show();}
+    }
+  }));
+  state_window = win.panel('panel');
+  createMask()
+  createShadow()
+  if (state_opts.left == null){hcenter();}
+  if (state_opts.top == null){vcenter();}
+  moveWindow();
+  
+  if (!state_opts.closed){
+    win.panel('open'); // open the window
+  }
+}
+createMask = function(){
+  if (state_mask){state_mask.remove();}
+  if (state_opts.modal == true){
+    state_mask = $('<div class="window-mask"></div>').insertAfter(state_window);
+    state_mask.css({
+      width: (state_opts.inline ? state_mask.parent().width() : getPageArea().width),
+      height: (state_opts.inline ? state_mask.parent().height() : getPageArea().height),
+      display: 'none'
+    });
+  } 
+}
+createShadow = function(){
+  if (state_shadow){state_shadow.remove();}
+  if (state_opts.shadow == true){
+    state_shadow = $('<div class="window-shadow"></div>').insertAfter(state_window);
+    state_shadow.css({
+      display: 'none'
+    });
+  }
+}
+getPageArea = function(){
+  if (document.compatMode == 'BackCompat') {
+    return {
+      width: Math.max(document.body.scrollWidth, document.body.clientWidth),
+      height: Math.max(document.body.scrollHeight, document.body.clientHeight)
+    }
+  } else {
+    return {
+      width: Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth),
+      height: Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight)
+    }
+  }  
+}
+hcenter = function(tomove){
+  var width = state_window._outerWidth();
+  if (state_opts.inline){
+    var parent = state_window.parent();
+    state_opts.left = Math.ceil((parent.width() - width) / 2 + parent.scrollLeft());
+  } else {
+    state_opts.left = Math.ceil(($(window)._outerWidth() - width) / 2 + $(document).scrollLeft());
+  }
+  if (tomove){moveWindow();}
+}
+vcenter = function(tomove){
+  var height = state_window._outerHeight();
+  if (state_opts.inline){
+    var parent = state_window.parent();
+    state_opts.top = Math.ceil((parent.height() - height) / 2 + parent.scrollTop());
+  } else {
+    state_opts.top = Math.ceil(($(window)._outerHeight() - height) / 2 + $(document).scrollTop());
+  }
+  if (tomove){moveWindow();}  
+}
+moveWindow = function(param){
+  if (param){
+    if (param.left != null) state_opts.left = param.left;
+    if (param.top != null) state_opts.top = param.top;
+  }
+  win.panel('move', state_opts);
+  if (state_shadow){
+    state_shadow.css({
+      left: state_opts.left,
+      top: state_opts.top
+    });
+  }  
+}
+setProperties = function(){
+  state_window.draggable({
+    handle: '>div.panel-header>div.panel-title',
+    disabled: state_opts.draggable == false,
+    onStartDrag: function(e){
+      if (state_mask) 
+        state_mask.css('z-index', defaults.zIndex++);
+      if (state_shadow) 
+        state_shadow.css('z-index', defaults.zIndex++);
+      state_window.css('z-index', defaults.zIndex++);
+      if (!state_proxy)
+        state_proxy = $('<div class="window-proxy"></div>').insertAfter(state_window);
+      state_proxy.css({
+        display:'none',
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(state_window._outerWidth());
+      state_proxy._outerHeight(state_window._outerHeight());
+      setTimeout(function(){
+        if (state_proxy) state_proxy.show();
+      }, 500);
+    },
+    onDrag: function(e){
+      state_proxy.css({
+        display:'block',
+        left: e.data.left,
+        top: e.data.top
+      });
+      return false;      
+    },
+    onStopDrag: function(e){
+      state_opts.left = e.data.left;
+      state_opts.top = e.data.top;
+      moveWindow();
+      state_proxy.remove();
+      state_proxy = null;      
+    }
+  })
+
+  state_window.resizable({
+    disabled: state_opts.resizable == false,
+    onStartResize:function(e){
+      if (state_pmask) state_pmask.remove();
+      state_pmask = $('<div class="window-proxy-mask"></div>').insertAfter(state_window);
+      state_pmask.css({
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top,
+        width: state_window._outerWidth(),
+        height: state_window._outerHeight()
+      });
+      if (state_proxy){state_proxy.remove();}
+      state_proxy = $('<div class="window-proxy"></div>').insertAfter(state_window);
+      state_proxy.css({
+        zIndex: defaults.zIndex++,
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(e.data.width)._outerHeight(e.data.height);
+    },
+    onResize: function(e){
+      state_proxy.css({
+        left: e.data.left,
+        top: e.data.top
+      });
+      state_proxy._outerWidth(e.data.width);
+      state_proxy._outerHeight(e.data.height);
+      return false;
+    },
+    onStopResize: function(e){
+      t.panel("resize",e.data);
+      state_pmask.remove();
+      state_pmask = null;
+      state_proxy.remove();
+      state_proxy = null;
+    }
+  })
+}
+$(window).resize(function(){
+  $('body>div.window-mask').css({
+    width: $(window)._outerWidth(),
+    height: $(window)._outerHeight()
+  });
+  setTimeout(function(){
+    $('body>div.window-mask').css({
+      width: getPageArea().width,
+      height: getPageArea().height
+    });
+  }, 50);
+});
+
+main();
+})
+</script>
+</html>

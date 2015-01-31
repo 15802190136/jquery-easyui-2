@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>layout_simple</title>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.layout {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+}
+.layout-panel {
+  position: absolute;
+  overflow: hidden;
+}
+.layout-panel-east, .layout-panel-west {
+  z-index: 2;
+}
+.layout-panel-north,.layout-panel-south {
+  z-index: 3;
+}
+.layout-expand {
+  position: absolute;
+  padding: 0px;
+  font-size: 1px;
+  cursor: pointer;
+  z-index: 1;
+}
+.layout-expand .panel-header,
+.layout-expand .panel-body {
+  background: transparent;
+  filter: none;
+  overflow: hidden;
+}
+.layout-expand .panel-header {
+  border-bottom-width: 0px;
+}
+.layout-split-proxy-h, .layout-split-proxy-v {
+  position: absolute;
+  font-size: 1px;
+  display: none;
+  z-index: 5;
+}
+.layout-split-proxy-h {
+  width: 5px;
+  cursor: e-resize;
+}
+.layout-split-proxy-v {
+  height: 5px;
+  cursor: n-resize;
+}
+.layout-split-proxy-h, .layout-split-proxy-v {
+  background-color: #aac5e7;
+}
+.layout-button-left {
+  background: url('../../img/layout_arrows.png') no-repeat 0 0;
+}
+.layout-button-right {
+  background: url('../../img/layout_arrows.png') no-repeat 0 -16px;
+}
+.layout-expand {
+  background-color: #E0ECFF;
+}
+.layout-expand-over {
+  background-color: #E0ECFF;
+}
+  </style>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+<!--最开始-->
+<div class="easyui-layout" style="width:700px;height:350px;">
+  <div id="p" data-options="region:'west'" title="West" style="width:30%;padding:10px">
+    <p>width: 30%</p>
+  </div>
+  <div data-options="region:'center'" title="Center">
+  </div>
+</div>
+<!--渲染后-->
+<div class="easyui-layout layout" style="width:700px;height:350px;">
+  <div class="panel layout-panel layout-panel-west">
+    <div class="panel-header">
+      <div class="panel-title">West</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="layout-button-left"></a>
+      </div>
+    </div>
+    <div id="p" data-options="region:'west'" title="West" style="padding: 10px;" class="panel-body layout-body">
+      <p>width: 30%</p>
+    </div>
+  </div>
+  <div class="panel layout-panel layout-panel-center">
+    <div class="panel-header">
+      <div class="panel-title">Center</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+      </div>
+    </div>
+    <div data-options="region:'center'" title="Center" class="panel-body layout-body" id=""></div>
+  </div>
+  <div class="layout-split-proxy-h"></div>
+  <div class="layout-split-proxy-v"></div>
+</div>
+<!--resize后-->
+<div class="easyui-layout layout" style="width: 700px; height: 350px;">
+  <div class="panel layout-panel layout-panel-west easyui-fluid" style="width: 210px; left: 0px; top: 0px;">
+    <div class="panel-header" style="width: 198px;">
+      <div class="panel-title">West</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="layout-button-left"></a>
+      </div>
+    </div>
+    <div id="p" data-options="region:'west'" title="West" style="padding: 10px; width: 188px; height: 301px;" class="panel-body layout-body">
+      <p>width: 30%</p>
+    </div>
+  </div>
+  <div class="panel layout-panel layout-panel-center" style="width: 491px; left: 209px; top: 0px;">
+    <div class="panel-header" style="width: 479px;">
+      <div class="panel-title">Center</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+      </div>
+    </div>
+    <div data-options="region:'center'" title="Center" class="panel-body layout-body" id="" style="width: 489px; height: 321px;"></div>
+  </div>
+  <div class="layout-split-proxy-h"></div>
+  <div class="layout-split-proxy-v"></div>
+</div>
+<!--折叠-->
+<div class="easyui-layout layout" style="width: 700px; height: 350px;">
+  <div class="panel layout-panel layout-panel-west easyui-fluid" style="width: 210px; left: -210px; top: 0px; height: 350px; display: none;">
+    <div class="panel-header" style="width: 198px;">
+      <div class="panel-title">West</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse panel-tool-expand" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="layout-button-left"></a>
+      </div>
+    </div>
+    <div id="p" data-options="region:'west'" title="West" style="padding: 10px; width: 188px; height: 301px; display: none;" class="panel-body layout-body">
+      <p>width: 30%</p>
+    </div>
+  </div>
+  <div class="panel layout-panel layout-panel-center" style="width: 673px; left: 27px; top: 0px;">
+    <div class="panel-header" style="width: 661px;">
+      <div class="panel-title">Center</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+      </div>
+    </div>
+    <div data-options="region:'center'" title="Center" class="panel-body layout-body" id="" style="width: 671px; height: 321px;"></div>
+  </div>
+  <div class="layout-split-proxy-h"></div>
+  <div class="layout-split-proxy-v"></div>
+  <div class="panel layout-expand layout-expand-west" style="display: block; width: 28px; left: 0px; top: 0px;">
+    <div class="panel-header" style="width: 16px;">
+      <div class="panel-title">&nbsp;</div>
+      <div class="panel-tool">
+        <a href="javascript:void(0)" class="layout-button-right"></a>
+      </div>
+    </div>
+    <div class="panel-body" id="" style="width: 26px; height: 322px;"></div>
+  </div>
+</div>
+</body>
+</html>

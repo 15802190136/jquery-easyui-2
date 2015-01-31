@@ -1,0 +1,352 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>panel_plugin</title>
+    <style>
+.window {
+  position: absolute;
+}
+.panel {
+  background-color:#333333;
+  padding:20px;
+}
+.panel-header,.panel-body,.panel-footer{
+  border:3px solid #5FB1A7;
+}
+.panel-header{
+  background-color:#F92672;
+  padding:10px;
+}
+.panel-body{
+  background-color:#C739F4;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-footer{
+  background-color:#235846;
+  padding:10px;
+  border-top-width: 0;
+}
+.panel-noscroll {
+  overflow: hidden;
+}
+.panel-fit,
+.panel-fit body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+.panel-loading{
+  color:#fff;
+}
+.panel-header-noborder,.panel-body-noborder,.panel-footer-noborder{
+  border:none;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+    <div class="easyui-panel" style="width:200px;height:200px;padding:20px;"></div>
+    <div style="width:200px;height:1400px;background-color:#363636;margin-top:30px;margin-left:300px;"></div>
+
+  </body>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+  $(".easyui-panel").panel()
+  setTimeout(function(){
+    //$(".easyui-panel").panel("resize",{width:220,height:400})
+    //$(".easyui-panel").panel("open")
+    $(".easyui-panel").panel("expand")
+    //$(".easyui-panel").panel("move",{left:50,top:200})
+    //$(".easyui-panel").panel("close")
+    //$(".easyui-panel").panel("collapse")
+    $(".easyui-panel").panel("maximize")
+    //$(".easyui-panel").panel("restore")
+    //$(".easyui-panel").panel("minimize")
+  },500);
+
+})
+;(function($) {
+/*    
+    var state = $.data(target, "panel");
+    var opts = state.options;
+    var panel = state.panel;
+    var original = state.original;
+    var pheader = panel.children("div.panel-header");
+    var pbody = panel.children("div.panel-body");
+    var pfooter = panel.children("div.panel-footer");
+*/
+$.fn.panel = function(options, param) {
+  if (typeof options == "string") {
+    return $.fn.panel.methods[options](this, param);
+  }
+  options = options || {};
+  return this.each(function() {
+    var state = $.data(this, "panel");
+    var opts;
+    if (state) {
+      opts = $.extend(state.options, options);
+    }else{
+      opts = $.extend({}, $.fn.panel.defaults, $.fn.panel.parseOptions(this), options);
+      state = $.data(this, "panel", {
+        options: opts,
+        panel: wrapPanel(this)
+      });
+    }
+    initPanelHeader(this)
+    initPanelFooter(this)
+    initStyle(this)
+    setBorder(this)
+    if (opts.doSize == true) {
+      setSize(this)
+    }
+    openPanel(this)
+  })
+}
+$.fn.panel.parseOptions = function(target){
+  return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title"]));    
+}
+$.fn.panel.defaults = {fit: false,border: true,collapsed:true,cls:"window",loadingMessage: "Loading..."};
+$.fn.panel.methods = {
+  options: function(jq) {
+    return $.data(jq[0], "panel").options;
+  },
+  panel: function(jq) {
+    return $.data(jq[0], "panel").panel;
+  },
+  header: function(jq) {
+    return $.data(jq[0], "panel").panel.find(">div.panel-header");
+  },
+  footer: function(jq) {
+    return jq.panel("panel").children(".panel-footer");
+  },
+  body: function(jq) {
+    return $.data(jq[0], "panel").panel.find(">div.panel-body");
+  },
+  open: function(jq, param) {
+    return jq.each(function() {
+      openPanel(this, param);
+    });
+  },
+  close: function(jq, param) {
+    return jq.each(function() {
+      closePanel(this, param);
+    });
+  },
+  resize: function(jq, param) {
+    return jq.each(function() {
+      setSize(this, param);
+    });
+  },
+  move: function(jq, param) {
+    return jq.each(function() {
+      movePanel(this, param);
+    });
+  },
+  maximize: function(jq) {
+    return jq.each(function() {
+      maximizePanel(this);
+    });
+  },
+  minimize: function(jq) {
+    return jq.each(function() {
+      minimizePanel(this);
+    });
+  },
+  restore: function(jq) {
+    return jq.each(function() {
+      restorePanel(this);
+    });
+  },
+  collapse: function(jq, param) {
+    return jq.each(function() {
+      collapsePanel(this, param);
+    });
+  },
+  expand: function(jq, param) {
+    return jq.each(function() {
+      expandPanel(this, param);
+    });
+  }
+}
+wrapPanel = function(target){
+  $(target).addClass("panel-body")._size("clear");
+  var panel = $("<div class='panel'></div>").insertBefore(target);
+  panel[0].appendChild(target);
+  var pbody = panel.children("div.panel-body");
+  return panel;    
+}
+initPanelHeader = function(target){
+  var state = $.data(target, "panel");
+  var panel = state.panel;
+  $("<div class='panel-header'></div>").prependTo(panel)
+  panel.children("div.panel-body").removeClass("panel-body-noheader")
+}
+initPanelFooter = function(target){
+  var state = $.data(target, "panel");
+  var panel = state.panel;
+  $("<div class='panel-footer'></div>").appendTo(panel) 
+}
+setBorder = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  var pheader = panel.children("div.panel-header");
+  var pbody = panel.children("div.panel-body");
+  var pfooter = panel.children("div.panel-footer");
+  panel.addClass(opts.cls);
+  if(opts.border){
+    pheader.removeClass("panel-header-noborder");
+    pbody.removeClass("panel-body-noborder");
+    pfooter.removeClass("panel-footer-noborder");
+  }else{
+    pheader.addClass("panel-header-noborder");
+    pbody.addClass("panel-body-noborder");
+    pfooter.addClass("panel-footer-noborder");    
+  }    
+}
+initStyle = function(target){
+  var state = $.data(target, "panel");
+  var panel = state.panel;
+  var pheader = panel.children("div.panel-header");
+  var pbody = panel.children("div.panel-body");
+  var pfooter = panel.children("div.panel-footer");
+  panel.css({width:200});
+  pheader.css({height:20});
+  pbody.css({height:20});
+  pfooter.css({height:20});    
+}
+setSize = function(target,param){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel; 
+  var pheader = panel.children("div.panel-header");
+  var pbody = panel.children("div.panel-body");
+  var pfooter = panel.children("div.panel-footer");   
+  if(param){
+    $.extend(opts,{
+      width: param.width,
+      height: param.height,
+      left: param.left,
+      top: param.top
+    });
+  }
+  panel._size(opts);
+  pheader.add(pbody)._outerWidth(panel.width());
+  pbody._outerHeight(panel.height()-pheader._outerHeight()-pfooter._outerHeight())
+  panel.css({
+    height: "",
+    minHeight: "",
+    maxHeight: "",
+    left:opts.left,
+    top:opts.top
+  })
+}
+refresh = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  var pbody = panel.children("div.panel-body");
+  pbody.html($("<div class='panel-loading'></div>").html(opts.loadingMessage));
+}
+openPanel = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  var cb = function(){
+    if (opts.collapsed == true) {
+      collapsePanel(target)
+    }
+    if (!opts.collapsed){
+      refresh(target)
+    }
+  }
+  panel.show(400, cb);
+}
+movePanel = function(target,param){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  if (param) {
+    if (param.left != null) {
+      opts.left = param.left;
+    }
+    if (param.top != null) {
+      opts.top = param.top;
+    }
+  }
+  panel.css({
+    left:opts.left,
+    top:opts.top
+  })
+}
+closePanel = function(target){
+  var state = $.data(target, "panel");
+  var panel = state.panel;
+  var cb = function(){}
+  //panel.slideUp(400, cb);
+  //panel.fadeOut(400, cb);
+  panel.hide(0, cb);
+}
+collapsePanel = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  var pbody = panel.children("div.panel-body");
+  var cb = function(){
+    opts.collapsed = true;
+  }
+  //pbody.slideUp("normal",cb);
+  pbody.hide(0,cb)
+}
+expandPanel = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  var pbody = panel.children("div.panel-body");
+  var cb = function(){
+    opts.collapsed = false;
+  }
+  //pbody.slideDown("normal",cb);
+  pbody.show(0,cb)
+  refresh(target);
+}
+maximizePanel = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var original = state.original;
+  if(!original){
+    $.data(target, "panel").original = {
+      width: opts.width,
+      height: opts.height,
+      left: opts.left,
+      top: opts.top,
+      fit: opts.fit
+    }      
+  }
+  opts.left = 0;
+  opts.top = 0;
+  opts.fit = true;
+  setSize(target,opts);
+}
+restorePanel = function(target){
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var original = state.original;
+  $.extend(opts, original);
+  setSize(target);
+  original = null;   
+}
+minimizePanel = function(target){
+  var state = $.data(target, "panel");
+  var panel = state.panel;
+  panel._size("unfit")
+  panel.hide()
+}
+})(jQuery);           
+</script>
+</html>

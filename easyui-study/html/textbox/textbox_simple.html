@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>textbox_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.textbox {
+  position: relative;
+  border: 1px solid #95B8E7;
+  background-color: #fff;
+  vertical-align: middle;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+.textbox .textbox-text {
+  font-size: 12px;
+  border: 0;
+  margin: 0;
+  padding: 4px;
+  white-space: normal;
+  vertical-align: top;
+  outline-style: none;
+  resize: none;
+}
+.textbox .textbox-prompt {
+  font-size: 12px;
+  color: #aaa;
+}
+.textbox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+}
+.textbox {
+  height: 20px;
+  margin: 0;
+  padding: 0 2px;
+  box-sizing: content-box;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/tooltip.css">
+  <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <div class="easyui-panel" title="Register" style="width:400px;padding:30px 60px">
+    <div style="margin-bottom:20px">
+      <div>Email:</div>
+      <input class="easyui-textbox" data-options="prompt:'Enter a email address...',validType:'email'" style="width:100%;height:32px">
+    </div>
+  </div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.panel.js"></script>
+<script src="../../src/jquery.tooltip.js"></script>
+<script src="../../src/jquery.validatebox.js"></script>
+<script>
+$(function(){
+$.parser.parse();
+var target = $(".easyui-textbox")[0]
+var t = $(".easyui-textbox")
+var state_opts
+var defaults = $.extend({}, $.fn.validatebox.defaults, {
+  width : "auto",
+  height : 22,
+  prompt : "",
+  value : "",
+  type : "text",
+  editable : true,
+  disabled : false,
+  readonly : false,
+  inputEvents : {
+    blur : function(e) {
+      setValue(state_opts.value)
+    },
+    keydown : function(e) {
+      if (e.keyCode == 13)
+        setValue(getText())
+    }
+  },
+  onChange : function(newValue, oldValue) {},
+  onResize : function(width, height) {},
+  onClickButton : function() {},
+  onClickIcon : function(index) {}
+})
+main = function(){
+  parseOptions()
+  init()
+  state_opts.originalValue = state_opts.value;
+  initBtns();
+  initBindEvents();
+  resize();
+  validateTextbox();
+  initValue(state_opts.value);  
+}
+parseOptions = function(){
+  state_opts = $.extend({},defaults, $.fn.validatebox.parseOptions(target),
+    $.parser.parseOptions(target, ["prompt",{editable : "boolean"}]), {
+      value : (t.val() || undefined),
+      type : (t.attr("type") ? t.attr("type") : undefined),
+      disabled: (t.attr('disabled') ? true : undefined),
+      readonly : (t.attr("readonly") ? true : undefined)
+    });
+}
+init = function(){
+  t.addClass("textbox-f").hide();
+  state_textbox = $("<span class='textbox'>" + 
+      "<input class='textbox-text' autocomplete='off'>" + 
+      "<input type='hidden' class='textbox-value'>" + 
+    "</span>").insertAfter(target);
+  var name = t.attr("name");
+  if (name) {
+    state_textbox.find("input.textbox-value").attr("name", name);
+    t.removeAttr("name").attr("textboxName", name);
+  }
+}
+initBtns = function(){
+  state_textbox.find(".textbox-text").remove();
+  $("<input type='" + state_opts.type + "' class='textbox-text' autocomplete='off'>").prependTo(state_textbox);
+  setDisabled(state_opts.disabled);
+  setReadonly(state_opts.readonly);
+}
+setDisabled = function(disabled){
+  var opts = state_opts;
+  var tb = state_textbox;
+  if (disabled) {
+    opts.disabled = true;
+    t.attr("disabled", "disabled");
+    tb.find(".textbox-text,.textbox-value").attr("disabled", "disabled");
+  } else {
+    opts.disabled = false;
+    t.removeAttr("disabled");
+    tb.find(".textbox-text,.textbox-value").removeAttr("disabled");
+  }
+}
+setReadonly = function(mode){
+  state_opts.readonly = mode == undefined ? true : mode;
+  var text = state_textbox.find(".textbox-text");
+  text.removeAttr("readonly").removeClass("textbox-text-readonly");
+  if (state_opts.readonly || !state_opts.editable) {
+    text.attr("readonly", "readonly").addClass("textbox-text-readonly");
+  }
+}
+textboxText = function(){
+  return state_textbox.find(".textbox-text");
+}
+initBindEvents = function(){
+  var opts = state_opts;
+  var tb = state_textbox;
+  var text = tb.find(".textbox-text");
+  text.attr("placeholder", opts.prompt);
+  text.unbind(".textbox");
+  if (!opts.disabled && !opts.readonly) {
+    text.bind("blur.textbox", function(e) {
+      if (!tb.hasClass("textbox-focused")) return;
+      opts.value = $(this).val();
+      if (opts.value == "")
+        $(this).val(opts.prompt).addClass("textbox-prompt");
+      else
+        $(this).removeClass("textbox-prompt");
+      tb.removeClass("textbox-focused");
+    }).bind("focus.textbox", function(e) {
+      if (tb.hasClass("textbox-focused")) return;
+      if ($(this).val() != opts.value)
+        $(this).val(opts.value);
+      $(this).removeClass("textbox-prompt");
+      tb.addClass("textbox-focused");
+    });
+    for ( var inputEvent in opts.inputEvents) {
+      text.bind(inputEvent + ".textbox", {
+        target : target
+      }, opts.inputEvents[inputEvent]);
+    }
+  }
+  tb.unbind(".textbox").bind("_resize.textbox", function(e, customClass) {
+    if ($(this).hasClass("easyui-fluid") || customClass)
+      resize(target);
+    return false;
+  });
+}
+resize = function(width){
+  var opts = state_opts;
+  var tb = state_textbox;
+  var span = tb.parent();
+  var text,paddingTop,c
+  if (width)
+    opts.width = width;
+  if (isNaN(parseInt(opts.width))) {
+    c = t.clone();
+    c.css("visibility", "hidden");
+    c.insertAfter(target);
+    opts.width = c.outerWidth();
+    c.remove();
+  }
+  tb.appendTo("body");
+  text = tb.find(".textbox-text");
+  tb._size(opts, span);
+  text.css({
+    paddingLeft : (target.style.paddingLeft || ""),
+    paddingRight : (target.style.paddingRight || ""),
+    marginLeft : 0,
+    marginRight : 0
+  });
+  paddingTop = Math.floor((tb.height() - text.height()) / 2);
+  text.css({
+    paddingTop : paddingTop + "px",
+    paddingBottom : paddingTop + "px"
+  });
+  text._outerWidth(tb.width());
+  tb.insertAfter(target);
+  opts.onResize.call(target, opts.width, opts.height);
+}
+validateTextbox = function(){
+  var opts = state_opts;
+  var textbox = textboxText();
+  textbox.validatebox($.extend({}, opts, {
+    deltaX : getTipX(),
+    onBeforeValidate : function() {
+      var box = $(this);
+      if (!box.is(":focus")) {
+        opts.oldInputValue = box.val();
+        box.val(opts.value);
+      }
+    },
+    onValidate : function(valid) {
+      var box = $(this);
+      if (opts.oldInputValue != undefined) {
+        box.val(opts.oldInputValue);
+        opts.oldInputValue = undefined;
+      }
+      var tb = box.parent();
+      if (valid)
+        tb.removeClass("textbox-invalid");
+      else
+        tb.addClass("textbox-invalid");
+    }
+  }));  
+}
+getTipX = function() {
+  var text = state_textbox.find(".textbox-text");
+  if (state_opts.tipPosition == "right")
+    return 1;
+  if (state_opts.tipPosition == "left")
+    return - 1;
+}
+setText = function(text) {
+  var textbox = textboxText();
+  if (getText() != text) {
+    state_opts.value = text;
+    textbox.val(text);
+  }
+  if (!textbox.is(":focus")) {
+    if (text)
+      textbox.removeClass("textbox-prompt");
+    else
+      textbox.val(state_opts.prompt).addClass("textbox-prompt");
+  }
+  textbox.validatebox("validate");
+}
+getText = function(){
+  var textbox = textboxText()
+  if (textbox.is(":focus"))
+    return textbox.val();
+  else
+    return state_opts.value;
+}
+getValue = function(){
+  return state_textbox.find(".textbox-value").val();
+}
+setValue = function(value){
+  var oldValue = getValue()
+  initValue(value)
+  if (oldValue != value)
+    state_opts.onChange.call(this, value, oldValue);
+}
+initValue = function(value){
+  state_opts.value = "";
+  setText(value);
+  state_textbox.find(".textbox-value").val(value);
+  t.val(value)
+}
+main();
+})
+</script>
+</html>

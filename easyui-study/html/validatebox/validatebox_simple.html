@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>validatevbox_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.validatebox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+  color: #000;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/tooltip.css">
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <div class="easyui-panel" title="Register" style="width:400px;padding:10px 60px 20px 60px">
+    <table cellpadding="5">
+      <tr>
+        <td>User Name:</td>
+        <td><input class="easyui-validatebox textbox" data-options="required:true,validType:'length[3,10]'"></td>
+      </tr>
+    </table>
+  </div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.panel.js"></script>
+<script src="../../src/jquery.tooltip.js"></script>
+<script>
+$(function(){
+$.parser.parse();
+var target = $(".easyui-validatebox")[0]
+var box = t = $(".easyui-validatebox")
+var defaults = {
+  required : false,
+  validType : null,validParams : null,
+  delay : 200,
+  missingMessage : "This field is required.",
+  invalidMessage : null,
+  deltaX : 0,
+  novalidate : false,
+  events : {
+    focus : focusEvent,
+    blur : blurEvent,
+    mouseenter : mouseenterEvent,
+    mouseleave : mouseleaveEvent,
+    click : function(e) {
+      $(e.data.target).trigger("focus");
+    }
+  },
+  tipPosition : "right",
+  tipOptions : {
+    showEvent : "none",hideEvent : "none",
+    showDelay : 0,hideDelay : 0,
+    zIndex : "",
+    onShow : function() {
+      $(this).tooltip("tip").css({
+        color : "#000",
+        borderColor : "#CC9933",
+        backgroundColor : "#FFFFCC"
+      })
+    },
+    onHide : function() {
+      $(this).tooltip("destroy");
+    }
+  },  
+  rules : {
+    email : {},
+    url : {},
+    remote : {},
+    length : {
+      validator : function(value, param) {
+        var len = $.trim(value).length;
+        return len >= param[0] && len <= param[1];
+      },
+      message : "Please enter a value between {0} and {1}."
+    }
+  },
+  onBeforeValidate : function() {},
+  onValidate : function(valid) {}
+}
+var state_opts,state_validating,state_timer,state_validating,state_tip
+main = function(){
+  init()
+  parseOptions()
+  setDisabledValidation();
+  validate();
+}
+init = function(){
+  t.addClass("validatebox-text");
+}
+parseOptions = function(){
+  state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['handle',
+    {minWidth:'number',minHeight:'number',maxWidth:'number',maxHeight:'number',edge:'number'}]), {
+      disabled: (t.attr('disabled') ? true : undefined)
+    });
+}
+setDisabledValidation = function() {
+  if (state_opts.novalidate) {
+    t.removeClass("validatebox-invalid");
+    hideTip();
+  }
+  validate();
+  bindEvents();
+}
+validate = function(){
+  state_opts.onBeforeValidate.call(target);
+  var valid = getValid();
+  state_opts.onValidate.call(target, valid);
+  return valid; 
+}
+getValid = function(){
+  var opts = state_opts;
+  box.removeClass("validatebox-invalid");
+  hideTip();
+  if (opts.novalidate || box.is(":disabled")) return true;
+  if (opts.required) {
+    if (box.val() == "") {
+      box.addClass("validatebox-invalid");
+      setTipMessage(opts.missingMessage);
+      if (state_validating)
+        showTip();
+      return false;
+    }
+  }
+  if (opts.validType) {
+    if ($.isArray(opts.validType)) {
+      for (var i = 0; i < opts.validType.length; i++) {
+        if (!setValidateMessage(opts.validType[i])) return false;
+      }
+    } else if (typeof opts.validType == "string") {
+      if (!setValidateMessage(opts.validType)) return false;
+    } else {
+      for ( var validType in opts.validType) {
+        var validParams = opts.validType[validType];
+        if (!setValidateMessage(validType, validParams)) return false;
+      }
+    }
+  }
+  return true;  
+}
+setValidateMessage = function(validType, validParams){
+  var opts = state_opts;
+  var value = box.val();
+  var result = /([a-zA-Z_]+)(.*)/.exec(validType);
+  var rule = opts.rules[result[1]];
+  if (rule && value) {
+    var param = validParams || opts.validParams || eval(result[2]);
+    if (!rule["validator"].call(target, value, param)) {
+      box.addClass("validatebox-invalid");
+      var message = rule["message"];
+      if (param) {
+        for (var i = 0; i < param.length; i++)
+          message = message.replace(new RegExp("\\{" + i + "\\}", "g"), param[i]);
+      }
+      setTipMessage(opts.invalidMessage || message);
+      if (state_validating)
+        showTip();
+      return false;
+    }
+  }
+  return true;  
+}
+setTipMessage = function(msg){
+  state_message = msg;
+}
+showTip = function(){
+  t.tooltip($.extend({}, state_opts.tipOptions, {
+    content : state_message,
+    position : state_opts.tipPosition,
+    deltaX : state_opts.deltaX
+  })).tooltip("show");
+  state_tip = true;
+}
+hideTip = function(){
+  state_tip = false;
+  t.tooltip("hide");
+}
+setTooltip = function(){
+  if (state_tip)
+    t.tooltip("reposition");
+}
+bindEvents = function(){
+  var opts = state_opts;
+  box.unbind(".validatebox");
+  if (opts.novalidate || box.is(":disabled")) return;
+  for ( var eventname in opts.events) {
+    t.bind(eventname + ".validatebox", {
+      target : target
+    }, opts.events[eventname]);
+  }
+}
+function focusEvent(e){
+  if (t.attr("readonly")) return;
+  state_validating = true;
+  state_value = undefined;
+  (function() {
+    if (state_validating) {
+      if (state_value != box.val()) {
+        state_value = box.val();
+        if (state_timer)
+          clearTimeout(state_timer);
+        state_timer = setTimeout(function() {
+          validate()
+        }, state_opts.delay);
+      } else {
+        setTooltip();
+      }
+      setTimeout(arguments.callee, 200);
+    }
+  })();
+}
+function blurEvent(e){
+  if (state_timer) {
+    clearTimeout(state_timer);
+    state_timer = undefined;
+  }
+  state_validating = false;
+  hideTip();
+}
+function mouseenterEvent(e){
+  if (t.hasClass("validatebox-invalid")) 
+    showTip();
+}
+function mouseleaveEvent(e){
+  if (!state_validating)
+    hideTip();
+}
+main();
+})
+</script>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>droppable_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.title{
+  margin-bottom:10px;
+}
+.dragitem{
+  border:1px solid #ccc;
+  width:50px;
+  height:50px;
+  margin-bottom:10px;
+}
+.targetarea{
+  border:1px solid red;
+  height:150px;
+}
+.proxy{
+  border:1px solid #ccc;
+  width:80px;
+  background:#fafafa;
+}
+  </style>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <div style="float:left;width:200px;margin-right:20px;">
+    <div class="title">Source</div>
+    <div>
+      <div class="dragitem">Apple</div>
+      <div class="dragitem">Peach</div>
+      <div class="dragitem">Orange</div>
+    </div>
+  </div>
+  <div style="float:left;width:200px;">
+    <div class="title">Target</div>
+    <div class="easyui-droppable targetarea"></div>
+  </div>
+  <div style="clear:both"></div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.draggable.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-droppable")[0]
+var t = $(".easyui-droppable")
+var data_options = {
+  accept: '.dragitem',
+  onDragEnter:function(e,source){
+    $(this).html('enter');
+  },
+  onDragLeave: function(e,source){
+    $(this).html('leave');
+  },
+  onDrop: function(e,source){
+    $(this).html($(source).html() + ' dropped');
+  }
+}
+var defaults = {
+  accept:null,
+  disabled:false,
+  onDragEnter:function(e, source){},
+  onDragOver:function(e, source){},
+  onDragLeave:function(e, source){},
+  onDrop:function(e, source){}
+}
+var state_opts
+main = function(){
+  init()
+  parseOptions()
+  $.data(target, 'droppable', {options: state_opts});
+  $('.dragitem').draggable({
+    revert:true,
+    deltaX:10,
+    deltaY:10,
+    proxy:function(source){
+      var n = $('<div class="proxy"></div>');
+      n.html($(source).html()).appendTo('body');
+      return n;
+    }
+  });
+}
+init = function(){
+  t.addClass('droppable');
+  t.bind('_dragenter', function(e, source){
+    state_opts.onDragEnter.apply(target, [e, source]);
+  });
+  t.bind('_dragleave', function(e, source){
+    state_opts.onDragLeave.apply(target, [e, source]);
+  });
+  t.bind('_dragover', function(e, source){
+    state_opts.onDragOver.apply(target, [e, source]);
+  });
+  t.bind('_drop', function(e, source){
+    state_opts.onDrop.apply(target, [e, source]);
+  });
+}
+parseOptions = function(){
+  state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['accept']), {
+      disabled: (t.attr('disabled') ? true : undefined)
+    },data_options);
+}
+$.fn.droppable = function(options, param){
+  return $.fn.droppable.methods[options](this, param);
+}
+$.fn.droppable.methods = {
+  options: function(jq){
+    return $.data(jq[0], 'droppable').options;
+  }
+}
+main();
+})
+</script>
+</html>

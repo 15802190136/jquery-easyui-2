@@ -1,0 +1,55 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>boxModel_jquery</title>
+    <style>
+    body {
+      background-color: #222222;
+      padding:20px;
+    }
+    #testDiv {
+      width:200px;
+      height:100px;
+      padding:10px;
+      border:5px solid #AE81FF;
+      margin:30px;
+      background-color: #A6E22E;
+    }
+    p {
+      color:#D7F0F2;
+      font-size: 20px;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="testDiv">
+      
+    </div>
+    <p></p>
+  </body>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+  <script>
+  //js
+  var testDiv = $("#testDiv")
+  p = document.getElementsByTagName("p")
+  /*
+  chrome
+  width-200:200
+  innerWidth-220:200+10*2
+  outerWidth-230(200+10*2+5*1)
+  */
+  /*
+  ie8
+  <!DOCTYPE html>h或者<!doctype html public "-//w3c//dtd xhtml 1.0 transitional//en" "http://www.w3.org/tr/xhtml1/dtd/xhtml1-transitional.dtd">:
+  width-200:200
+  innerWidth-220:200+10*2
+  outerWidth-230(200+10*2+5*1)
+  无:
+  width-170:200-10*2-5*2=170
+  innerWidth-190:170+10*2
+  outerWidth-200(170+10*2+5*2)
+  */
+  p[0].innerHTML = "width="+testDiv.width()+" innerWidth="+testDiv.innerWidth()+" outerWidth="+testDiv.outerWidth() 
+  </script>
+</html>

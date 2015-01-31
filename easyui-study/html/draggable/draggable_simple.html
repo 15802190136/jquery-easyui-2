@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>draggable_simple</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+  </style>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <div class="easyui-draggable" data-options="handle:'#title'" style="width:200px;height:150px;background:#fafafa;border:1px solid #ccc;margin-top:10px">
+    <div id="title" style="padding:5px;background:#ccc;color:#fff">Title</div>
+  </div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-draggable")[0]
+var t = $(".easyui-draggable")
+var defaults = {
+  deltaX:null,
+  deltaY:null,
+  handle: null,
+  disabled: false,
+  edge:0
+}
+var state_opts,state_handle
+var isDragging = false
+main = function(){
+  parseOptions()
+  state_handle = state_opts.handle ? (typeof state_opts.handle=='string' ? $(state_opts.handle, target) : state_opts.handle) : t;
+  if (state_opts.disabled) {
+    $(this).css('cursor', '');
+    return;
+  }
+  bindEvents()
+}
+parseOptions = function(){
+  state_opts = $.extend({}, defaults, $.parser.parseOptions(target, ['handle',{'deltaX':'number','deltaY':'number','edge':'number'}]), {
+      disabled: (t.attr('disabled') ? true : undefined)
+    });
+}
+bindEvents = function(){
+  state_handle.unbind('.draggable').bind('mousemove.draggable',function(e){
+    if (isDragging){return}
+    if (checkArea(e)){
+      $(this).css('cursor', 'move');
+    } else {
+      $(this).css('cursor', '');
+    }
+  }).bind('mouseleave.draggable',function(e){
+    $(this).css('cursor', '');
+  }).bind('mousedown.draggable',function(e){
+    if (checkArea(e) == false) return;
+    $(this).css('cursor', '');
+    var position = t.position();
+    var offset = t.offset();
+    var data = {
+      startPosition: t.css('position'),
+      startLeft: position.left,
+      startTop: position.top,
+      left: position.left,
+      top: position.top,
+      startX: e.pageX,
+      startY: e.pageY,
+      offsetWidth: (e.pageX - offset.left),
+      offsetHeight: (e.pageY - offset.top),
+      parent: t.parent()[0]
+    };
+    $(document).bind('mousedown.draggable', data, doDown);
+    $(document).bind('mousemove.draggable', data, doMove);
+    $(document).bind('mouseup.draggable', data, doUp);
+  });
+}
+checkArea = function(e){
+  var handle = state_handle;
+  var offset = $(handle).offset();
+  var width = $(handle).outerWidth();
+  var height = $(handle).outerHeight();
+  var t = e.pageY - offset.top;
+  var r = offset.left + width - e.pageX;
+  var b = offset.top + height - e.pageY;
+  var l = e.pageX - offset.left;
+  return Math.min(t,r,b,l) > state_opts.edge;
+}
+doDown = function(e){
+  isDragging = true
+  t.css('position', 'absolute');
+  drag(e);
+  applyDrag(e);
+  return false;
+}
+drag = function(e){
+  var pageX = e.pageX,pageY = e.pageY
+  var dragData = e.data;
+  var left = dragData.startLeft + pageX - dragData.startX;
+  var top = dragData.startTop + pageY - dragData.startY;
+  var deltaX = state_opts.deltaX,deltaY = state_opts.deltaY
+  var offsetWidth = dragData.offsetWidth,offsetHeight = dragData.offsetHeight
+  var parent = dragData.parent
+  if (parent != document.body) {
+    left += $(parent).scrollLeft();
+    top += $(parent).scrollTop();
+  }
+  
+  dragData.left = left;
+  dragData.top = top;
+}
+applyDrag = function(e){
+  t.css({
+    left:e.data.left,
+    top:e.data.top
+  });
+  $('body').css('cursor', 'move');
+}
+doMove = function(e){
+  drag(e);
+  applyDrag(e);
+  return false;
+}
+doUp = function(e){
+  isDragging = false;
+  doMove(e);
+  t.css({
+    position:'absolute',
+    left:e.data.left,
+    top:e.data.top
+  });
+  $(document).unbind('.draggable');
+  setTimeout(function(){
+    $('body').css('cursor','');
+  },100);
+  return false;
+}
+main();
+})
+</script>
+</html>
