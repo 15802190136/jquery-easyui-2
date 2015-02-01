@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>validatevbox_dom</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.validatebox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+  color: #000;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/tooltip.css">
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+<!--   
+<div class="easyui-panel" title="Register" style="width:400px;padding:10px 60px 20px 60px">
+  <table cellpadding="5">
+    <tr>
+      <td>User Name:</td>
+      <td><input class="easyui-validatebox textbox" data-options="required:true,validType:'length[3,10]'"></td>
+    </tr>
+  </table>
+</div>
+ -->
+<div class="panel" style="display: block; width: 400px;">
+  <div class="panel-header" style="width: 388px;">
+    <div class="panel-title">Register</div>
+    <div class="panel-tool"></div>
+  </div>
+  <div class="easyui-panel panel-body" title="Register" style="padding: 10px 60px 20px; width: 278px;" id="">
+    <table cellpadding="5">
+      <tbody>
+        <tr>
+          <td>User Name:</td>
+          <td>
+            <input class="easyui-validatebox textbox validatebox-text validatebox-invalid" data-options="required:true,validType:'length[3,10]'" title=""></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

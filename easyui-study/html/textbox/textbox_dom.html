@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>textbox_dom</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.textbox {
+  position: relative;
+  border: 1px solid #95B8E7;
+  background-color: #fff;
+  vertical-align: middle;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+.textbox .textbox-text {
+  font-size: 12px;
+  border: 0;
+  margin: 0;
+  padding: 4px;
+  white-space: normal;
+  vertical-align: top;
+  outline-style: none;
+  resize: none;
+}
+.textbox .textbox-prompt {
+  font-size: 12px;
+  color: #aaa;
+}
+.textbox-invalid {
+  border-color: #ffa8a8;
+  background-color: #fff3f3;
+}
+.textbox {
+  height: 20px;
+  margin: 0;
+  padding: 0 2px;
+  box-sizing: content-box;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/tooltip.css">
+  <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+<!-- 
+<div class="easyui-panel" title="Register" style="width:400px;padding:30px 60px">
+  <div style="margin-bottom:20px">
+    <div>Email:</div>
+    <input class="easyui-textbox" data-options="prompt:'Enter a email address...',validType:'email'" style="width:100%;height:32px">
+  </div>
+</div>
+-->
+<div class="panel" style="display: block; width: 400px;">
+  <div class="panel-header" style="width: 388px;">
+    <div class="panel-title">Register</div>
+    <div class="panel-tool"></div>
+  </div>
+  <div class="easyui-panel panel-body" title="Register" style="padding: 30px 60px; width: 278px;" id="">
+    <div style="margin-bottom:20px">
+      <div>Email:</div>
+      <input class="easyui-textbox textbox-f" data-options="prompt:'Enter a email address...',validType:'email'" style="width: 100%; height: 32px; display: none;">
+      <span class="textbox easyui-fluid" style="width: 272px; height: 30px;">
+        <input type="text" class="textbox-text validatebox-text textbox-prompt" autocomplete="off" placeholder="Enter a email address..." style="margin-left: 0px; margin-right: 0px; padding-top: 8px; padding-bottom: 8px; width: 264px;">
+        <input type="hidden" class="textbox-value" value=""></span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

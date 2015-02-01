@@ -1,0 +1,68 @@
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>panel_setSize</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <style>
+.window {position: absolute;}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">My Panel</div>
+        <div class="panel-tool"></div>
+      </div>
+      <div class="easyui-panel panel-body" title="My Panel" style="width:200px;height:200px;padding:20px;">
+        <p>panel content.</p>
+      </div>
+    </div>
+  </body>
+<script src="../../src/jquery.parser.js"></script>
+<script>     
+$(function(){
+var target = $(".easyui-panel")[0]
+var t = $(".easyui-panel")
+var panel = $(".panel")
+var pheader = panel.children("div.panel-header");
+var pbody = panel.children("div.panel-body");
+var pfooter = panel.children("div.panel-footer");
+var state_opts
+function main(){
+  parseOptions()
+  wrapPanel()
+  resize()
+}
+function parseOptions(){
+  state_opts = $.parser.parseOptions(target)
+}
+function wrapPanel(){
+  t._size("clear");
+}
+function resize(){
+  panel._size(state_opts);
+  pheader.add(pbody)._outerWidth(panel.width());
+  if (!isNaN(parseInt(state_opts.height))) {
+    pbody._outerHeight(panel.height()-pheader._outerHeight()-pfooter._outerHeight())
+  }else{
+    pbody.css("height", "");
+    var minHeight = $.parser.parseValue("minHeight", state_opts.minHeight, panel.parent());
+    var maxHeight = $.parser.parseValue("maxHeight", state_opts.maxHeight, panel.parent());
+    var outerHeight = pheader._outerHeight() + pfooter._outerHeight() + panel._outerHeight() - panel.height();
+    pbody._size("minHeight", minHeight ? (minHeight - outerHeight) : "");
+    pbody._size("maxHeight", maxHeight ? (maxHeight - outerHeight) : "");
+  }
+  panel.css({
+    height: "",
+    minHeight: "",
+    maxHeight: "",
+    left:state_opts.left,
+    top:state_opts.top
+  })
+}
+main();
+})
+</script>
+</html>

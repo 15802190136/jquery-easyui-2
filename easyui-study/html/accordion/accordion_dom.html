@@ -1,0 +1,126 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>accordion_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.accordion {
+  overflow: hidden;
+  border: 1px solid;
+}
+.accordion .accordion-header {
+  border-width: 0 0 1px;
+  cursor: pointer;
+}
+.accordion .accordion-body {
+  border-width: 0 0 1px;
+}
+.accordion-noborder {
+  border-width: 0;
+}
+.accordion-noborder .accordion-header {
+  border-width: 0 0 1px;
+}
+.accordion-noborder .accordion-body {
+  border-width: 0 0 1px;
+}
+.accordion-collapse {background: url('../../img/accordion_arrows.png') no-repeat 0 0;}
+.accordion-expand {background: url('../../img/accordion_arrows.png') no-repeat -16px 0;}
+.accordion {
+  background: #ffffff;
+  border-color: #95B8E7;
+}
+.accordion .accordion-header {
+  background: #E0ECFF;
+  filter: none;
+}
+.accordion .accordion-header-selected {
+  background: #ffe48d;
+}
+.accordion .accordion-header-selected .panel-title {
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+  <body>
+<div class="easyui-accordion accordion" data-options="" style="width: 498px; height: 298px;">
+  <div class="panel" style="width: 498px;">
+    <div class="panel-header accordion-header" style="height: 16px; width: 488px;">
+      <div class="panel-title">Language</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse panel-tool-expand" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="accordion-collapse accordion-expand"></a>
+      </div>
+    </div>
+    <div title="Language" style="overflow: auto; padding: 10px; display: none; width: 478px; height: 68px;" class="panel-body accordion-body" id="">
+      <p>
+        A programming language is a formal language designed to communicate instructions to a machine,A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine, A programming language is a formal language designed to communicate instructions to a machine,
+      </p>
+    </div>
+  </div>
+  <div class="panel" style="width: 498px;">
+    <div class="panel-header accordion-header" style="height: 16px; width: 488px;">
+      <div class="panel-title">Java</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse panel-tool-expand" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="accordion-collapse accordion-expand"></a>
+      </div>
+    </div>
+    <div title="Java" style="padding: 10px; display: none; width: 478px; height: 68px;" class="panel-body accordion-body" id="">
+      <p>
+        Java (Indonesian: Jawa) is an island of Indonesia. With a population of 135 million (excluding the 3.6
+      </p>
+    </div>
+  </div>
+  <div class="panel" style="width: 498px;">
+    <div class="panel-header accordion-header" style="height: 16px; width: 488px;">
+      <div class="panel-title">C#</div>
+      <div class="panel-tool">
+        <a href="javascript:void(0)" class="accordion-collapse accordion-expand" style="display: none;"></a>
+      </div>
+    </div>
+    <div title="C#" style="padding: 10px; width: 478px;" data-options="collapsible:false,collapsed:false" class="panel-body accordion-body" id="">
+      <p>
+        C# is a multi-paradigm programming language encompassing strong typing, imperative, declarative,
+      </p>
+    </div>
+  </div>
+  <div class="panel" style="width: 498px;">
+    <div class="panel-header accordion-header" style="height: 16px; width: 488px;">
+      <div class="panel-title">Ruby</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse panel-tool-expand" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="accordion-collapse accordion-expand"></a>
+      </div>
+    </div>
+    <div title="Ruby" style="padding: 10px; display: none; width: 478px; height: 68px;" class="panel-body accordion-body" id="">
+      <p>
+        A dynamic, reflective, general-purpose object-oriented programming language.
+      </p>
+    </div>
+  </div>
+  <div class="panel" style="width: 498px;">
+    <div class="panel-header accordion-header accordion-header-selected" style="height: 16px; width: 488px;">
+      <div class="panel-title">Fortran</div>
+      <div class="panel-tool">
+        <a class="panel-tool-collapse" href="javascript:void(0)" style="display: none;"></a>
+        <a href="javascript:void(0)" class="accordion-collapse"></a>
+      </div>
+    </div>
+    <div title="Fortran" style="padding: 10px; display: block; width: 478px; height: 68px;" selected="" class="panel-body accordion-body" id="">
+      <p>
+        Fortran (previously FORTRAN) is a general-purpose, imperative programming language that is especially
+      </p>
+    </div>
+  </div>
+</div>
+  </body>
+<script src="../../src/jquery.parser.js"></script>
+</html>

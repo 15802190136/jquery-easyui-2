@@ -1,0 +1,104 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>linkbutton_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.l-btn {
+  text-decoration: none;
+  display: inline-block;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+  vertical-align: middle;
+}
+.l-btn {
+  color: #444;
+  background: #fafafa;
+  border: 1px solid #bbb;
+}
+.l-btn:hover {
+  background: #eaf2ff;
+  color: #000000;
+  border: 1px solid #b7d2ff;
+}
+.l-btn-left {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+.l-btn-text {
+  display: inline-block;
+  vertical-align: top;
+  width: auto;
+  line-height: 24px;
+  font-size: 12px;
+  padding: 0;
+  margin: 0 4px;
+}
+.l-btn-icon-left .l-btn-text {
+  margin: 0 4px 0 24px;
+}
+.icon-add {
+  background: url('../../img/icons/edit_add.png') no-repeat center center;
+}
+.l-btn-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  position: absolute;
+  top: 50%;
+  margin-top: -8px;
+  font-size: 1px;
+}
+.l-btn-icon-left .l-btn-icon {
+  left: 4px;
+}
+.l-btn-disabled,
+.l-btn-disabled:hover {
+  opacity: 0.5;
+  cursor: default;
+  background: #fafafa;
+  color: #444;
+}
+.l-btn-disabled .l-btn-text,
+.l-btn-disabled .l-btn-icon {
+  filter: alpha(opacity=50);
+}
+.l-btn-selected,
+.l-btn-selected:hover {
+  background: #ddd;
+  filter: none;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!-- 
+<div style="padding:5px 0;">
+ <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add'">Add</a>
+</div>
+--> 
+  <div style="padding:5px 0;">
+    <a href="#" class="easyui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-add'" id="">
+      <span class="l-btn-left l-btn-icon-left">
+        <span class="l-btn-text">Add</span>
+        <span class="l-btn-icon icon-add">&nbsp;</span>
+      </span>
+    </a>
+  </div>
+</body>
+</html>

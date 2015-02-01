@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>tooltip_dom</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.tooltip {
+  position: absolute;
+  display: none;
+  z-index: 9900000;
+  outline: none;
+  opacity: 1;
+  filter: alpha(opacity=100);
+  padding: 5px;
+  border:1px solid;
+}
+.tooltip-arrow-outer,
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  line-height: 0;
+  font-size: 0;
+  border:6px solid transparent;
+}
+.tooltip-bottom .tooltip-arrow-outer {
+  top: 0;
+  left: 50%;
+  margin: -13px 0 0 -6px;
+}
+.tooltip-bottom .tooltip-arrow {
+  top: 0;
+  left: 50%;
+  margin: -12px 0 0 -6px;
+}
+.tooltip {
+  background-color: #ffffff;
+  border-color: #95B8E7;
+  color: #000000;
+}
+.tooltip-bottom .tooltip-arrow-outer {border-bottom-color: #95B8E7;}
+.tooltip-bottom .tooltip-arrow {border-bottom-color: #ffffff;}
+  </style>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+<!--
+<a href="#" title="This is the tooltip message." class="easyui-tooltip">Hover me</a>
+-->
+<a href="#" title="" class="easyui-tooltip tooltip-f">Hover me</a>
+<div tabindex="-1" class="tooltip tooltip-bottom" style="left: 0px; top: 47px; display: none;">
+  <div class="tooltip-content">This is the tooltip message.</div>
+  <div class="tooltip-arrow-outer" style="left: 49px; border-bottom-color: rgb(149, 184, 231);"></div>
+  <div class="tooltip-arrow" style="left: 49px; border-bottom-color: rgb(255, 255, 255);"></div>
+</div>
+</body>
+</html>
