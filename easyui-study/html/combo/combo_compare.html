@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>combo_compare</title>
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+  </style>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/tooltip.css">
+  <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+<!--
+  <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+  <link rel="stylesheet" type="text/css" href="../../css/combo.css">
+-->
+  <link rel="stylesheet" type="text/css" href="../../../easyui-1.4/themes/default/textbox.css">
+  <link rel="stylesheet" type="text/css" href="../../../easyui-1.4/themes/default/linkbutton.css">
+  <link rel="stylesheet" type="text/css" href="../../../easyui-1.4/themes/default/combo.css">
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <select id="cc" style="width:150px"></select>
+  <div id="sp">
+    <div style="color:#99BBE8;background:#fafafa;padding:5px;">Select a language</div>
+    <div style="padding:10px">
+      <input type="radio" name="lang" value="01"><span>Java</span><br/>
+      <input type="radio" name="lang" value="02"><span>C#</span><br/>
+      <input type="radio" name="lang" value="03"><span>Ruby</span><br/>
+      <input type="radio" name="lang" value="04"><span>Basic</span><br/>
+      <input type="radio" name="lang" value="05"><span>Fortran</span>
+    </div>
+  </div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<!--
+<script src="../../src/jquery.panel.js"></script>
+-->
+<!-- -->
+<script src="../../../easyui-1.4/recover/jquery.panel.js"></script>
+
+<script src="../../src/jquery.tooltip.js"></script>
+<script src="../../src/jquery.validatebox.js"></script>
+<!--
+<script src="../../src/jquery.textbox.js"></script>
+-->
+<script src="../../../easyui-1.4/recover/jquery.linkbutton.js"></script>
+<script src="../../../easyui-1.4/recover/jquery.textbox.js"></script>
+<script src="../../../easyui-1.4/recover/jquery.menu.js"></script>
+<script src="../../../easyui-1.4/recover/jquery.window.js"></script>
+<script src="../../../easyui-1.4/recover/jquery.combo.js"></script>
+<script>
+$(function(){
+$.parser.parse();
+var main = function(){
+  $('#cc').combo({
+    required:true,
+    editable:false
+  });
+  $('#sp').appendTo($('#cc').combo('panel'));
+  $('#sp input').click(function(){
+    var v = $(this).val();
+    var s = $(this).next('span').text();
+    $('#cc').combo('setValue', v).combo('setText', s).combo('hidePanel');
+  });
+}
+main();
+})
+</script>
+</html>

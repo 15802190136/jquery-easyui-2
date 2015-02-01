@@ -87,7 +87,7 @@ function initPanelTool(target){
   var opts = state.options;
   var panel = state.panel;
   remove(panel.children("div.panel-header"));
-  if (!opts.noheader) {
+  if (opts.title && !opts.noheader) {
     var pheader = $("<div class='panel-header'></div>").prependTo(panel);
     var ptitle = $("<div class='panel-title'></div>").html(opts.title).appendTo(pheader);
     if (opts.iconCls) {

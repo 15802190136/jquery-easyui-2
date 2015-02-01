@@ -26,16 +26,11 @@ $.fn.tooltip.defaults = {
   showDelay : 200,hideDelay : 100,
   showEvent : "mouseenter",
   hideEvent : "mouseleave",
-  onShow : function(e) {
-  },
-  onHide : function(e) {
-  },
-  onUpdate : function(content) {
-  },
-  onPosition : function(left, top) {
-  },
-  onDestroy : function() {
-  }
+  onShow : function(e) {},
+  onHide : function(e) {},
+  onUpdate : function(content) {},
+  onPosition : function(left, top) {},
+  onDestroy : function() {}
 }
 $.fn.tooltip.parseOptions = function(target){
   var t = $(target);

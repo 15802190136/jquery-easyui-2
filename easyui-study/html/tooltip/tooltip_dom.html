@@ -29,6 +29,36 @@ body {
   font-size: 0;
   border:6px solid transparent;
 }
+.tooltip-right .tooltip-arrow-outer {
+  left: 0;
+  top: 50%;
+  margin: -6px 0 0 -13px;
+}
+.tooltip-right .tooltip-arrow {
+  left: 0;
+  top: 50%;
+  margin: -6px 0 0 -12px;
+}
+.tooltip-left .tooltip-arrow-outer {
+  right: 0;
+  top: 50%;
+  margin: -6px -13px 0 0;
+}
+.tooltip-left .tooltip-arrow {
+  right: 0;
+  top: 50%;
+  margin: -6px -12px 0 0;
+}
+.tooltip-top .tooltip-arrow-outer {
+  bottom: 0;
+  left: 50%;
+  margin: 0 0 -13px -6px;
+}
+.tooltip-top .tooltip-arrow {
+  bottom: 0;
+  left: 50%;
+  margin: 0 0 -12px -6px;
+}
 .tooltip-bottom .tooltip-arrow-outer {
   top: 0;
   left: 50%;
@@ -44,8 +74,30 @@ body {
   border-color: #95B8E7;
   color: #000000;
 }
-.tooltip-bottom .tooltip-arrow-outer {border-bottom-color: #95B8E7;}
-.tooltip-bottom .tooltip-arrow {border-bottom-color: #ffffff;}
+.tooltip-right .tooltip-arrow-outer {
+  border-right-color: #95B8E7;
+}
+.tooltip-right .tooltip-arrow {
+  border-right-color: #ffffff;
+}
+.tooltip-left .tooltip-arrow-outer {
+  border-left-color: #95B8E7;
+}
+.tooltip-left .tooltip-arrow {
+  border-left-color: #ffffff;
+}
+.tooltip-top .tooltip-arrow-outer {
+  border-top-color: #95B8E7;
+}
+.tooltip-top .tooltip-arrow {
+  border-top-color: #ffffff;
+}
+.tooltip-bottom .tooltip-arrow-outer {
+  border-bottom-color: #95B8E7;
+}
+.tooltip-bottom .tooltip-arrow {
+  border-bottom-color: #ffffff;
+}
   </style>
   <script src="../../bower_components/jquery/jquery.js"></script>
 </head>
@@ -53,11 +105,30 @@ body {
 <!--
 <a href="#" title="This is the tooltip message." class="easyui-tooltip">Hover me</a>
 -->
-<a href="#" title="" class="easyui-tooltip tooltip-f">Hover me</a>
-<div tabindex="-1" class="tooltip tooltip-bottom" style="left: 0px; top: 47px; display: none;">
+<!-- buttom -->
+<a href="#" title="" class="easyui-tooltip tooltip-f" style="position:relative;left:50px;">Hover me</a>
+<div tabindex="-1" class="tooltip tooltip-bottom" style="left: 12px; top: 47px; display: block;">
   <div class="tooltip-content">This is the tooltip message.</div>
-  <div class="tooltip-arrow-outer" style="left: 49px; border-bottom-color: rgb(149, 184, 231);"></div>
-  <div class="tooltip-arrow" style="left: 49px; border-bottom-color: rgb(255, 255, 255);"></div>
+  <div class="tooltip-arrow-outer" style="border-bottom-color: rgb(149, 184, 231);"></div>
+  <div class="tooltip-arrow" style="border-bottom-color: rgb(255, 255, 255);"></div>
+</div>
+<!-- top -->
+<div tabindex="-1" class="tooltip tooltip-top" style="left: 12px; top: 77px; display: block;">
+  <div class="tooltip-content">This is the tooltip message.</div>
+  <div class="tooltip-arrow-outer" style="border-top-color: rgb(149, 184, 231);"></div>
+  <div class="tooltip-arrow" style="border-top-color: rgb(255, 255, 255);"></div>
+</div>
+<!-- right -->
+<div tabindex="-1" class="tooltip tooltip-right" style="left: 12px; top: 117px; display: block;">
+  <div class="tooltip-content">This is the tooltip message.</div>
+  <div class="tooltip-arrow-outer" style="border-right-color: rgb(149, 184, 231);"></div>
+  <div class="tooltip-arrow" style="border-right-color: rgb(255, 255, 255);"></div>
+</div>
+<!-- left -->
+<div tabindex="-1" class="tooltip tooltip-left" style="left: 12px; top: 147px; display: block;">
+  <div class="tooltip-content">This is the tooltip message.</div>
+  <div class="tooltip-arrow-outer" style="border-left-color: rgb(149, 184, 231);"></div>
+  <div class="tooltip-arrow" style="border-left-color: rgb(255, 255, 255);"></div>
 </div>
 </body>
 </html>

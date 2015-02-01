@@ -23,13 +23,56 @@
   font-size: 12px;
   color: #aaa;
 }
+.textbox-button,
+.textbox-button:hover {
+  position: absolute;
+  top: 0;
+  padding: 0;
+  vertical-align: top;
+}
+.textbox-button-right,
+.textbox-button-right:hover {
+  border-width: 0 0 0 1px;
+}
+.textbox-button-left,
+.textbox-button-left:hover {
+  border-width: 0 1px 0 0;
+}
+.textbox-addon {
+  position: absolute;
+  top: 0;
+}
+.textbox-icon {
+  display: inline-block;
+  width: 18px;
+  height: 20px;
+  overflow: hidden;
+  vertical-align: top;
+  background-position: center center;
+  cursor: pointer;
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+  text-decoration: none;
+  outline-style: none;
+}
+.textbox-icon-disabled,
+.textbox-icon-readonly {
+  cursor: default;
+}
+.textbox-icon:hover {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
+}
+.textbox-icon-disabled:hover {
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+}
+.textbox-focused {
+  -moz-box-shadow: 0 0 3px 0 #95B8E7;
+  -webkit-box-shadow: 0 0 3px 0 #95B8E7;
+  box-shadow: 0 0 3px 0 #95B8E7;
+}
 .textbox-invalid {
   border-color: #ffa8a8;
   background-color: #fff3f3;
-}
-.textbox {
-  height: 20px;
-  margin: 0;
-  padding: 0 2px;
-  box-sizing: content-box;
 }
