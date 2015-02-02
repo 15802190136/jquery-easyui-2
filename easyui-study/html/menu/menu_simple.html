@@ -1,0 +1,485 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>menu_simple</title>
+     <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.menu {
+  position: absolute;
+  margin: 0;
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+}
+.menu-item {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+}
+.menu-text {
+  height: 20px;
+  line-height: 20px;
+  float: left;
+  padding-left: 28px;
+}
+.menu-icon {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 50%;
+  margin-top: -8px;
+}
+.menu-rightarrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: 0;
+  top: 50%;
+  margin-top: -8px;
+}
+.menu-line {
+  position: absolute;
+  left: 26px;
+  top: 0;
+  height: 2000px;
+  font-size: 1px;
+}
+.menu-sep {
+  margin: 3px 0px 3px 25px;
+  font-size: 1px;
+}
+.menu-active {
+  border-radius: 5px 5px 5px 5px;
+}
+.menu-item-disabled {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  cursor: default;
+}
+.menu-text,
+.menu-text span {
+  font-size: 12px;
+}
+.menu-shadow {
+  position: absolute;
+  border-radius: 5px 5px 5px 5px;
+  background: #ccc;
+  box-shadow: 2px 2px 3px #cccccc;
+}
+.menu-rightarrow {
+  background: url('../../img/menu_arrows.png') no-repeat -32px center;
+}
+.menu-line {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #fff;
+}
+.menu-sep {
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #fff;
+}
+.menu {
+  background-color: #fafafa;
+  border-color: #ddd;
+  color: #444;
+}
+.menu-content {
+  background: #ffffff;
+}
+.menu-item {
+  border-color: transparent;
+  _border-color: #fafafa;
+}
+.menu-active {
+  border-color: #b7d2ff;
+  color: #000000;
+  background: #eaf2ff;
+}
+.menu-active-disabled {
+  border-color: transparent;
+  background: transparent;
+  color: #444;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<div id="mm" class="easyui-menu" style="width:120px;">
+  <div>New</div>
+  <div>
+    <span>Open</span>
+    <div style="width:150px;">
+      <div><b>Word</b></div>
+      <div>Excel</div>
+    </div>
+  </div>
+  <div data-options="iconCls:'icon-save'">Save</div>
+  <div data-options="iconCls:'icon-print',disabled:true">Print</div>
+  <div class="menu-sep"></div>
+  <div>Exit</div>
+</div>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-menu")[0]
+var t = $(".easyui-menu")
+var state_opts
+var defaults = {   
+  zIndex : 110000,
+  left : 0,
+  top : 0,
+  alignTo : null,
+  align : 'left',
+  minWidth : 120,
+  duration : 100,
+  hideOnUnhover : true,
+  onShow : function() {},
+  onHide : function() {},
+  onClick : function(item) {}
+}
+function main(){
+  parseOptions()
+  init()
+  t.css({
+    left : state_opts.left,
+    top : state_opts.top
+  });
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,
+    $.parser.parseOptions(target, [{
+      minWidth : 'number',
+      duration : 'number',
+      hideOnUnhover : 'boolean'    
+    }]));
+}
+function init(){
+  t.appendTo('body');
+  t.addClass('menu-top'); // the top menu
+
+  $(document).unbind('.menu').bind('mousedown.menu', function(e) {
+    var m = $(e.target).closest('div.menu,div.combo-p');
+    if (m.length) return
+    hideAll();
+  });
+
+  var menus = splitMenu(t);
+  for (var i = 0; i < menus.length; i++) {
+    createMenu(menus[i]);
+  }  
+}
+function splitMenu(menu) {
+  var menus = [];
+  menu.addClass('menu');
+  menus.push(menu);
+  if (!menu.hasClass('menu-content')) {
+    menu.children('div').each(function() {
+      var submenu = $(this).children('div');
+      if (submenu.length) {
+        submenu.insertAfter(target);
+        this.submenu = submenu; // point to the sub menu
+        var mm = splitMenu(submenu);
+        menus = menus.concat(mm);
+      }
+    });
+  }
+  return menus;
+}
+function createMenu(menu) {
+  var wh = $.parser.parseOptions(menu[0], [ 'width', 'height' ]);
+  var item,itemOpts,text
+  menu[0].originalHeight = wh.height || 0;
+  if (menu.hasClass('menu-content')) {
+    menu[0].originalWidth = wh.width || menu._outerWidth();
+  } else {
+    menu[0].originalWidth = wh.width || 0;
+    menu.children('div').each(function() {
+      item = $(this);
+      itemOpts = $.extend({}, $.parser.parseOptions(this, [ 'name', 'iconCls', 'href', {
+        separator : 'boolean'
+      } ]), {
+        disabled : (item.attr('disabled') ? true : undefined)
+      });
+      if (itemOpts.separator)
+        item.addClass('menu-sep');
+      if (!item.hasClass('menu-sep')) {
+        item[0].itemName = itemOpts.name || '';
+        item[0].itemHref = itemOpts.href || '';
+
+        text = item.addClass('menu-item').html();
+        item.empty().append($('<div class="menu-text"></div>').html(text));
+        if (itemOpts.iconCls)
+          $('<div class="menu-icon"></div>').addClass(itemOpts.iconCls).appendTo(item);
+        if (itemOpts.disabled)
+          setDisabled(item[0], true);
+        if (item[0].submenu) {
+          $('<div class="menu-rightarrow"></div>').appendTo(item);
+        }
+
+        bindMenuItemEvent(item);
+      }
+    });
+    $('<div class="menu-line"></div>').prependTo(menu);
+  }
+  setMenuSize(menu);
+  menu.hide();
+  bindMenuEvent(menu);
+}
+function setDisabled(itemEl, disabled) {
+  var t = $(itemEl);
+  if (!t.hasClass('menu-item')) return
+  if (disabled) {
+    t.addClass('menu-item-disabled');
+    if (itemEl.onclick) {
+      itemEl.onclick1 = itemEl.onclick;
+      itemEl.onclick = null;
+    }
+  } else {
+    t.removeClass('menu-item-disabled');
+    if (itemEl.onclick1) {
+      itemEl.onclick = itemEl.onclick1;
+      itemEl.onclick1 = null;
+    }
+  }
+}
+function setMenuSize(menu) {
+  var opts = state_opts;
+  var style = menu.attr('style') || '';
+  var el,width,height,at,h1,h2,lineHeight
+  menu.css({
+    display : 'block',
+    left : -10000,
+    height : 'auto',
+    overflow : 'hidden'
+  });
+
+  el = menu[0];
+  width = el.originalWidth || 0;
+  if (!width) {
+    width = 0;
+    menu.find('div.menu-text').each(function() {
+      if (width < $(this)._outerWidth()) {
+        width = $(this)._outerWidth();
+      }
+      $(this).closest('div.menu-item')._outerHeight($(this)._outerHeight() + 2);
+    });
+    width += 40;
+  }
+
+  width = Math.max(width, opts.minWidth);
+  height = el.originalHeight || 0;
+  if (!height) {
+    height = menu.outerHeight();
+
+    if (menu.hasClass('menu-top') && opts.alignTo) {
+      at = $(opts.alignTo);
+      h1 = at.offset().top - $(document).scrollTop();
+      h2 = $(window)._outerHeight() + $(document).scrollTop() - at.offset().top - at._outerHeight();
+      height = Math.min(height, Math.max(h1, h2));
+    } else if (height > $(window)._outerHeight()) {
+      height = $(window).height();
+      style += ';overflow:auto';
+    } else {
+      style += ';overflow:hidden';
+    }
+  }
+  lineHeight = Math.max(el.originalHeight, menu.outerHeight()) - 2;
+  menu._outerWidth(width)._outerHeight(height);
+  menu.children('div.menu-line')._outerHeight(lineHeight);
+
+  style += ';width:' + el.style.width + ';height:' + el.style.height;
+  menu.attr('style', style);
+}
+function bindMenuEvent(menu) {
+  var state = state_opts;
+  menu.unbind('.menu').bind('mouseenter.menu', function() {
+    if (state_timer) {
+      clearTimeout(state_timer);
+      state_timer = null;
+    }
+  }).bind('mouseleave.menu', function() {
+    if (state_opts.hideOnUnhover) {
+      state_timer = setTimeout(function() {
+        hideAll();
+      }, state_opts.duration);
+    }
+  });
+}
+function bindMenuItemEvent(item){
+  if (!item.hasClass('menu-item')) return
+  item.unbind('.menu');
+  item.bind('click.menu', function() {
+    if ($(this).hasClass('menu-item-disabled'))
+      return;
+    if (!this.submenu) {
+      hideAll();
+      var href = this.itemHref;
+      if (href)
+        location.href = href;
+    }
+    var item =  getItem(this);
+    state_opts.onClick.call(target, item);
+  }).bind('mouseenter.menu', function(e) {
+    item.siblings().each(function() {
+      if (this.submenu)
+        hideMenu(this.submenu);
+      $(this).removeClass('menu-active');
+    });
+    item.addClass('menu-active');
+
+    if ($(this).hasClass('menu-item-disabled')) {
+      item.addClass('menu-active-disabled');
+      return;
+    }
+
+    var submenu = item[0].submenu;
+    if (submenu) {
+      showMenu({
+        menu : submenu,
+        parent : item
+      })
+    }
+  }).bind('mouseleave.menu', function(e) {
+    item.removeClass('menu-active menu-active-disabled');
+    var submenu = item[0].submenu;
+    if (submenu) {
+      if (e.pageX >= parseInt(submenu.css('left')))
+        item.addClass('menu-active');
+      else
+        hideMenu(submenu);
+    } else {
+      item.removeClass('menu-active');
+    }
+  });
+}
+function hideAll() {
+  if (t.is(':visible')) {
+    hideMenu(t);
+    state_opts.onHide.call(target);
+  }
+  return false;
+}
+function hideMenu(menu) {
+  if (!menu) return;
+  hideit(menu);
+  menu.find('div.menu-item').each(function() {
+    if (this.submenu)
+      hideMenu(this.submenu);
+    $(this).removeClass('menu-active');
+  });
+}
+function hideit(m){
+  m.stop(true, true);
+  if (m[0].shadow)
+    m[0].shadow.hide();
+  m.hide();  
+}
+function showMenu(param){
+  var left,top,menu;
+  param = param || {};
+  menu = $(param.menu || target);
+  setMenuSize(menu[0]);
+  if (menu.hasClass('menu-top')) {
+    var opts = state_opts;
+    $.extend(opts, param);
+    left = opts.left;
+    top = opts.top;
+    if (opts.alignTo) {
+      var at = $(opts.alignTo);
+      left = at.offset().left;
+      top = at.offset().top + at._outerHeight();
+      if (opts.align == 'right') {
+        left += at.outerWidth() - menu.outerWidth();
+      }
+    }
+    if (left + menu.outerWidth() > $(window)._outerWidth() + $(document)._scrollLeft()) {
+      left = $(window)._outerWidth() + $(document).scrollLeft() - menu.outerWidth() - 5;
+    }
+    if (left < 0)
+      left = 0;
+    top = _fixTop(top, opts.alignTo);
+  } else {
+    var parent = param.parent; // the parent menu item
+    left = parent.offset().left + parent.outerWidth() - 2;
+    if (left + menu.outerWidth() + 5 > $(window)._outerWidth() + $(document).scrollLeft()) {
+      left = parent.offset().left - menu.outerWidth() + 2;
+    }
+    top = _fixTop(parent.offset().top - 3);
+  }  
+  menu.css({
+    left : left,
+    top : top
+  });
+  menu.show(0, function() {
+    if (!menu[0].shadow) {
+      menu[0].shadow = $('<div class="menu-shadow"></div>').insertAfter(menu);
+    }
+    menu[0].shadow.css({
+      display : 'block',
+      zIndex : $.fn.menu.defaults.zIndex++,
+      left : menu.css('left'),
+      top : menu.css('top'),
+      width : menu.outerWidth(),
+      height : menu.outerHeight()
+    });
+    menu.css('z-index', $.fn.menu.defaults.zIndex++);
+    if (menu.hasClass('menu-top')) {
+      $.data(menu[0], 'menu').options.onShow.call(menu[0]);
+    }
+  });
+}
+function _fixTop(top, alignTo) {
+  if (top + menu.outerHeight() > $(window)._outerHeight() + $(document).scrollTop()) {
+    if (alignTo)
+      top = $(alignTo).offset().top - menu._outerHeight();
+    else
+      top = $(window)._outerHeight() + $(document).scrollTop() - menu.outerHeight();
+  }
+  if (top < 0)
+    top = 0;
+  return top;
+}
+function getItem(itemEl){
+  var t = $(itemEl);
+  var item = {
+    target : itemEl,
+    id : t.attr('id'),
+    text : $.trim(t.children('div.menu-text').html()),
+    disabled : t.hasClass('menu-item-disabled'),
+    // href: t.attr('href'),
+    // name: t.attr('name'),
+    name : itemEl.itemName,
+    href : itemEl.itemHref,
+    onclick : itemEl.onclick
+  }
+  var icon = t.children('div.menu-icon');
+  if (icon.length) {
+    var cc = [];
+    var aa = icon.attr('class').split(' ');
+    for (var i = 0; i < aa.length; i++) {
+      if (aa[i] != 'menu-icon') {
+        cc.push(aa[i]);
+      }
+    }
+    item.iconCls = cc.join(' ');
+  }
+  return item; 
+}
+main()
+
+
+})
+</script>
+</html>
