@@ -28,6 +28,7 @@ $.fn.linkbutton.defaults = {
   disabled: false,
   toggle: true,
   selected: false,
+  plain: false,
   text: '',
   iconCls: null,
   size: 'small',  // small,large
@@ -35,7 +36,7 @@ $.fn.linkbutton.defaults = {
 }
 $.fn.linkbutton.parseOptions = function(target){
   var t = $(target)
-  return $.extend({},$.parser.parseOptions(target,['id','iconCls','size',{toggle:'boolean',selected:'boolean'}]),{ 
+  return $.extend({},$.parser.parseOptions(target,['id','iconCls','size',{plain:'boolean',toggle:'boolean',selected:'boolean'}]),{ 
     disabled: (t.attr('disabled') ? true : undefined),
     text: $.trim(t.html()),
     iconCls: (t.attr('icon') || t.attr('iconCls'))
@@ -44,10 +45,12 @@ $.fn.linkbutton.parseOptions = function(target){
 function createButton(target){
   var opts = $.data(target, 'linkbutton').options;
   var t = $(target).empty();
-  t.empty().addClass('l-btn').removeClass('l-btn-selected');
+  t.empty().addClass('l-btn').removeClass('l-btn-plain l-btn-selected l-btn-plain-selected');
   t.removeClass('l-btn-small l-btn-medium l-btn-large').addClass('l-btn-'+opts.size);
+  if (opts.plain)
+    t.addClass('l-btn-plain')
   if (opts.selected)
-    t.addClass('l-btn-selected');
+    t.addClass(opts.plain ? 'l-btn-selected l-btn-plain-selected' : 'l-btn-selected');
   t.attr('id', opts.id || '');
 
   var inner = $('<span class="l-btn-left"></span>').appendTo(t);
@@ -78,10 +81,10 @@ function setSelected(target,selected){
   var t = $(target);
   var opts = state.options;
   if (selected){
-    t.addClass('l-btn-selected');
+    t.addClass(opts.plain ? 'l-btn-selected l-btn-plain-selected' : 'l-btn-selected');
     opts.selected = true;
   } else {
-    t.removeClass('l-btn-selected');
+    t.removeClass('l-btn-selected l-btn-plain-selected');
     opts.selected = false;
   }
 }
@@ -89,7 +92,7 @@ function setDisabled(target,disabled){
   var state = $.data(target, 'linkbutton');
   var t = $(target);
   var opts = state.options;
-  t.removeClass('l-btn-disabled');
+  t.removeClass('l-btn-disabled l-btn-plain-disabled');
   if (disabled){
     opts.disabled = true;
     var href = t.attr('href');
@@ -101,7 +104,7 @@ function setDisabled(target,disabled){
       state.onclick = target.onclick;
       target.onclick = null;
     }
-    t.addClass('l-btn-disabled');
+    opts.plain ? t.addClass('l-btn-disabled l-btn-plain-disabled') : t.addClass('l-btn-disabled');
   } else {
     opts.disabled = false;
     if (state.href)

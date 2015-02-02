@@ -152,9 +152,6 @@
   background: #eaf2ff;
   color: #000000;
   border: 1px solid #b7d2ff;
-  -moz-border-radius: 5px 5px 5px 5px;
-  -webkit-border-radius: 5px 5px 5px 5px;
-  border-radius: 5px 5px 5px 5px;
 }
 .l-btn-disabled,
 .l-btn-disabled:hover {
