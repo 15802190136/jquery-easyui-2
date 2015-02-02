@@ -37,9 +37,17 @@ $.fn.textbox.defaults = $.extend({}, $.fn.validatebox.defaults, {
   prompt : "",
   value : "",
   type : "text",
+  multiline : false,
   editable : true,
   disabled : false,
   readonly : false,
+  icons : [],
+  iconCls : null,
+  iconAlign : "right",
+  iconWidth : 18,
+  buttonText : "",
+  buttonIcon : null,
+  buttonAlign : "right",
   inputEvents : {
     blur : function(e) {
       var t = $(e.data.target);
@@ -61,7 +69,9 @@ $.fn.textbox.defaults = $.extend({}, $.fn.validatebox.defaults, {
 $.fn.textbox.parseOptions = function(target) {
   var t = $(target)
   return $.extend({},$.fn.validatebox.parseOptions(target),
-    $.parser.parseOptions(target, ["prompt",{editable : "boolean"}]), {
+    $.parser.parseOptions(target, [
+      "prompt","iconCls", "iconAlign", "buttonText", "buttonIcon", "buttonAlign",
+      {multiline : "boolean",editable : "boolean",iconWidth : "number"}]), {
       value : (t.val() || undefined),
       type : (t.attr("type") ? t.attr("type") : undefined),
       disabled: (t.attr('disabled') ? true : undefined),
@@ -87,7 +97,33 @@ function initBtns(target){
   var opts = state.options;
   var tb = state.textbox;
   tb.find(".textbox-text").remove();
-  $("<input type='" + opts.type + "' class='textbox-text' autocomplete='off'>").prependTo(tb);
+  if (opts.multiline) 
+    $("<textarea class='textbox-text' autocomplete='off'></textarea>").prependTo(tb);
+  else
+    $("<input type='" + opts.type + "' class='textbox-text' autocomplete='off'>").prependTo(tb);
+  tb.find(".textbox-addon").remove();
+  var bb = opts.icons ? $.extend(true, [], opts.icons) : [];
+  if (opts.iconCls) {
+    bb.push({
+      iconCls : opts.iconCls,
+      disabled : true
+    });
+  }
+  if (bb.length) {
+    var bc = $("<span class='textbox-addon'></span>").prependTo(tb);
+    bc.addClass("textbox-addon-" + opts.iconAlign);
+    for (var i = 0; i < bb.length; i++) {
+      bc.append("<a href='javascript:void(0)' class='textbox-icon " + bb[i].iconCls + "' icon-index='" + i + "' tabindex='-1'></a>");
+    }
+  }
+  tb.find(".textbox-button").remove();
+  if (opts.buttonText || opts.buttonIcon) {
+    var btn = $("<a href='javascript:void(0)' class='textbox-button'></a>").prependTo(tb);
+    btn.addClass("textbox-button-" + opts.buttonAlign).linkbutton({
+      text : opts.buttonText,
+      iconCls : opts.buttonIcon
+    });
+  }
   setDisabled(target,opts.disabled);
   setReadonly(target,opts.readonly);
 }
@@ -96,6 +132,7 @@ function initBindEvents(target){
   var opts = state.options;
   var tb = state.textbox;
   var text = tb.find(".textbox-text");
+  var addon,icon,activeIcon,currentSpan,index,btn
   text.attr("placeholder", opts.prompt);
   text.unbind(".textbox");
   if (!opts.disabled && !opts.readonly) {
@@ -120,6 +157,34 @@ function initBindEvents(target){
       }, opts.inputEvents[inputEvent]);
     }
   }
+  addon = tb.find(".textbox-addon");
+  addon.unbind().bind("click", {
+    target : target
+  }, function(e) {
+    icon = $(e.target).closest("a.textbox-icon:not(.textbox-icon-disabled)");
+    if (icon.length) {
+      index = parseInt(icon.attr("icon-index"));
+      activeIcon = opts.icons[index];
+      if (activeIcon && activeIcon.handler) {
+        activeIcon.handler.call(icon[0], e);
+        opts.onClickIcon.call(target, index);
+      }
+    }
+  });
+  addon.find(".textbox-icon").each(function(indexIcon) {
+    icon = opts.icons[indexIcon];
+    currentSpan = $(this);
+    if (!icon || icon.disabled || opts.disabled || opts.readonly)
+      currentSpan.addClass("textbox-icon-disabled");
+    else
+      currentSpan.removeClass("textbox-icon-disabled");
+  });
+  btn = tb.find(".textbox-button");
+  btn.unbind(".textbox").bind("click.textbox", function() {
+    if (!btn.linkbutton("options").disabled)
+      opts.onClickButton.call(target);
+  });
+  btn.linkbutton((opts.disabled || opts.readonly) ? "disable" : "enable");
   tb.unbind(".textbox").bind("_resize.textbox", function(e, customClass) {
     if ($(this).hasClass("easyui-fluid") || customClass)
       resize(target);
@@ -131,7 +196,7 @@ function resize(target,width){
   var opts = state.options;
   var tb = state.textbox;
   var span = tb.parent();
-  var text,paddingTop,c
+  var text,btn,addon,icon,paddingTop,c
   if (width)
     opts.width = width;
   if (isNaN(parseInt(opts.width))) {
@@ -143,21 +208,55 @@ function resize(target,width){
   }
   tb.appendTo("body");
   text = tb.find(".textbox-text");
+  btn = tb.find(".textbox-button");
+  addon = tb.find(".textbox-addon");
+  icon = addon.find(".textbox-icon");
   tb._size(opts, span);
+  btn.linkbutton("resize", {
+    height : tb.height()
+  });
+  btn.css({
+    left : (opts.buttonAlign == "left" ? 0 : ""),
+    right : (opts.buttonAlign == "right" ? 0 : "")
+  });
+  addon.css({
+    left : (opts.iconAlign == "left" ? (opts.buttonAlign == "left" ? btn._outerWidth() : 0) : ""),
+    right : (opts.iconAlign == "right" ? (opts.buttonAlign == "right" ? btn._outerWidth() : 0) : "")
+  });
+  icon.css({
+    width : opts.iconWidth + "px",
+    height : tb.height() + "px"
+  });
   text.css({
     paddingLeft : (target.style.paddingLeft || ""),
     paddingRight : (target.style.paddingRight || ""),
-    marginLeft : 0,
-    marginRight : 0
+    marginLeft : setAlign("left"),
+    marginRight : setAlign("right")
   });
   paddingTop = Math.floor((tb.height() - text.height()) / 2);
   text.css({
     paddingTop : paddingTop + "px",
     paddingBottom : paddingTop + "px"
   });
-  text._outerWidth(tb.width());
+  if (opts.multiline) {
+    text.css({
+      paddingTop : (target.style.paddingTop || ""),
+      paddingBottom : (target.style.paddingBottom || "")
+    });
+    text._outerHeight(tb.height());
+  } else {
+    var paddingTop = Math.floor((tb.height() - text.height()) / 2);
+    text.css({
+      paddingTop : paddingTop + "px",
+      paddingBottom : paddingTop + "px"
+    });
+  }  
+  text._outerWidth(tb.width() - icon.length * opts.iconWidth - btn._outerWidth());
   tb.insertAfter(target);
   opts.onResize.call(target, opts.width, opts.height);
+  function setAlign(type) {
+    return (opts.iconAlign == type ? addon._outerWidth() : 0) + (opts.buttonAlign == type ? btn._outerWidth() : 0);
+  }
 }
 function setDisabled(target,disabled){
   var state = $.data(target, "textbox");
