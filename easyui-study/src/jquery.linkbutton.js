@@ -26,7 +26,7 @@ $.fn.linkbutton = function(options, param){
 $.fn.linkbutton.defaults = {
   id: null,
   disabled: false,
-  toggle: true,
+  toggle: false,
   selected: false,
   plain: false,
   text: '',

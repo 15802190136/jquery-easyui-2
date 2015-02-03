@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="../../css/panel.css">
     <link rel="stylesheet" type="text/css" href="../../css/icon.css">
     <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+    <link rel="stylesheet" type="text/css" href="../../css/menu.css">
     <style>
 body {
   font-family: verdana,helvetica,arial,sans-serif;
@@ -109,10 +110,23 @@ body {
 <div class="easyui-panel" style="padding:5px;">
   <a href="#" class="easyui-menubutton" data-options="menu:'#mm1',iconCls:'icon-edit'">Edit</a>
 </div>
+<div id="mm1" style="width:150px;">
+  <div data-options="iconCls:'icon-undo'">Undo</div>
+  <div data-options="iconCls:'icon-redo'">Redo</div>
+  <div class="menu-sep"></div>
+  <div>
+    <span>Toolbar</span>
+    <div>
+      <div>Address</div>
+      <div>Link</div>
+    </div>
+  </div>
+</div>
 </body>
 <script src="../../src/jquery.parser.js"></script>
 <script src="../../src/jquery.panel.js"></script>
 <script src="../../src/jquery.linkbutton.js"></script>
+<script src="../../src/jquery.menu.js"></script>
 <script>
 $(function(){
 $.parser.parse();
@@ -145,19 +159,87 @@ function parseOptions(){
 }
 function init(){
   var opts = state_opts;
-  var btnLeftObj
+  var btnLeftObj,menuOpts,onShow,onHide
   t.linkbutton(opts);
   t.removeClass(opts.cls.btn1 + " " + opts.cls.btn2).addClass("m-btn");
   t.removeClass("m-btn-small m-btn-medium m-btn-large").addClass("m-btn-" + opts.size);
   btnLeftObj = t.find(".l-btn-left");
   $("<span></span>").addClass(opts.cls.arrow).appendTo(btnLeftObj);
   $("<span></span>").addClass("m-btn-line").appendTo(btnLeftObj);
+  if (opts.menu) {
+    $(opts.menu).menu({
+      duration : opts.duration
+    });
+    menuOpts = $(opts.menu).menu("options");
+    onShow = menuOpts.onShow;
+    onHide = menuOpts.onHide;
+    $.extend(menuOpts, {
+      onShow : function() {
+        var menuOpts = $(this).menu("options");
+        var alignTo = $(menuOpts.alignTo);
+        var opts = options();
+        alignTo.addClass((opts.plain == true) ? opts.cls.btn2 : opts.cls.btn1);
+        onShow.call(this);
+      },
+      onHide : function() {
+        var menuOpts = $(this).menu("options");
+        var alignTo = $(menuOpts.alignTo);
+        var opts = options();
+        alignTo.removeClass((opts.plain == true) ? opts.cls.btn2 : opts.cls.btn1);
+        onHide.call(this);
+      }
+    });
+  }
+}
+function options(){
+  var linkbuttonOpts = t.linkbutton("options");
+  return $.extend(state_opts, {
+    toggle : linkbuttonOpts.toggle,
+    selected : linkbuttonOpts.selected,
+    disabled : linkbuttonOpts.disabled
+  });
 }
 function setDisabled() {
   var opts = state_opts;
+  var timer = null;
   var t = btn.find("." + opts.cls.trigger);
   if (!t.length)
     t = btn;
+    t.unbind(".menubutton");
+    t.bind("click.menubutton", function() {
+      if (!isDisabled()) {
+        showMenu();
+        return false;
+      }
+    }).bind("mouseenter.menubutton", function() {
+      if (!isDisabled()) {
+        timer = setTimeout(function() {
+          showMenu();
+        }, opts.duration);
+        return false;
+      }
+    }).bind("mouseleave.menubutton", function() {
+      if (timer)
+        clearTimeout(timer);
+      $(opts.menu).triggerHandler("mouseleave");
+    });
+}
+function isDisabled() {
+  return t.linkbutton("options").disabled;
+}
+function showMenu() {
+  var opts = state_opts;
+  if (opts.disabled || !opts.menu) return;
+  $("body>div.menu-top").menu("hide");
+  var mm = $(opts.menu);
+  if (mm.length) {
+    mm.menu("options").alignTo = btn;
+    mm.menu("show", {
+      alignTo : btn,
+      align : opts.menuAlign
+    });
+  }
+  btn.blur();
 }
 main();
 })
