@@ -210,16 +210,18 @@ function setDisabled(target,disabled){
 }
 function setSize(target,param){
   var state = $.data(target, 'linkbutton');
-  var t = $(target);
+  var btn = $(target);
+  var parent = btn.parent();
+  var left = btn.find('.l-btn-left');
   var opts = state.options;
+  var isVisible,spacer,style
   if (param)
     $.extend(opts, param);
   if (opts.width || opts.height || opts.fit){
-    var parent = btn.parent();
-    var isVisible = btn.is(':visible');
+    isVisible = btn.is(':visible');
     if (!isVisible){
-      var spacer = $('<div style="display:none"></div>').insertBefore(target);
-      var style = {
+      spacer = $('<div style="display:none"></div>').insertBefore(target);
+      style = {
         position: btn.css('position'),
         display: btn.css('display'),
         left: btn.css('left')
@@ -232,8 +234,8 @@ function setSize(target,param){
       })
     }
     btn._size(opts, parent);
-    $inner.css('margin-top', 0);
-    $inner.css('margin-top', parseInt((btn.height()-$inner.height())/2)+'px');
+    left.css('margin-top', 0);
+    left.css('margin-top', parseInt((btn.height()-left.height())/2)+'px');
     if (!isVisible){
       btn.insertAfter(spacer);
       btn.css(style);

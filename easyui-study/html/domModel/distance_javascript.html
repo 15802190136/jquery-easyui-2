@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>distance_javascript</title>
+<style>
+body {
+  background-color: #222222;
+  width:2000px;
+  height:1000px;
+  margin:8px;
+  padding:20px;
+}
+#outerDiv {
+  position:relative;
+  left:1500px;
+  top:800px;
+  overflow: auto;
+  width:400px;
+  height:200px;
+  padding:10px;
+  border:5px solid #AE81FF;
+  margin:30px;
+  background-color: #A6E22E;
+}
+#innerDiv {
+  position:relative;
+  top:10px;
+  left:5px;
+  width:500px;
+  height:250px;
+  padding:5px;
+  border:2px solid #333333;
+  margin: 10px;
+  background-color: #fff;
+}
+#otherDiv{
+  position: absolute;
+  width:200px;
+  height:200px;
+  background-color: #AB81FF;
+  top:2000px;
+  left:4000px;
+}
+</style>
+  </head>
+  <body>
+    <button onclick="showDomState()" style="position:absolute;left:1200px;top:800px;">showDomState</button>
+    <button onclick="showDomState()" style="position:absolute;left:3800px;top:1800px;">showDomState</button>
+    <div id="outerDiv">
+      <div id="innerDiv"></div>
+    </div>
+    <div id="otherDiv">
+    </div>
+  </body>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+  <script>
+$(function(){
+//初始状态
+/*--documentElement
+clientHeight:950(可视区域),clientWidth:1899(可视区域)
+scrollHeight:1118,scrollWidth:2048
+scrollTop:0,scrollLeft:0
+clientTop:0,clientLeft:0
+*/
+showDocumentState()
+/*--body
+height:1000,width:2000
+clientHeight:1040(1000+20*2+0*2 height,padding,border)
+  clientWidth:2040(2000+20*2+0*2 width,padding,border)
+scrollHeight:2200(2000+200 otherDiv_left+otherDiv_width)
+  scrollWidth:4200(4000+200 otherDiv_top+otherDiv_height)
+scrollTop:0,scrollLeft:0
+clientTop:0,clientLeft:0
+*/
+showBodyState()
+/*-innerDiv_state
+height:250(250-0 height,scrollH)
+  width:500(500-0 width,scroolW)
+clientHeight:260(250+5*2-0 height,padding,scrollH)
+  clientWidth:510(500+5*2-0 width,padding,scrollW)
+scrollHeight: 260(250+5*2 height,padding)
+  scrollWidth: 510(500+5*2 width,padding)
+offsetHeight:264(250+5*2+2*2 height,padding,border)
+  offsetWidth:514(500+5*2+2*2 width,padding,border)
+
+scrollTop: 0(?),scrollLeft: 0(?)
+clientTop: 2(border_top),clientLeft: 2(border_left)
+top:10,left:5
+offsetTop: 30(10+10+10 outerPadding_top,margin_top,top)
+  offsetLeft: 25(10+10+5 outerPadding_left,margin_left,left)
+*/
+showInnerDivState()
+/*-outerDiv_state
+height:179(200-21 height,scrollH)
+  width:379(400-21 width,scrollW)
+clientHeight:199(200+10*2-21 height,padding,scrollH)
+  clientWidth:399(400+10*2-21 width,padding,scrollW)
+offsetHeight: 230(200+10*2+5*2 pureHeight,padding,border)
+  offsetWidth:430(400+10*2+5*2 pureWidth,padding,border)
+scrollHeight: 304(264+10+10+10*2 innerOffsetHeight+innerTop+padding*2)
+  scrollWidth: 539(514+5+10*2 innerOffsetWidth+innerLeft+padding*2)
+
+scrollTop: 0(?),scrollLeft: 0(?)
+clientTop: 5(border_top),clientLeft: 5(border_left)
+top:800,left:1500
+offsetTop: 858(8+20+30+800 bodyMargin_top,bodyPadding_top,margin_top,top)
+  offsetLeft: 1558(8+20+30+1500 bodyMargin_left,bodyPadding_left,margin_left,left)
+*/
+showOuterDivState()
+/*
+  改变最外层滚动条
+  outerDiv和innerDiv的scrollTop,scrollLeft,scrollHeight,scrollWidth都没改变
+*/
+/*
+移动outerDiv的滚动条
+innerDiv
+  scrollTop: 0(没变),scrollLeft: 0(没变)
+outerDiv
+  scrollTop:105(304-199 scrollHeight-clientHeight)
+  scrollLeft:140(539-399 scrollWidth-clientWidth)
+
+*/
+
+function getStyle(obj,attr){
+  //ie
+  if(obj.currentStyle)
+    return obj.currentStyle(attr)
+  else
+    return getComputedStyle(obj,false)[attr]
+}
+function showDocumentState(){
+  var document_state = {
+    clientHeight:document.documentElement.clientHeight,
+    clientWidth:document.documentElement.clientWidth,
+    scrollHeight:document.documentElement.scrollHeight,
+    scrollWidth:document.documentElement.scrollWidth,
+    scrollTop:document.documentElement.scrollTop,
+    scrollLeft:document.documentElement.scrollLeft,
+    clientTop:document.documentElement.clientTop,
+    clientLeft:document.documentElement.clientLeft
+  }  
+  console.log("documentElement",document_state)
+}
+function showBodyState(){
+  var body_state = {
+    clientHeight:document.body.clientHeight,
+    clientWidth:document.body.clientWidth,
+    scrollHeight:document.body.scrollHeight,
+    scrollWidth:document.body.scrollWidth,
+    scrollTop:document.body.scrollTop,
+    scrollLeft:document.body.scrollLeft,
+    clientTop:document.body.clientTop,
+    clientLeft:document.body.clientLeft
+  }  
+  console.log("body",body_state)
+}
+function showOuterDivState(){
+  var outerDiv = document.getElementById("outerDiv")
+  var outerDiv_state = {
+    height:getStyle(outerDiv,"height"),
+    width:getStyle(outerDiv,"width"),
+    clientWidth:outerDiv.clientWidth,
+    clientHeight:outerDiv.clientHeight,
+    scrollHeight:outerDiv.scrollHeight,
+    scrollWidth:outerDiv.scrollWidth,
+    offsetHeight:outerDiv.offsetHeight,
+    offsetWidth:outerDiv.offsetWidth,
+
+    scrollTop:outerDiv.scrollTop,
+    scrollLeft:outerDiv.scrollLeft,
+    clientLeft:outerDiv.clientLeft,
+    clientTop:outerDiv.clientTop,
+    top:getStyle(outerDiv,"top"),
+    left:getStyle(outerDiv,"left"),
+    offsetTop:outerDiv.offsetTop,
+    offsetLeft:outerDiv.offsetLeft
+  }
+  console.log("outerDiv",outerDiv_state)
+}
+function showInnerDivState(){
+  var innerDiv = document.getElementById("innerDiv")
+  var innerDiv_state = {
+    height:getStyle(innerDiv,"height"),
+    width:getStyle(innerDiv,"width"),
+    clientWidth:innerDiv.clientWidth,
+    clientHeight:innerDiv.clientHeight,
+    scrollHeight:innerDiv.scrollHeight,
+    scrollWidth:innerDiv.scrollWidth,
+    offsetHeight:innerDiv.offsetHeight,
+    offsetWidth:innerDiv.offsetWidth,
+
+    scrollTop:innerDiv.scrollTop,
+    scrollLeft:innerDiv.scrollLeft,
+    clientLeft:innerDiv.clientLeft,
+    clientTop:innerDiv.clientTop,
+    top:getStyle(innerDiv,"top"),
+    left:getStyle(innerDiv,"left"),
+    offsetTop:innerDiv.offsetTop,
+    offsetLeft:innerDiv.offsetLeft
+  }
+  console.log("innerDiv",innerDiv_state)
+}
+window.showDomState = function(){
+  showDocumentState()
+  showInnerDivState()
+  showOuterDivState()
+}
+});
+  </script>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>boxModal_javascript</title>
+    <title>boxModel_javascript</title>
     <style>
     body {
       background-color: #222222;
@@ -35,9 +35,9 @@
   p = document.getElementsByTagName("p")
   /*
   chrome
-  offsetWidth-230:200+10*2+5*2
-  scrollWidth-220:200+10*2 ?
-  clientWidth-220
+  clientWidth-220 (width,padding)
+  scrollWidth-220:200+10*2 ?(width,padding)
+  offsetWidth-230:200+10*2+5*2(width,padding,border)
   */
   /*
   ie8
@@ -51,11 +51,10 @@
   clientWidth-190:200-5*2
   */
   getStyle = function(obj,attr){
-    if(obj.currentStyle){
+    if(obj.currentStyle)
       return obj.currentStyle[attr];
-    }else{
+    else
       return getComputedStyle(obj,false)[attr];
-    }
   }
   p[0].innerHTML = "style.width="+testDiv.style.width+" currentStyle/getComputedStyle('width')="+getStyle(testDiv,"width")+" scrollWidth="+testDiv.scrollWidth+" clientWidth"+testDiv.clientWidth +" offsetWidh="+testDiv.offsetWidth
   </script>

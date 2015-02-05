@@ -14,8 +14,7 @@ body {
   position: absolute;
   margin: 0;
   padding: 2px;
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid;
   overflow: hidden;
 }
 .menu-item {
@@ -25,8 +24,7 @@ body {
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid;
 }
 .menu-text {
   height: 20px;
@@ -276,9 +274,8 @@ function setMenuSize(menu) {
   if (!width) {
     width = 0;
     menu.find('div.menu-text').each(function() {
-      if (width < $(this)._outerWidth()) {
+      if (width < $(this)._outerWidth())
         width = $(this)._outerWidth();
-      }
       $(this).closest('div.menu-item')._outerHeight($(this)._outerHeight() + 2);
     });
     width += 40;

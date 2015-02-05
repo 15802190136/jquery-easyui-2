@@ -133,27 +133,27 @@ function parseData(){
     if (this.tagName.toLowerCase() == 'optgroup') {
       var group = $(this).attr('label');
       $(this).children().each(function() {
-        _parseItem(this, group);
+        _parseItem(data,this, group);
       });
     } else {
-      _parseItem(this);
+      _parseItem(data,this);
     }
   });
-
-  function _parseItem(el, group) {
-    var t = $(el);
-    var row = {};
-    row[opts.valueField] = t.attr('value') != undefined ? t.attr('value') : t.text();
-    row[opts.textField] = t.text();
-    row['selected'] = t.is(':selected');
-    row['disabled'] = t.is(':disabled');
-    if (group) {
-      opts.groupField = opts.groupField || 'group';
-      row[opts.groupField] = group;
-    }
-    data.push(row);
-  }
   return data;
+}
+function _parseItem(data,el, group) {
+  var opts = state_opts;
+  var t = $(el);
+  var row = {};
+  row[opts.valueField] = t.attr('value') != undefined ? t.attr('value') : t.text();
+  row[opts.textField] = t.text();
+  row['selected'] = t.is(':selected');
+  row['disabled'] = t.is(':disabled');
+  if (group) {
+    opts.groupField = opts.groupField || 'group';
+    row[opts.groupField] = group;
+  }
+  data.push(row);
 }
 function create(){
   var opts = state_opts;
@@ -304,7 +304,6 @@ function getRowIndex(value){
   return -1;
 }
 function doQuery(target, q) {
-  console.log("doQuery");
   var opts = state_opts;
   if (opts.multiple && !q)
     setValues([], true);
@@ -328,8 +327,6 @@ function doQuery(target, q) {
         s = row[opts.textField];
         g = row[opts.groupField];
         item = opts.finder.getEl(v).show();
-        console.log("s",s);
-        console.log("q",q);
         if (s.toLowerCase() == q.toLowerCase()) {
           vv.push(v);
           item.addClass('combobox-item-selected');
@@ -341,7 +338,6 @@ function doQuery(target, q) {
       }
     }
   });
-  console.log("vv",vv)
   setValues(vv, true);
 }
 main()
