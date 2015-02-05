@@ -200,7 +200,7 @@ function resize(target,width){
   if (width)
     opts.width = width;
   if (isNaN(parseInt(opts.width))) {
-    c = t.clone();
+    c = $(target).clone();
     c.css("visibility", "hidden");
     c.insertAfter(target);
     opts.width = c.outerWidth();

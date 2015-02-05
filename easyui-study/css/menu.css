@@ -2,8 +2,7 @@
   position: absolute;
   margin: 0;
   padding: 2px;
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid;
   overflow: hidden;
 }
 .menu-item {
@@ -13,8 +12,7 @@
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid;
 }
 .menu-text {
   height: 20px;
