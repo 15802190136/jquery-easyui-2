@@ -2,10 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>scrollTop_jquery</title>
+    <title>distance_jquery</title>
 <style>
 body {
   background-color: #222222;
+  width:2000px;
+  height:1000px;
+  margin:8px;
   padding:20px;
 }
 #outerDiv {
@@ -31,25 +34,71 @@ body {
   margin: 10px;
   background-color: #fff;
 }
-#testWrap{
+#otherDiv{
   position: absolute;
-  top:400px;
-  left:500px;
+  width:200px;
+  height:200px;
+  background-color: #AB81FF;
+  top:2000px;
+  left:4000px;
 }
 </style>
   </head>
   <body>
+    <button onclick="showDomState()" style="position:absolute;left:1200px;top:800px;">showDomState</button>
+    <button onclick="showDomState()" style="position:absolute;left:3800px;top:1800px;">showDomState</button>
     <div id="outerDiv">
       <div id="innerDiv"></div>
     </div>
-    <div id="testWrap">
-      <button id="documentState">document state</button>
+    <div id="otherDiv">
     </div>
   </body>
   <script src="../../bower_components/jquery/jquery.js"></script>
   <script>
 $(function(){
-
+showOuterDivState();
+showInnerDivState();
+window.showDomState = showDomState;
+function showOuterDivState(){
+  var outerDiv = $("#outerDiv")
+  var outerDiv_state = {
+    width:outerDiv.width(),
+    height:outerDiv.height(),
+    innerWidth:outerDiv.innerWidth(),
+    innerHeight:outerDiv.innerHeight(),
+    outerWidth:outerDiv.outerWidth(),
+    outerHeight:outerDiv.outerHeight(),
+    left:outerDiv.css("left"),
+    top:outerDiv.css("top"),
+    position_left:outerDiv.position().left,
+    position_top:outerDiv.position().top,
+    offset_left:outerDiv.offset().left,
+    offset_top:outerDiv.offset().top
+  }
+  console.log("outerDiv",outerDiv_state);
+}
+function showInnerDivState(){
+  var innerDiv = $("#innerDiv")
+  var innerDiv_state = {
+    width:innerDiv.width(),
+    height:innerDiv.height(),
+    innerWidth:innerDiv.innerWidth(),
+    innerHeight:innerDiv.innerHeight(),
+    outerWidth:innerDiv.outerWidth(),
+    outerHeight:innerDiv.outerHeight(),
+    left:innerDiv.css("left"),
+    top:innerDiv.css("top"),
+    position_left:innerDiv.position().left,
+    position_top:innerDiv.position().top,
+    offset_left:innerDiv.offset().left,
+    offset_top:innerDiv.offset().top
+  }
+  console.log("innerDiv",innerDiv_state);
+}
+function showDomState(){
+  showOuterDivState();
+  showInnerDivState();
+}
 });
   </script>
 </html>
