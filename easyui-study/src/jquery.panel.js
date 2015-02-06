@@ -408,7 +408,37 @@ function minimize(target){
   opts.maximized = false;
   opts.onMinimize.call(target);
 }
-
+function destroy(target, forceDestroy) {
+  var state = $.data(target, "panel");
+  var opts = state.options;
+  var panel = state.panel;
+  if (forceDestroy != true) {
+    if (opts.onBeforeDestroy.call(target) == false)
+      return;
+  }
+  $(target).panel("clear").panel("clear", "footer");
+  remove(panel);
+  opts.onDestroy.call(target);  
+}
+function clear(target) {
+  var t = $(target);
+  t.find(".combo-f").each(function() {
+    $(this).combo("destroy");
+  });
+  t.find(".m-btn").each(function() {
+    $(this).menubutton("destroy");
+  });
+  t.find(".s-btn").each(function() {
+    $(this).splitbutton("destroy");
+  });
+  t.find(".tooltip-f").each(function() {
+    $(this).tooltip("destroy");
+  });
+  t.children("div").each(function() {
+    $(this)._size("unfit");
+  });
+  t.empty();
+}
 $.fn.panel.methods = {
   options: function(jq) {
     return $.data(jq[0], "panel").options;
@@ -469,7 +499,17 @@ $.fn.panel.methods = {
     return jq.each(function() {
       expand(this, param);
     });
-  }
+  },
+  destroy : function(jq, forceDestroy) {
+    return jq.each(function() {
+      destroy(this, forceDestroy);
+    });
+  },
+  clear : function(jq, isFooter) {
+    return jq.each(function() {
+      clear(isFooter == "footer" ? $(this).panel("footer") : this);
+    });
+  }  
 }
 
 })(jQuery);
