@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>dialog_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/window.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.dialog-content {
+  overflow: auto;
+}
+.dialog-toolbar {
+  padding: 2px 5px;
+}
+.dialog-tool-separator {
+  float: left;
+  height: 24px;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #fff;
+  margin: 2px 1px;
+}
+.dialog-button {
+  padding: 5px;
+  text-align: right;
+}
+.dialog-button .l-btn {
+  margin-left: 5px;
+}
+.dialog-toolbar,
+.dialog-button {
+  background: #F4F4F4;
+  border: 1px solid;
+}
+.dialog-toolbar {
+  border-color: #95B8E7 #95B8E7 #dddddd #95B8E7;
+}
+.dialog-button {
+  border-color: #dddddd #95B8E7 #95B8E7 #95B8E7;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!-- 
+<div id="dlg" class="easyui-dialog" title="Basic Dialog" data-options="iconCls:'icon-save'" style="width:400px;height:200px;padding:10px">
+  The dialog content.
+</div>
+-->
+<div class="panel window" style="display: block; width: 388px; left: 373px; top: 307px; z-index: 9001;">
+  <div class="panel-header panel-header-noborder window-header" style="width: 388px;">
+    <div class="panel-title panel-with-icon">Basic Dialog</div>
+    <div class="panel-icon icon-save"></div>
+    <div class="panel-tool">
+      <a class="panel-tool-close" href="javascript:void(0)"></a>
+    </div>
+  </div>
+  <div id="dlg" class="easyui-dialog panel-body panel-body-noborder window-body" title="" data-options="iconCls:'icon-save'" style="padding: 10px; width: 366px; height: 144px;">The dialog content.</div>
+</div>
+<div class="window-shadow" style="display: block; left: 373px; top: 307px; z-index: 9000; width: 400px; height: 200px;"></div>
+</body>
+</html>

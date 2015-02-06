@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>message_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+    <link rel="stylesheet" type="text/css" href="../../css/window.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.messager-body {
+  padding: 10px;
+  overflow: hidden;
+}
+.messager-button {
+  text-align: center;
+  padding-top: 10px;
+}
+.messager-button .l-btn {
+  width: 70px;
+}
+.messager-icon {
+  float: left;
+  width: 32px;
+  height: 32px;
+  margin: 0 10px 10px 0;
+}
+..messager-error {
+  background: url('../../img/messager_icons.png') no-repeat scroll -64px 0;
+}
+.messager-info {
+  background: url('../../img/messager_icons.png') no-repeat scroll 0 0;
+}
+.messager-question {
+  background: url('../../img/messager_icons.png') no-repeat scroll -32px 0;
+}
+.messager-warning {
+  background: url('../../img/messager_icons.png') no-repeat scroll -96px 0;
+}
+.messager-progress {
+  padding: 10px;
+}
+.messager-p-msg {
+  margin-bottom: 5px;
+}
+.messager-body .messager-input {
+  width: 100%;
+  padding: 1px 0;
+  border: 1px solid #95B8E7;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<div class="panel window" style="right: 20px; z-index: 9005; bottom: 20px; display: block; width: 238px;">
+  <div class="panel-header panel-header-noborder window-header" style="width: 238px;">
+    <div class="panel-title">My Title</div>
+    <div class="panel-tool">
+      <a class="panel-tool-close" href="javascript:void(0)"></a>
+    </div>
+  </div>
+  <div class="messager-body panel-body panel-body-noborder window-body" title="" style="width: 216px; height: 44px;">Message will be closed after 4 seconds.</div>
+</div>
+</body>
+</html>

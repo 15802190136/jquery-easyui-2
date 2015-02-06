@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>splitbutton_dom</title>
+  <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+  <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+  <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+  <link rel="stylesheet" type="text/css" href="../../css/menubutton.css">
+  <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.s-btn:hover .m-btn-line,
+.s-btn-active .m-btn-line,
+.s-btn-plain-active .m-btn-line {
+  display: inline-block;
+}
+.l-btn:hover .s-btn-downarrow,
+.s-btn-active .s-btn-downarrow,
+.s-btn-plain-active .s-btn-downarrow {
+  border-style: solid;
+  border-color: #aac5e7;
+  border-width: 0 0 0 1px;
+}
+    </style>
+  <script src="../../bower_components/jquery/jquery.js"></script>
+</head>
+<body>
+  <!-- 
+<div class="easyui-panel" style="padding:5px;">
+  <a href="#" class="easyui-splitbutton" data-options="menu:'#mm1',iconCls:'icon-ok'">Ok</a>
+</div>
+<div id="mm1" style="width:100px;">
+  <div data-options="iconCls:'icon-ok'">Ok</div>
+  <div data-options="iconCls:'icon-cancel'">Cancel</div>
+</div>
+-->
+<div class="panel" style="display: block;">
+  <div class="easyui-panel panel-body panel-body-noheader" style="padding: 5px; width: 1868px;" id="">
+    <a href="#" class="easyui-splitbutton l-btn l-btn-small l-btn-plain m-btn m-btn-small s-btn" data-options="menu:'#mm1',iconCls:'icon-ok'" id="">
+      <span class="l-btn-left l-btn-icon-left">
+        <span class="l-btn-text">Ok</span>
+        <span class="l-btn-icon icon-ok">&nbsp;</span>
+        <span class="m-btn-downarrow"></span>
+        <span class="m-btn-line"></span>
+      </span>
+    </a>
+  </div>
+</div>
+<div id="mm1" style="width: 114px; overflow: hidden; height: 44px; display: none; left: 26px; top: 52px; z-index: 110003;" class="menu-top menu">
+  <div class="menu-line" style="height: 48px;"></div>
+  <div data-options="iconCls:'icon-ok'" class="menu-item">
+    <div class="menu-text">Ok</div>
+    <div class="menu-icon icon-ok"></div>
+  </div>
+  <div data-options="iconCls:'icon-cancel'" class="menu-item">
+    <div class="menu-text">Cancel</div>
+    <div class="menu-icon icon-cancel"></div>
+  </div>
+</div>
+<div class="menu-shadow" style="display: none; z-index: 110002; left: 26px; top: 52px; width: 120px; height: 50px;"></div>
+</body>
+</html>

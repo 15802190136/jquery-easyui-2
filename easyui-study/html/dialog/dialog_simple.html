@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>dialog_simple</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/window.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.dialog-content {
+  overflow: auto;
+}
+.dialog-toolbar {
+  padding: 2px 5px;
+}
+.dialog-tool-separator {
+  float: left;
+  height: 24px;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #fff;
+  margin: 2px 1px;
+}
+.dialog-button {
+  padding: 5px;
+  text-align: right;
+}
+.dialog-button .l-btn {
+  margin-left: 5px;
+}
+.dialog-toolbar,
+.dialog-button {
+  background: #F4F4F4;
+  border: 1px solid;
+}
+.dialog-toolbar {
+  border-color: #95B8E7 #95B8E7 #dddddd #95B8E7;
+}
+.dialog-button {
+  border-color: #dddddd #95B8E7 #95B8E7 #95B8E7;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body> 
+<div id="dlg" class="easyui-dialog" title="Basic Dialog" data-options="iconCls:'icon-save'" style="width:400px;height:200px;padding:10px">
+  The dialog content.
+</div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.draggable.js"></script>
+<script src="../../src/jquery.resizable.js"></script>
+<script src="../../src/jquery.panel.js"></script>
+<script src="../../src/jquery.window.js"></script>
+<script>     
+$(function(){
+var target = $(".easyui-dialog")[0]
+var t = $(".easyui-dialog")
+var state_opts
+var defaults = $.extend({}, $.fn.window.defaults, {
+  title : "New Dialog",
+  collapsible : false,
+  minimizable : false,maximizable : false,
+  resizable : false,
+  toolbar : null,
+  buttons : null
+});
+function main(){
+  parseOptions()
+  init()
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.fn.window.parseOptions(target), 
+    $.parser.parseOptions(target, [ "toolbar", "buttons" ])
+  )
+  console.log("state_opts",state_opts)
+}
+function init() {
+  var opts = state_opts;
+  var window,toolbarHtml,tr,td,linkbutton,linkbuttonJq
+  var buttonHtml,p
+  opts.inited = false;
+  t.window($.extend({}, opts, {
+    onResize : function(w, h) {
+      if (opts.inited) {
+        resize();
+        opts.onResize.call(this, w, h);
+      }
+    }
+  }));
+  window = t.window("window");
+  if (opts.toolbar) {
+    if ($.isArray(opts.toolbar)) {
+      t.siblings("div.dialog-toolbar").remove();
+      toolbarHtml = $("<div class='dialog-toolbar'><table cellspacing='0' cellpadding='0'><tr></tr></table></div>").appendTo(window);
+      tr = toolbarHtml.find("tr");
+      for (var i = 0; i < opts.toolbar.length; i++) {
+        linkbutton = opts.toolbar[i];
+        if (linkbutton == "-") {
+          $("<td><div class='dialog-tool-separator'></div></td>").appendTo(tr);
+        } else {
+          td = $("<td></td>").appendTo(tr);
+          linkbuttonJq = $("<a href='javascript:void(0)'></a>").appendTo(td);
+          linkbuttonJq[0].onclick = eval(linkbutton.handler || function() {});
+          linkbuttonJq.linkbutton($.extend({}, linkbutton, {
+            plain : true
+          }));
+        }
+      }
+    } else {
+      $(opts.toolbar).addClass("dialog-toolbar").appendTo(window);
+      $(opts.toolbar).show();
+    }
+  } else {
+    t.siblings("div.dialog-toolbar").remove();
+  }
+  if (opts.buttons) {
+    if ($.isArray(opts.buttons)) {
+      t.siblings("div.dialog-button").remove();
+      buttonHtml = $("<div class='dialog-button'></div>").appendTo(window);
+      for (var i = 0; i < opts.buttons.length; i++) {
+        p = opts.buttons[i];
+        linkbuttonJq = $("<a href='javascript:void(0)'></a>").appendTo(buttonHtml);
+        if (p.handler)
+          linkbuttonJq[0].onclick = p.handler;
+        linkbuttonJq.linkbutton(p);
+      }
+    } else {
+      $(opts.buttons).addClass("dialog-button").appendTo(window);
+      $(opts.buttons).show();
+    }
+  } else {
+    t.siblings("div.dialog-button").remove();
+  }
+  opts.inited = true;
+  window.show();
+  t.window("resize");
+  if (opts.closed)
+    window.hide();
+}
+function resize(param) {
+  var opts = state_opts;
+  var noheader = opts.noheader;
+  var tb = t.siblings(".dialog-toolbar");
+  var bb = t.siblings(".dialog-button");
+  var shadow,cc
+  tb.insertBefore(target).css({
+    position : "relative",
+    borderTopWidth : (noheader ? 1 : 0),
+    top : (noheader ? tb.length : 0)
+  });
+  bb.insertAfter(target).css({
+    position : "relative",
+    top : -1
+  });
+  if (!isNaN(parseInt(opts.height)))
+    t._outerHeight(t._outerHeight() - tb._outerHeight() - bb._outerHeight());
+  tb.add(bb)._outerWidth(t._outerWidth());
+  shadow = $.data(target, "window").shadow;
+  if (shadow) {
+    cc = t.panel("panel");
+    shadow.css({
+      width : cc._outerWidth(),
+      height : cc._outerHeight()
+    });
+  }
+}
+
+main()
+})
+</script>
+</html>

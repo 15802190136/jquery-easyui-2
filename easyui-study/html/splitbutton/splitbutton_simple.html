@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>splitbutton_simple</title>
+    <link rel="stylesheet" type="text/css" href="../../css/panel.css">
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+    <link rel="stylesheet" type="text/css" href="../../css/menu.css">
+    <link rel="stylesheet" type="text/css" href="../../css/menubutton.css">
+    <style>
+body {
+  font-family: verdana,helvetica,arial,sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  margin: 0;
+}
+.s-btn:hover .m-btn-line,
+.s-btn-active .m-btn-line,
+.s-btn-plain-active .m-btn-line {
+  display: inline-block;
+}
+.l-btn:hover .s-btn-downarrow,
+.s-btn-active .s-btn-downarrow,
+.s-btn-plain-active .s-btn-downarrow {
+  border-style: solid;
+  border-color: #aac5e7;
+  border-width: 0 0 0 1px;
+}
+
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<div class="easyui-panel" style="padding:5px;">
+  <a href="#" class="easyui-splitbutton" data-options="menu:'#mm1',iconCls:'icon-ok'">Ok</a>
+</div>
+<div id="mm1" style="width:100px;">
+  <div data-options="iconCls:'icon-ok'">Ok</div>
+  <div data-options="iconCls:'icon-cancel'">Cancel</div>
+</div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.panel.js"></script>
+<script src="../../src/jquery.linkbutton.js"></script>
+<script src="../../src/jquery.menu.js"></script>
+<script src="../../src/jquery.menubutton.js"></script>
+<script>
+$(function(){
+$.parser.parse();
+var target = $(".easyui-splitbutton")[0]
+var t = $(".easyui-splitbutton")
+var state_opts
+var defaults = $.extend({}, $.fn.linkbutton.defaults, {
+  plain : true,
+  menu : null,
+  duration : 100,
+  cls : {
+    btn1 : "m-btn-active s-btn-active",
+    btn2 : "m-btn-plain-active s-btn-plain-active",
+    arrow : "m-btn-downarrow",
+    trigger : "m-btn-line"
+  }
+});
+function main(){
+  parseOptions();
+  t.removeAttr("disabled");
+  init()
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.fn.linkbutton.parseOptions(target),$.parser.parseOptions(target, [ "menu", {
+    plain : "boolean",
+    duration : "number"
+  }]));
+}
+function init() {
+  t.menubutton(state_opts);
+  t.addClass("s-btn");
+}
+main()
+})
+</script>
+</html>

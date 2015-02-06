@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>progressbar_plugin</title>
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.progressbar {
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+  position: relative;
+}
+.progressbar-text {
+  text-align: center;
+  position: absolute;
+}
+.progressbar-value {
+  position: relative;
+  overflow: hidden;
+  width: 0;
+}
+.progressbar {
+  border-color: #95B8E7;
+}
+.progressbar-text {
+  color: #000000;
+  font-size: 12px;
+}
+.progressbar-value .progressbar-text {
+  background-color: #ffe48d;
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<div id="p" class="easyui-progressbar" style="width:400px;"></div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+function start(){
+  var value = $('#p').progressbar('getValue');
+  if (value < 100){
+    value += Math.floor(Math.random() * 10);
+    $('#p').progressbar('setValue', value);
+    setTimeout(arguments.callee, 200);
+  }
+};
+$('#p').progressbar();
+start();
+})
+;(function($){
+  function init(target){
+    $(target).addClass('progressbar');
+    $(target).html('<div class="progressbar-text"></div><div class="progressbar-value"><div class="progressbar-text"></div></div>');
+    $(target).bind('_resize', function(e,force){
+      if ($(this).hasClass('easyui-fluid') || force)
+        setSize(target);
+      return false;
+    })
+    return $(target);
+  }
+  
+  function setSize(target,width){
+    var opts = $.data(target, 'progressbar').options;
+    var bar = $.data(target, 'progressbar').bar;
+    if (width) opts.width = width;
+    bar._size(opts);
+    
+    bar.find('div.progressbar-text').css('width', bar.width());
+    bar.find('div.progressbar-text,div.progressbar-value').css({
+      height: bar.height()+'px',
+      lineHeight: bar.height()+'px'
+    });
+  }
+  
+  $.fn.progressbar = function(options, param){
+    if (typeof options == 'string'){
+      var method = $.fn.progressbar.methods[options];
+      if (method)
+        return method(this, param);
+    }
+    
+    options = options || {};
+    return this.each(function(){
+      var state = $.data(this, 'progressbar');
+      if (state){
+        $.extend(state.options, options);
+      } else {
+        state = $.data(this, 'progressbar', {
+          options: $.extend({}, $.fn.progressbar.defaults, $.fn.progressbar.parseOptions(this), options),
+          bar: init(this)
+        });
+      }
+      $(this).progressbar('setValue', state.options.value);
+      setSize(this);
+    });
+  };
+  
+  $.fn.progressbar.methods = {
+    options: function(jq){
+      return $.data(jq[0], 'progressbar').options;
+    },
+    resize: function(jq, width){
+      return jq.each(function(){
+        setSize(this, width);
+      });
+    },
+    getValue: function(jq){
+      return $.data(jq[0], 'progressbar').options.value;
+    },
+    setValue: function(jq, value){
+      if (value < 0) value = 0;
+      if (value > 100) value = 100;
+      return jq.each(function(){
+        var opts = $.data(this, 'progressbar').options;
+        var text = opts.text.replace(/{value}/, value);
+        var oldValue = opts.value;
+        opts.value = value;
+        $(this).find('div.progressbar-value').width(value+'%');
+        $(this).find('div.progressbar-text').html(text);
+        if (oldValue != value){
+          opts.onChange.call(this, value, oldValue);
+        }
+      });
+    }
+  };
+  
+  $.fn.progressbar.parseOptions = function(target){
+    return $.extend({}, $.parser.parseOptions(target, ['width','height','text',{value:'number'}]));
+  };
+  
+  $.fn.progressbar.defaults = {
+    width: 'auto',
+    height: 22,
+    value: 0,
+    text: '{value}%',
+    onChange:function(newValue,oldValue){}
+  };
+})(jQuery);
+</script>
+</html>

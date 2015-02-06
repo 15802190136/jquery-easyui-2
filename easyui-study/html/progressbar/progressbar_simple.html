@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>progressbar_simple</title>
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.progressbar {
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+  position: relative;
+}
+.progressbar-text {
+  text-align: center;
+  position: absolute;
+}
+.progressbar-value {
+  position: relative;
+  overflow: hidden;
+  width: 0;
+}
+.progressbar {
+  border-color: #95B8E7;
+}
+.progressbar-text {
+  color: #000000;
+  font-size: 12px;
+}
+.progressbar-value .progressbar-text {
+  background-color: #ffe48d;
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<div id="p" class="easyui-progressbar" style="width:400px;"></div>
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-progressbar")[0]
+var t = $(".easyui-progressbar")
+var state_opts,state_bar
+var defaults = {
+  width: 'auto',
+  height: 22,
+  value: 0,
+  text: '{value}%',
+  onChange:function(newValue,oldValue){}
+}
+function main(){
+  parseOptions()
+  setValue(state_opts.value)
+  state_bar = init()
+  setSize()
+  start()
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.parser.parseOptions(target, ['width','height','text',{value:'number'}]));
+}
+function init(){
+  t.addClass('progressbar');
+  t.html('<div class="progressbar-text"></div><div class="progressbar-value"><div class="progressbar-text"></div></div>');
+  t.bind('_resize', function(e,force){
+    if ($(this).hasClass('easyui-fluid') || force)
+      setSize();
+    return false;
+  });
+  return t;
+}
+function setSize(width){
+  var opts = state_opts;
+  var bar = state_bar;
+  if (width) opts.width = width;
+  bar._size(opts);
+  
+  bar.find('div.progressbar-text').css('width', bar.width());
+  bar.find('div.progressbar-text,div.progressbar-value').css({
+    height: bar.height()+'px',
+    lineHeight: bar.height()+'px'
+  });
+}
+function setValue(value){
+  if (value < 0) value = 0;
+  if (value > 100) value = 100;
+  var opts = state_opts;
+  var text = opts.text.replace(/{value}/, value);
+  var oldValue = opts.value;
+  opts.value = value;
+  console.log("value",value)
+  t.find('div.progressbar-value').width(value+'%');
+  t.find('div.progressbar-text').html(text);
+  if (oldValue != value)
+    opts.onChange.call(target,value,oldValue);
+}
+function getValue(){
+  return state_opts.value;
+}
+
+function start(){
+  var value = getValue();
+  if (value < 100){
+    value += Math.floor(Math.random() * 10);
+    setValue(value)
+    setTimeout(arguments.callee, 200);
+  }
+}
+main()
+})
+</script>
+</html>

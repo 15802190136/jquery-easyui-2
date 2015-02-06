@@ -59,8 +59,10 @@ $.fn.panel.defaults = {
   onBeforeOpen : function() {},onOpen : function() {},
   onBeforeClose : function() {},onClose : function() {},
   onBeforeDestroy : function() {},onDestroy : function() {},
-  onResize : function(width, height) {},onMove : function(left, top) {},onMaximize : function() {},onRestore : function() {},onMinimize : function() {},
-  onBeforeCollapse : function() {},onBeforeExpand : function() {},onCollapse : function() {},onExpand : function() {}
+  onResize : function(width, height) {},onMove : function(left, top) {},onRestore : function() {},
+  onMinimize : function() {},onMaximize : function() {},
+  onBeforeCollapse : function() {},onCollapse : function() {},
+  onBeforeExpand : function() {},onExpand : function() {}
 };
 $.fn.panel.parseOptions = function(target){
   return $.extend({},$.parser.parseOptions(target, ["id", "width", "height", "left", "top", "title",

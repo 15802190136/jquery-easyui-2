@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>progressbar_dom</title>
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.progressbar {
+  border-width: 1px;
+  border-style: solid;
+  overflow: hidden;
+  position: relative;
+}
+.progressbar-text {
+  text-align: center;
+  position: absolute;
+}
+.progressbar-value {
+  position: relative;
+  overflow: hidden;
+  width: 0;
+}
+.progressbar {
+  border-color: #95B8E7;
+}
+.progressbar-text {
+  color: #000000;
+  font-size: 12px;
+}
+.progressbar-value .progressbar-text {
+  background-color: #ffe48d;
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!--
+<div id="p" class="easyui-progressbar" style="width:400px;"></div>
+-->
+<div id="p" class="easyui-progressbar progressbar" style="width: 400px; height: 22px;">
+  <div class="progressbar-text" style="width: 398px; height: 20px; line-height: 20px;">100%</div>
+  <div class="progressbar-value" style="width: 100%; height: 20px; line-height: 20px;">
+    <div class="progressbar-text" style="width: 398px; height: 20px; line-height: 20px;">100%</div>
+  </div>
+</div>
+</body>
+</html>
