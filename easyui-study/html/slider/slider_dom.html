@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>slider_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.slider-disabled {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
+.slider-h {
+  height: 22px;
+}
+.slider-v {
+  width: 22px;
+}
+.slider-inner {
+  position: relative;
+  height: 6px;
+  top: 7px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+.slider-handle {
+  position: absolute;
+  display: block;
+  outline: none;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+}
+.slider-tip {
+  position: absolute;
+  display: inline-block;
+  line-height: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  top: -22px;
+}
+.slider-rule {
+  position: relative;
+  top: 15px;
+}
+.slider-rule span {
+  position: absolute;
+  display: inline-block;
+  font-size: 0;
+  height: 5px;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+}
+.slider-rulelabel {
+  position: relative;
+  top: 20px;
+}
+.slider-rulelabel span {
+  position: absolute;
+  display: inline-block;
+  font-size: 12px;
+}
+.slider-v .slider-inner {
+  width: 6px;
+  left: 7px;
+  top: 0;
+  float: left;
+}
+.slider-v .slider-handle {
+  left: 50%;
+  margin-top: -10px;
+}
+.slider-v .slider-tip {
+  left: -10px;
+  margin-top: -6px;
+}
+.slider-v .slider-rule {
+  float: left;
+  top: 0;
+  left: 16px;
+}
+.slider-v .slider-rule span {
+  width: 5px;
+  height: 'auto';
+  border-left: 0;
+  border-width: 1px 0 0 0;
+  border-style: solid;
+}
+.slider-v .slider-rulelabel {
+  float: left;
+  top: 0;
+  left: 23px;
+}
+.slider-handle {
+  background: url('../../img/slider_handle.png') no-repeat;
+}
+.slider-inner {
+  border-color: #95B8E7;
+  background: #E0ECFF;
+}
+.slider-rule span {
+  border-color: #95B8E7;
+}
+.slider-rulelabel span {
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!--
+  <input class="easyui-slider" style="width:300px" data-options="showTip:true">
+-->
+  <input class="easyui-slider slider-f" style="width: 300px; display: none;" data-options="showTip:true">
+  <div class="slider slider-h" style="width: 300px;">
+    <div class="slider-inner">
+      <a href="javascript:void(0)" class="slider-handle" style="left:0px;"></a>
+      <span class="slider-tip" style="left:0px;margin-left:-4px">0</span>
+    </div>
+    <div class="slider-rule"></div>
+    <div class="slider-rulelabel"></div>
+    <div style="clear:both"></div>
+    <input type="hidden" class="slider-value" value="0">
+  </div>
+</body>
+</html>

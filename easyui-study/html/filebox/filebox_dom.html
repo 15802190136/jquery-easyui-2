@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>filebox_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.filebox .textbox-value {
+  vertical-align: top;
+  position: absolute;
+  top: 0;
+  left: -5000px;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!--
+  <input class="easyui-filebox" name="file1" data-options="prompt:'Choose a file...'" style="width:100%">
+-->
+  <input class="easyui-filebox filebox-f textbox-f" data-options="prompt:'Choose a file...'" style="width: 100%; display: none;" textboxname="file1">
+  <span class="textbox easyui-fluid filebox" style="width: 258px; height: 22px;">
+    <a href="javascript:void(0)" class="textbox-button textbox-button-right l-btn l-btn-small" group="" id="" style="height: 20px; right: 0px;">
+      <span class="l-btn-left" style="margin-top: -2px;">
+        <span class="l-btn-text">Choose File</span>
+      </span>
+    </a>
+    <input type="text" class="textbox-text validatebox-text textbox-prompt" autocomplete="off" placeholder="Choose a file..." readonly="readonly" style="margin-left: 0px; margin-right: 76px; padding-top: 1px; padding-bottom: 1px; width: 180px;">
+    <input type="file" class="textbox-value" name="file1">
+  </span>
+</body>
+</html>

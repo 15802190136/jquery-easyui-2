@@ -68,9 +68,10 @@ function main(){
   init()
 }
 function parseOptions(){
-  state_opts = $.extend({},defaults,$.fn.linkbutton.parseOptions(target),$.parser.parseOptions(target, [ "menu", {
-    plain : "boolean",
-    duration : "number"
+  state_opts = $.extend({},defaults,$.fn.linkbutton.parseOptions(target),
+    $.parser.parseOptions(target, [ "menu", {
+      plain : "boolean",
+      duration : "number"
   }]));
 }
 function init() {

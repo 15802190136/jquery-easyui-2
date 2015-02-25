@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>slider_simple</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.slider-disabled {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
+.slider-h {
+  height: 22px;
+}
+.slider-v {
+  width: 22px;
+}
+.slider-inner {
+  position: relative;
+  height: 6px;
+  top: 7px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+.slider-handle {
+  position: absolute;
+  display: block;
+  outline: none;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+}
+.slider-tip {
+  position: absolute;
+  display: inline-block;
+  line-height: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  top: -22px;
+}
+.slider-rule {
+  position: relative;
+  top: 15px;
+}
+.slider-rule span {
+  position: absolute;
+  display: inline-block;
+  font-size: 0;
+  height: 5px;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+}
+.slider-rulelabel {
+  position: relative;
+  top: 20px;
+}
+.slider-rulelabel span {
+  position: absolute;
+  display: inline-block;
+  font-size: 12px;
+}
+.slider-v .slider-inner {
+  width: 6px;
+  left: 7px;
+  top: 0;
+  float: left;
+}
+.slider-v .slider-handle {
+  left: 50%;
+  margin-top: -10px;
+}
+.slider-v .slider-tip {
+  left: -10px;
+  margin-top: -6px;
+}
+.slider-v .slider-rule {
+  float: left;
+  top: 0;
+  left: 16px;
+}
+.slider-v .slider-rule span {
+  width: 5px;
+  height: 'auto';
+  border-left: 0;
+  border-width: 1px 0 0 0;
+  border-style: solid;
+}
+.slider-v .slider-rulelabel {
+  float: left;
+  top: 0;
+  left: 23px;
+}
+.slider-handle {
+  background: url('../../img/slider_handle.png') no-repeat;
+}
+.slider-inner {
+  border-color: #95B8E7;
+  background: #E0ECFF;
+}
+.slider-rule span {
+  border-color: #95B8E7;
+}
+.slider-rulelabel span {
+  color: #000000;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+  <input class="easyui-slider" style="width:300px" data-options="showTip:true">
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.draggable.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-slider")[0]
+var t = $(".easyui-slider")
+var state_opts,state_slider
+var isDragging = false
+var defaults = {
+  width: 'auto',
+  height: 'auto',
+  mode: 'h',  // 'h'(horizontal) or 'v'(vertical)
+  reversed: false,
+  showTip: false,
+  disabled: false,
+  value: 0,
+  min: 0,max: 100,
+  step: 1,
+  rule: [], // [0,'|',100]
+  tipFormatter: function(value){return value},
+  converter:{
+    toPosition:function(value, size){
+      var opts = state_opts;
+      return (value-opts.min)/(opts.max-opts.min)*size;
+    },
+    toValue:function(pos, size){
+      var opts = state_opts;
+      return opts.min + (opts.max-opts.min)*(pos/size);
+    }
+  },
+  onChange: function(value, oldValue){},
+  onSlideStart: function(value){},
+  onSlideEnd: function(value){},
+  onComplete: function(value){}
+};
+function main(){
+  parseOptions()
+  state_slider = init()
+  var opts = state_opts;
+  opts.min = parseFloat(opts.min);
+  opts.max = parseFloat(opts.max);
+  opts.value = parseFloat(opts.value);
+  opts.step = parseFloat(opts.step);
+  opts.originalValue = opts.value;
+  
+  buildSlider();
+  showRule();
+  setSize();
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.parser.parseOptions(target, [ 'width','height','mode',{reversed:'boolean',showTip:'boolean',min:'number',max:'number',step:'number'} ]), {
+    value: (t.val() || undefined),
+    disabled: (t.attr('disabled') ? true : undefined),
+    rule: (t.attr('rule') ? eval(t.attr('rule')) : undefined)
+  });
+}
+function init(){
+  var slider = $('<div class="slider">' +
+      '<div class="slider-inner">' +
+      '<a href="javascript:void(0)" class="slider-handle"></a>' +
+      '<span class="slider-tip"></span>' +
+      '</div>' +
+      '<div class="slider-rule"></div>' +
+      '<div class="slider-rulelabel"></div>' +
+      '<div style="clear:both"></div>' +
+      '<input type="hidden" class="slider-value">' +
+      '</div>').insertAfter(target);
+  t.addClass('slider-f').hide();
+  var name = t.attr('name');
+  if (name){
+    slider.find('input.slider-value').attr('name', name);
+    t.removeAttr('name').attr('sliderName', name);
+  }
+  slider.bind('_resize', function(e,force){
+    if ($(this).hasClass('easyui-fluid') || force)
+      setSize();
+    return false;
+  });
+  return slider;
+}
+function buildSlider(){
+  var state = $.data(target, 'slider');
+  var opts = state_opts;
+  var slider = state_slider;
+  
+  slider.removeClass('slider-h slider-v slider-disabled');
+  slider.addClass(opts.mode == 'h' ? 'slider-h' : 'slider-v');
+  slider.addClass(opts.disabled ? 'slider-disabled' : '');
+  
+  slider.find('a.slider-handle').draggable({
+    axis:opts.mode,
+    cursor:'pointer',
+    disabled: opts.disabled,
+    onDrag:function(e){
+      var left = e.data.left;
+      var width = slider.width();
+      if (opts.mode!='h'){
+        left = e.data.top;
+        width = slider.height();
+      }
+      if (left < 0 || left > width) {
+        return false;
+      } else {
+        var value = pos2value(left);
+        adjustValue(value);
+        return false;
+      }
+    },
+    onBeforeDrag:function(){
+      isDragging = true;
+    },
+    onStartDrag:function(){
+      opts.onSlideStart.call(target, opts.value);
+    },
+    onStopDrag:function(e){
+      var value = pos2value((opts.mode=='h'?e.data.left:e.data.top));
+      adjustValue(value);
+      opts.onSlideEnd.call(target, opts.value);
+      opts.onComplete.call(target, opts.value);
+      isDragging = false;
+    }
+  });
+  slider.find('div.slider-inner').unbind('.slider').bind('mousedown.slider', function(e){
+    if (isDragging || opts.disabled){return}
+    var pos = $(this).offset();
+    var value = pos2value((opts.mode=='h'?(e.pageX-pos.left):(e.pageY-pos.top)));
+    adjustValue(value);
+    opts.onComplete.call(target, opts.value);
+  });
+}
+function adjustValue(value){
+  var opts = state_opts
+  var s = Math.abs(value % opts.step);
+  if (s < opts.step/2)
+    value -= s;
+  else
+    value = value - s + opts.step;
+  setValue(value);
+}
+function setValue(value){
+  var opts = state_opts;
+  var slider = state_slider;
+  var oldValue = opts.value;
+  if (value < opts.min) value = opts.min;
+  if (value > opts.max) value = opts.max;
+  
+  opts.value = value;
+  t.val(value);
+  slider.find('input.slider-value').val(value);
+  
+  var pos = value2pos(value);
+  var tip = slider.find('.slider-tip');
+  if (opts.showTip){
+    tip.show();
+    tip.html(opts.tipFormatter.call(target, opts.value));
+  } else {
+    tip.hide();
+  }
+  
+  if (opts.mode == 'h'){
+    var style = 'left:'+pos+'px;';
+    slider.find('.slider-handle').attr('style', style);
+    tip.attr('style', style +  'margin-left:' + (-Math.round(tip.outerWidth()/2)) + 'px');
+  } else {
+    var style = 'top:' + pos + 'px;';
+    slider.find('.slider-handle').attr('style', style);
+    tip.attr('style', style + 'margin-left:' + (-Math.round(tip.outerWidth())) + 'px');
+  }
+  
+  if (oldValue != value)
+    opts.onChange.call(target, value, oldValue);
+}
+function value2pos(value){
+  var opts = state_opts;
+  var slider = state_slider;
+  var size = opts.mode == 'h' ? slider.width() : slider.height();
+  var pos = opts.converter.toPosition.call(target, value, size);
+  if (opts.mode == 'v')
+    pos = slider.height() - pos;
+  if (opts.reversed)
+    pos = size - pos;
+  return pos.toFixed(0);
+}
+function pos2value(pos){
+  var opts = state_opts;
+  var slider = state_slider;
+  var size = opts.mode == 'h' ? slider.width() : slider.height();
+  var value = opts.converter.toValue.call(target, opts.mode=='h'?(opts.reversed?(size-pos):pos):(size-pos), size);
+  return value.toFixed(0);
+}
+function showRule(){
+  var opts = state_opts;
+  var slider = state_slider;
+  
+  var aa = opts.mode == 'h' ? opts.rule : opts.rule.slice(0).reverse();
+  if (opts.reversed)
+    aa = aa.slice(0).reverse();
+  _build(aa);
+}
+function _build(aa){
+  var opts = state_opts;
+  var slider = state_slider;
+  var rule = slider.find('div.slider-rule');
+  var label = slider.find('div.slider-rulelabel');
+  rule.empty();
+  label.empty();
+  for(var i=0; i<aa.length; i++){
+    var distance = i*100/(aa.length-1)+'%';
+    var span = $('<span></span>').appendTo(rule);
+    span.css((opts.mode=='h'?'left':'top'), distance);
+    
+    // show the labels
+    if (aa[i] != '|'){
+      span = $('<span></span>').appendTo(label);
+      span.html(aa[i]);
+      if (opts.mode == 'h'){
+        span.css({
+          left: distance,
+          marginLeft: -Math.round(span.outerWidth()/2)
+        });
+      } else {
+        span.css({
+          top: distance,
+          marginTop: -Math.round(span.outerHeight()/2)
+        });
+      }
+    }
+  }
+}
+function setSize(param){
+  var opts = state_opts;
+  var slider = state_slider;
+  
+  if (param){
+    if (param.width) opts.width = param.width;
+    if (param.height) opts.height = param.height;
+  }
+  slider._size(opts);
+  if (opts.mode == 'h'){
+    slider.css('height', '');
+    slider.children('div').css('height', '');
+  } else {
+    slider.css('width', '');
+    slider.children('div').css('width', '');
+    slider.children('div.slider-rule,div.slider-rulelabel,div.slider-inner')._outerHeight(slider._outerHeight());
+  }
+  initValue();
+}
+function initValue(){
+  var opts = state_opts;
+  var fn = opts.onChange;
+  opts.onChange = function(){};
+  setValue(opts.value);
+  opts.onChange = fn;
+}
+main();
+});  
+</script>
+</html>

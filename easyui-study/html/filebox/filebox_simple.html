@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>filebox_simple</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/linkbutton.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.filebox .textbox-value {
+  vertical-align: top;
+  position: absolute;
+  top: 0;
+  left: -5000px;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+  <input class="easyui-filebox" name="file1" data-options="prompt:'Choose a file...'" style="width:100%">
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script src="../../src/jquery.menu.js"></script>
+<script src="../../src/jquery.linkbutton.js"></script>
+<script src="../../src/jquery.tooltip.js"></script>
+<script src="../../src/jquery.validatebox.js"></script>
+<script src="../../src/jquery.textbox.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-filebox")[0]
+var t = $(".easyui-filebox")
+var state_opts,index = 0
+var defaults = $.extend({}, $.fn.textbox.defaults, {
+  buttonIcon : null,
+  buttonText : "Choose File",
+  buttonAlign : "right",
+  inputEvents : {}
+});
+function main(){
+  parseOptions()
+  init()
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.fn.textbox.parseOptions(target));
+}
+function init(){
+  var opts = state_opts;
+  var id = "filebox_file_id_" + (++index);
+  t.addClass("filebox-f").textbox($.extend({}, opts, {
+    buttonText : opts.buttonText ? ("<label for=\"" + id + "\">" + opts.buttonText + "</label>") : ""
+  }));
+  t.textbox("textbox").attr("readonly", "readonly");
+  state.filebox = t.next().addClass("filebox");
+  state.filebox.find(".textbox-value").remove();
+  opts.oldValue = "";
+  var inputHtml = $("<input type=\"file\" class=\"textbox-value\">").appendTo(state.filebox);
+  inputHtml.attr("id", id).attr("name", t.attr("textboxName") || "");
+  inputHtml.change(function() {
+    t.filebox("setText", this.value);
+    opts.onChange.call(target, this.value, opts.oldValue);
+    opts.oldValue = this.value;
+  });
+  var button = t.filebox("button");
+  if (button.length) {
+    if (button.linkbutton("options").disabled)
+      inputHtml.attr("disabled", "disabled");
+    else
+      inputHtml.removeAttr("disabled");
+  }
+}
+main();
+});
+</script>
+</html>

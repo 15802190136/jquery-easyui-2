@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>numberbox_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.numberbox {
+  border: 1px solid #95B8E7;
+  margin: 0;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+.textbox {
+  padding: 0;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+<!--
+  <input class="easyui-numberbox" value="1234567.89" data-options="precision:2,groupSeparator:','"></input>
+-->
+  <input class="easyui-numberbox numberbox-f textbox-f" value="1234567.89" data-options="precision:2,groupSeparator:','" style="display: none;">
+  <span class="textbox numberbox" style="width: 155px; height: 22px;">
+    <input type="text" class="textbox-text validatebox-text" autocomplete="off" placeholder="" style="margin-left: 0px; margin-right: 0px; padding-top: 1px; padding-bottom: 1px; width: 153px;" value="1,234,567.89">
+    <input type="hidden" class="textbox-value" value="1234567.89">
+  </span>
+</body>
+</html>

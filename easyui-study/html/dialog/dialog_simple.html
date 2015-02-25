@@ -78,7 +78,6 @@ function parseOptions(){
   state_opts = $.extend({},defaults,$.fn.window.parseOptions(target), 
     $.parser.parseOptions(target, [ "toolbar", "buttons" ])
   )
-  console.log("state_opts",state_opts)
 }
 function init() {
   var opts = state_opts;
