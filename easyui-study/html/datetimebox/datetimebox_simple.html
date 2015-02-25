@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>datetimebox_dom</title>
+    <link rel="stylesheet" type="text/css" href="../../css/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/validatebox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/textbox.css">
+    <link rel="stylesheet" type="text/css" href="../../css/calendar.css">
+    <link rel="stylesheet" type="text/css" href="../../css/datebox.css">
+    <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+  padding: 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 0;
+}
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+    </style>
+    <script src="../../bower_components/jquery/jquery.js"></script>
+  </head>
+<body>
+  <input class="easyui-datetimebox" required style="width:200px">
+</body>
+<script src="../../src/jquery.parser.js"></script>
+<script>
+$(function(){
+var target = $(".easyui-calendar")[0]
+var t = $(".easyui-calendar")
+var state_opts
+var defaults
+function main(){
+  parseOptions()
+  init()
+}
+function parseOptions(){
+  state_opts = $.extend({},defaults,$.fn.textbox.parseOptions(target), $.parser.parseOptions(target, [ "menu" ]), {
+    searcher : (t.attr("searcher") ? eval(t.attr("searcher")) : undefined)
+  });
+}
+function init(){
+
+}
+main();
+});
+</script>
+</html>
